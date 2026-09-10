@@ -2,6 +2,7 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { type Prisma, PrismaClient } from '../../src/generated/prisma/client.js';
+import { getPrismaPgConfig } from '../prisma-pg-config.js';
 import { getSessionCountForDay } from './distributions/temporal.js';
 import {
   type EventData,
@@ -291,7 +292,7 @@ function createPrismaClient(): PrismaClient {
     );
   }
 
-  const adapter = new PrismaPg({ connectionString: url }, { schema });
+  const adapter = new PrismaPg(getPrismaPgConfig(url), { schema });
 
   return new PrismaClient({
     adapter,

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { getPrismaPgConfig } from './prisma-pg-config.js';
 import { M4_DEMO_IDS, seedM4Demo } from './seed-m4-demo-data.js';
 
 export const DEMO_IDS = Object.freeze({
@@ -137,10 +138,7 @@ async function main() {
     throw new Error('DATABASE_URL is required.');
   }
   const url = new URL(databaseUrl);
-  const adapter = new PrismaPg(
-    { connectionString: url.toString() },
-    { schema: url.searchParams.get('schema') },
-  );
+  const adapter = new PrismaPg(getPrismaPgConfig(url.toString()), { schema: url.searchParams.get('schema') });
   const prisma = new PrismaClient({ adapter });
 
   try {

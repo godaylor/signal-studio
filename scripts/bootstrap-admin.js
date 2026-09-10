@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { getPrismaPgConfig } from './prisma-pg-config.js';
 
 const legacyId = '41e2b680-648e-4b09-bcd7-3e2b10c06264';
 export const disabledDemoPassword = '!'.repeat(60);
@@ -54,7 +55,7 @@ async function main() {
     if (credentials.database !== scope) throw new Error('This credentials file belongs to another database. Select a separate local credentials file.');
     ({ username, password } = credentials);
   }
-  const client = new PrismaClient({ adapter: new PrismaPg({ connectionString: url.toString() }, { schema: url.searchParams.get('schema') }) });
+  const client = new PrismaClient({ adapter: new PrismaPg(getPrismaPgConfig(url.toString()), { schema: url.searchParams.get('schema') }) });
   try {
     const result = await bootstrapAdmin(client, username, password);
     console.log(`Administrator ${result.created ? 'initialized' : 'already initialized'}: ${username}`);

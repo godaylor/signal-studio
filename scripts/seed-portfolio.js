@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { getPrismaPgConfig } from './prisma-pg-config.js';
 
 // Explicit, additive demo seed. Each UTC week owns a separate immutable project.
 const day = 86_400_000;
@@ -13,7 +14,7 @@ const active = weekEnd.getTime() - 7 * day;
 const cohort = weekEnd.getTime() - 28 * day;
 const domain = 'portfolio-' + weekEnd.toISOString().slice(0, 10) + '.demo.invalid';
 const url = new URL(process.env.DATABASE_URL ?? '');
-const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: url.toString() }) });
+const db = new PrismaClient({ adapter: new PrismaPg(getPrismaPgConfig(url.toString())) });
 try {
   const existing = await db.website.findFirst({ where: { domain, deletedAt: null }, select: { id: true } });
   if (existing) {

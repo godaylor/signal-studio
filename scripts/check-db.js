@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import chalk from 'chalk';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { getPrismaPgConfig } from './prisma-pg-config.js';
 
 const MIN_VERSION = '15.0';
 const MIN_VERSION_NUM = 150000;
@@ -27,10 +28,7 @@ async function main() {
   success('DATABASE_URL is defined.');
 
   const url = new URL(process.env.DATABASE_URL);
-  const adapter = new PrismaPg(
-    { connectionString: url.toString() },
-    { schema: url.searchParams.get('schema') },
-  );
+  const adapter = new PrismaPg(getPrismaPgConfig(url.toString()), { schema: url.searchParams.get('schema') });
   const prisma = new PrismaClient({ adapter });
 
   try {

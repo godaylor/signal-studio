@@ -4,6 +4,7 @@ import debug from 'debug';
 import { PrismaClient } from '@/generated/prisma/client';
 import { DATA_TYPE, DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS, SESSION_COLUMNS } from './constants';
 import { filtersObjectToArray } from './params';
+import { getPrismaPgConfig } from './prisma-pg';
 import type { Operator, PropertyFilter, QueryFilters, QueryOptions } from './types';
 
 const log = debug('umami:prisma');
@@ -870,7 +871,7 @@ function getClient() {
 
   const schema = getSchema();
 
-  const baseAdapter = new PrismaPg({ connectionString: url }, { schema });
+  const baseAdapter = new PrismaPg(getPrismaPgConfig(url), { schema });
 
   const baseClient = new PrismaClient({
     adapter: baseAdapter,
@@ -888,7 +889,7 @@ function getClient() {
     return baseClient;
   }
 
-  const replicaAdapter = new PrismaPg({ connectionString: replicaUrl }, { schema });
+  const replicaAdapter = new PrismaPg(getPrismaPgConfig(replicaUrl), { schema });
 
   const replicaClient = new PrismaClient({
     adapter: replicaAdapter,

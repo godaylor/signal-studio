@@ -1,14 +1,15 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/generated/prisma/client';
+import { getPrismaPgConfig } from '@/lib/prisma-pg';
 
 const registry = globalThis as typeof globalThis & { signalStudioLifecycleLocks?: PrismaClient };
 function lockDatabase() {
   if (!registry.signalStudioLifecycleLocks) {
     const url = new URL(process.env.DATABASE_URL!);
-    registry.signalStudioLifecycleLocks = new PrismaClient({ adapter: new PrismaPg({
-      connectionString: url.toString(), max: 2, connectionTimeoutMillis: 5000, idleTimeoutMillis: 10000,
+    registry.signalStudioLifecycleLocks = new PrismaClient({ adapter: new PrismaPg(getPrismaPgConfig(url.toString(), {
+      max: 2, connectionTimeoutMillis: 5000, idleTimeoutMillis: 10000,
       application_name: 'signal-studio-ingestion-locks',
-    }, { schema: url.searchParams.get('schema') ?? 'public' }) });
+    }), { schema: url.searchParams.get('schema') ?? 'public' }) });
   }
   return registry.signalStudioLifecycleLocks;
 }
