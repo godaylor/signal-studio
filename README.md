@@ -112,8 +112,10 @@ a frozen install, isolated migrations, secure bootstrap, golden integration,
 production readiness, and `LICENSE`/notices inside the production image. Selected
 critical Chromium flows include Home, Explore, Insights, Dashboards, Audiences,
 Experience, Live, exports and role/share restrictions. The existing pixel baseline
-is Windows-specific; functional and axe checks also run on Linux CI. Remote CI
-execution is not confirmed until this checkout is pushed to the owner's repository.
+is Windows-specific; functional and axe checks also run on Linux CI. The published
+source and current workflow history are available in the
+[Signal Studio repository](https://github.com/godaylor/signal-studio) and
+[GitHub Actions](https://github.com/godaylor/signal-studio/actions).
 
 ## Publication status
 
@@ -137,8 +139,9 @@ publish PostgreSQL directly. See `scripts/runtime-config.js` for startup checks.
 
 Release image builds are manual and default to **no publication**. The workflow
 uses only the current repository's GHCR namespace; configure its `release`
-environment approval before enabling publication. No external hosting target or
-owner repository URL is assumed.
+environment approval before enabling publication. Source publication does not by
+itself claim a production deployment: a host must provide the full app/worker,
+PostgreSQL, durable shared storage and secret-management contract described above.
 
 ## M0 verification baseline
 
