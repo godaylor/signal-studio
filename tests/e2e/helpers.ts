@@ -41,14 +41,18 @@ export async function loginPage(page: Page, request: APIRequestContext): Promise
 
   await page.addInitScript(token => {
     window.localStorage.setItem('umami.auth', JSON.stringify(token));
+    // Legacy workflow assertions use English; explicit RU test setup/URLs win.
+    if (!window.localStorage.getItem('umami.locale')) {
+      window.localStorage.setItem('umami.locale', JSON.stringify('en-US'));
+    }
   }, auth.token);
 
   return auth;
 }
 
 export async function logout(page: Page) {
-  await page.getByTestId('button-profile').click();
-  await page.getByTestId('item-logout').click();
+  await page.getByRole('button', { name: umamiUser.username }).first().click();
+  await page.getByRole('menuitem', { name: /logout/i }).click();
   await expect(page).toHaveURL(/\/login$/);
 }
 
@@ -69,14 +73,21 @@ export async function addWebsite(
   });
 
   expect(response.status()).toBe(200);
+
+  return response.json();
 }
 
-export async function deleteWebsite(request: APIRequestContext, auth: Auth, websiteId: string) {
+export async function deleteWebsite(
+  request: APIRequestContext,
+  auth: Auth,
+  websiteId: string,
+  allowMissing = false,
+) {
   const response = await request.delete(`/api/websites/${websiteId}`, {
     headers: authHeaders(auth),
   });
 
-  expect(response.status()).toBe(200);
+  expect(allowMissing ? [200, 404] : [200]).toContain(response.status());
 }
 
 export async function addUser(
@@ -92,14 +103,21 @@ export async function addUser(
   });
 
   expect(response.status()).toBe(200);
+
+  return response.json();
 }
 
-export async function deleteUser(request: APIRequestContext, auth: Auth, userId: string) {
+export async function deleteUser(
+  request: APIRequestContext,
+  auth: Auth,
+  userId: string,
+  allowMissing = false,
+) {
   const response = await request.delete(`/api/users/${userId}`, {
     headers: authHeaders(auth),
   });
 
-  expect(response.status()).toBe(200);
+  expect(allowMissing ? [200, 404] : [200]).toContain(response.status());
 }
 
 export async function addTeam(request: APIRequestContext, auth: Auth, name: string) {
@@ -109,12 +127,19 @@ export async function addTeam(request: APIRequestContext, auth: Auth, name: stri
   });
 
   expect(response.status()).toBe(200);
+
+  return response.json();
 }
 
-export async function deleteTeam(request: APIRequestContext, auth: Auth, teamId: string) {
+export async function deleteTeam(
+  request: APIRequestContext,
+  auth: Auth,
+  teamId: string,
+  allowMissing = false,
+) {
   const response = await request.delete(`/api/teams/${teamId}`, {
     headers: authHeaders(auth),
   });
 
-  expect(response.status()).toBe(200);
+  expect(allowMissing ? [200, 404] : [200]).toContain(response.status());
 }

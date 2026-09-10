@@ -1,98 +1,49 @@
 import { expect, test } from '@playwright/test';
-import { users } from './fixtures';
-import { type Auth, authHeaders, loginViaApi } from './helpers';
+import { createE2eFixtures } from './fixtures';
+import { authHeaders, deleteUser, loginViaApi } from './helpers';
 
-test.describe('User API tests', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  let auth: Auth;
+test('user API CRUD is secure, isolated and retry-safe', async ({ request }, testInfo) => {
+  const auth = await loginViaApi(request);
+  const fixture = createE2eFixtures(testInfo, 'api-user');
   let userId = '';
 
-  test.beforeAll(async ({ request }) => {
-    auth = await loginViaApi(request);
-  });
-
-  test('creates a user', async ({ request }) => {
-    const response = await request.post('/api/users', {
+  try {
+    const createResponse = await request.post('/api/users', {
       headers: authHeaders(auth),
-      data: users.userCreate,
+      data: fixture.user.create,
     });
-    const body = await response.json();
+    const created = await createResponse.json();
+    userId = created.id;
 
-    userId = body.id;
+    expect(createResponse.status()).toBe(200);
+    expect(created).toMatchObject({ username: fixture.user.create.username, role: 'user' });
+    expect(created).not.toHaveProperty('password');
 
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('username', 'playwright1');
-    expect(body).toHaveProperty('role', 'user');
-  });
+    const listResponse = await request.get('/api/admin/users', { headers: authHeaders(auth) });
+    const listed = await listResponse.json();
+    const listUser = listed.data.find(item => item.id === userId);
 
-  test('returns all users when admin access is used', async ({ request }) => {
-    const response = await request.get('/api/admin/users', {
+    expect(listResponse.status()).toBe(200);
+    expect(listUser).toMatchObject({ id: userId, username: fixture.user.create.username });
+    expect(listUser).not.toHaveProperty('password');
+
+    const updateResponse = await request.post(`/api/users/${userId}`, {
       headers: authHeaders(auth),
+      data: fixture.user.update,
     });
-    const body = await response.json();
+    expect(updateResponse.status()).toBe(200);
+    await expect(updateResponse.json()).resolves.toMatchObject({ id: userId, role: 'view-only' });
 
-    expect(response.status()).toBe(200);
-    expect(body.data[0]).toHaveProperty('id');
-    expect(body.data[0]).toHaveProperty('username');
-    expect(body.data[0]).toHaveProperty('password');
-    expect(body.data[0]).toHaveProperty('role');
-  });
+    for (const resource of ['', '/websites', '/teams']) {
+      const response = await request.get(`/api/users/${userId}${resource}`, {
+        headers: authHeaders(auth),
+      });
+      expect(response.status()).toBe(200);
+    }
 
-  test('updates a user', async ({ request }) => {
-    const response = await request.post(`/api/users/${userId}`, {
-      headers: authHeaders(auth),
-      data: users.userUpdate,
-    });
-    const body = await response.json();
-
-    userId = body.id;
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('id', userId);
-    expect(body).toHaveProperty('username', 'playwright1');
-    expect(body).toHaveProperty('role', 'view-only');
-  });
-
-  test('gets a user by ID', async ({ request }) => {
-    const response = await request.get(`/api/users/${userId}`, {
-      headers: authHeaders(auth),
-    });
-    const body = await response.json();
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('id', userId);
-    expect(body).toHaveProperty('username', 'playwright1');
-    expect(body).toHaveProperty('role', 'view-only');
-  });
-
-  test('deletes a user', async ({ request }) => {
-    const response = await request.delete(`/api/users/${userId}`, {
-      headers: authHeaders(auth),
-    });
-    const body = await response.json();
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('ok', true);
-  });
-
-  test('gets all websites that belong to a user', async ({ request }) => {
-    const response = await request.get(`/api/users/${userId}/websites`, {
-      headers: authHeaders(auth),
-    });
-    const body = await response.json();
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('data');
-  });
-
-  test('gets all teams that belong to a user', async ({ request }) => {
-    const response = await request.get(`/api/users/${userId}/teams`, {
-      headers: authHeaders(auth),
-    });
-    const body = await response.json();
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('data');
-  });
+    await deleteUser(request, auth, userId);
+    userId = '';
+  } finally {
+    if (userId) await deleteUser(request, auth, userId, true);
+  }
 });

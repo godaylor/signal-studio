@@ -1,0 +1,26 @@
+{
+  "environment": "PostgreSQL 15 Alpine in isolated signal-studio-transform Docker; Node v22.15.1; Windows host; fixture vacuumed/analyzed before samples",
+  "dataset": {
+    "events": 1000000,
+    "actors": 10000,
+    "relevantEvents": 50000,
+    "rangeDays": 30
+  },
+  "samples": 5,
+  "funnel4StepP50Ms": 999.69,
+  "funnel4StepP95Ms": 1094.85,
+  "retention12PeriodP50Ms": 1446.29,
+  "retention12PeriodP95Ms": 1639.06,
+  "cacheHitMs": 75.28,
+  "plan": {
+    "nodeTypes": [
+      "Aggregate",
+      "Index Only Scan"
+    ],
+    "indexes": [
+      "website_event_website_id_event_name_created_at_idx"
+    ],
+    "scannedRows": 40001
+  },
+  "exactness": "exact"
+}

@@ -1,0 +1,15 @@
+{
+  "environment": "PostgreSQL 15 Alpine in local Docker; Node 22.15.1; Windows host; one Project",
+  "dataset": {
+    "events": 1000000,
+    "eventSessions": 10000,
+    "eventVisits": 100000,
+    "measuredIdentityObservations": 200
+  },
+  "seedDurationMs": 50.55,
+  "factLoadDurationMs": 37497.79,
+  "projectionP50Ms": 2.75,
+  "projectionP95Ms": 3.18,
+  "userPageP50Ms": 4.13,
+  "userPageP95Ms": 5.51
+}

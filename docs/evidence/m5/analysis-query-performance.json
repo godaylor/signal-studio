@@ -1,0 +1,21 @@
+{
+  "environment": "PostgreSQL 15 Alpine in local Docker; Node 22.15.1; Windows host; one Project",
+  "dataset": {
+    "events": 1000000,
+    "signupEvents": 250000,
+    "eventSessions": 10000,
+    "eventVisits": 100000,
+    "rangeDays": 10
+  },
+  "samples": 10,
+  "totalP50Ms": 417.76,
+  "totalP95Ms": 574.26,
+  "plannerP50Ms": 0.31,
+  "plannerP95Ms": 3.22,
+  "sqlP50Ms": 416.72,
+  "sqlP95Ms": 573.88,
+  "cacheHitMs": 0.36,
+  "rowsScanned": 1000000,
+  "bytesScannedApprox": 155410432,
+  "exactness": "exact"
+}

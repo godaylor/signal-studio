@@ -1,0 +1,15 @@
+@prisma/dev@0.24.17
+Published license declaration: ISC
+Author (verbatim package metadata): {"url":"https://github.com/igalklebanov","name":"Igal Klebanov","email":"igalklebanov@gmail.com"}
+Source: https://registry.npmjs.org/%40prisma%2Fdev/0.24.17
+Tarball integrity: sha512-UvdZzmpFwknnfreh6Jije84ekkYGPYEJhXG1tFzCsCfQyzJifrOo38eZc0qajzvaC6OLUOrN9ML5XfCnEZL9DA==
+
+No separate license/copyright document is published in this package. The following is the standard SPDX license text, not an invented upstream notice. Placeholder copyright fields belong to the standard template.
+
+ISC License
+
+Copyright <year> <owner> 
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.

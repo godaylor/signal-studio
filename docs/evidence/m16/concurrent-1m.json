@@ -1,0 +1,89 @@
+{
+  "environment": "Windows v22.22.2; PostgreSQL15 Docker; isolated DB; no other benchmark/build",
+  "dataset": {
+    "events": 1000000,
+    "users": 10000,
+    "accounts": 1000,
+    "sessions": 10000,
+    "rangeDays": 10,
+    "backgroundHeatmapRows": 20000
+  },
+  "concurrency": {
+    "dashboardViewers": 20,
+    "widgetsPerDashboard": 4,
+    "liveViewers": 50,
+    "waves": 5
+  },
+  "widget": {
+    "p50Ms": 207.39150000000518,
+    "p95Ms": 813.420100000003
+  },
+  "dashboard": {
+    "p50Ms": 716.3268000000025,
+    "p95Ms": 921.861699999994
+  },
+  "live": {
+    "p50Ms": 1822.8315000000002,
+    "p95Ms": 2081.1852999999974
+  },
+  "cached": {
+    "p95Ms": 0.7253999999957159
+  },
+  "waves": [
+    {
+      "wave": 0,
+      "analysisExecutions": 4,
+      "live": {
+        "requests": 50,
+        "loaderCalls": 1,
+        "cacheHits": 0,
+        "singleFlightHits": 49,
+        "lastLoadMs": 2077
+      }
+    },
+    {
+      "wave": 1,
+      "analysisExecutions": 4,
+      "live": {
+        "requests": 50,
+        "loaderCalls": 1,
+        "cacheHits": 0,
+        "singleFlightHits": 49,
+        "lastLoadMs": 1822
+      }
+    },
+    {
+      "wave": 2,
+      "analysisExecutions": 4,
+      "live": {
+        "requests": 50,
+        "loaderCalls": 1,
+        "cacheHits": 0,
+        "singleFlightHits": 49,
+        "lastLoadMs": 1753
+      }
+    },
+    {
+      "wave": 3,
+      "analysisExecutions": 4,
+      "live": {
+        "requests": 50,
+        "loaderCalls": 1,
+        "cacheHits": 0,
+        "singleFlightHits": 49,
+        "lastLoadMs": 1924
+      }
+    },
+    {
+      "wave": 4,
+      "analysisExecutions": 4,
+      "live": {
+        "requests": 50,
+        "loaderCalls": 1,
+        "cacheHits": 0,
+        "singleFlightHits": 49,
+        "lastLoadMs": 1800
+      }
+    }
+  ]
+}

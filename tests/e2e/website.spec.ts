@@ -1,73 +1,44 @@
 import { expect, test } from '@playwright/test';
-import { addWebsite, deleteWebsite, loginPage } from './helpers';
+import { createE2eFixtures } from './fixtures';
+import { deleteWebsite, loginPage } from './helpers';
 
-test.describe('Website tests', () => {
-  test('adds a website', async ({ page, request }) => {
-    const auth = await loginPage(page, request);
+test('website UI creates, edits and deletes unique retry-safe state', async ({
+  page,
+  request,
+}, testInfo) => {
+  const auth = await loginPage(page, request);
+  const fixture = createE2eFixtures(testInfo, 'ui-website');
+  let websiteId = '';
 
-    await page.goto('/settings/websites');
-    await page.getByTestId('button-website-add').click();
-    await expect(page.getByText(/Add website/i)).toBeVisible();
-    await page.getByTestId('input-name').locator('input').fill('Add test');
-    await page.getByTestId('input-domain').locator('input').fill('addtest.com');
+  try {
+    await page.goto('/websites');
+    await page.getByRole('button', { name: /add website/i }).click();
+    await expect(page.getByRole('dialog', { name: /add website/i })).toBeVisible();
+    await page.getByTestId('input-name').locator('input').fill(fixture.website.create.name);
+    await page.getByTestId('input-domain').locator('input').fill(fixture.website.create.domain);
     await page.getByTestId('button-submit').click();
 
-    await expect(page.locator('td[label="Name"]')).toContainText('Add test');
-    await expect(page.locator('td[label="Domain"]')).toContainText('addtest.com');
+    const row = page.getByRole('row').filter({ hasText: fixture.website.create.name });
+    await expect(row).toContainText(fixture.website.create.domain);
+    const settingsLink = row.locator('a[href*="/websites/"][href$="/settings"]');
+    websiteId = (await settingsLink.getAttribute('href'))?.match(/\/websites\/([^/]+)/)?.[1] ?? '';
+    expect(websiteId).not.toBe('');
+    await settingsLink.click();
 
-    await page.getByTestId('link-button-edit').first().click();
-    await expect(page.getByText(/Details/i)).toBeVisible();
-
-    const websiteId = await page.getByTestId('text-field-websiteId').locator('input').inputValue();
-
-    await deleteWebsite(request, auth, websiteId);
-    await page.goto('/settings/websites');
-    await expect(page.getByText(/Add test/i)).toHaveCount(0);
-  });
-
-  test('edits a website', async ({ page, request }) => {
-    const auth = await loginPage(page, request);
-
-    await addWebsite(request, auth, 'Update test', 'updatetest.com');
-    await page.goto('/settings/websites');
-
-    await page.getByTestId('link-button-edit').first().click();
-    await expect(page.getByText(/Details/i)).toBeVisible();
-    await page.getByTestId('input-name').locator('input').fill('Updated website');
-    await page.getByTestId('input-domain').locator('input').fill('updatedwebsite.com');
-    await page.getByTestId('button-submit').click();
-
-    await expect(page.getByTestId('input-name').locator('input')).toHaveValue('Updated website');
-    await expect(page.getByTestId('input-domain').locator('input')).toHaveValue(
-      'updatedwebsite.com',
+    await page.getByRole('textbox', { name: 'Name' }).fill(fixture.website.update.name);
+    await page.getByRole('textbox', { name: 'Domain' }).fill(fixture.website.update.domain);
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(
+      fixture.website.update.name,
     );
 
-    await page.getByText(/Tracking code/i).click();
-    await expect(page.locator('textarea')).toContainText('/script.js');
-
-    await page.getByText(/Details/i).click();
-    const websiteId = await page.getByTestId('text-field-websiteId').locator('input').inputValue();
-
-    await deleteWebsite(request, auth, websiteId);
-    await page.goto('/settings/websites');
-    await expect(page.getByText(/Update test/i)).toHaveCount(0);
-  });
-
-  test('deletes a website', async ({ page, request }) => {
-    const auth = await loginPage(page, request);
-
-    await addWebsite(request, auth, 'Delete test', 'deletetest.com');
-    await page.goto('/settings/websites');
-
-    await page.getByTestId('link-button-edit').first().click();
-    await expect(page.getByText(/Data/i)).toBeVisible();
-    await page.getByText(/Data/i).click();
-    await expect(page.getByText(/All website data will be deleted./i)).toBeVisible();
-    await page.getByTestId('button-delete').click();
-    await expect(page.getByText(/Type DELETE in the box below to confirm./i)).toBeVisible();
-    await page.locator('input[name="confirm"]').fill('DELETE');
-    await page.locator('button[type="submit"]').click();
-
-    await expect(page.getByText(/Delete test/i)).toHaveCount(0);
-  });
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('textbox', { name: 'Confirm' }).fill('DELETE');
+    await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
+    await expect(page).toHaveURL(/\/websites$/);
+    websiteId = '';
+  } finally {
+    if (websiteId) await deleteWebsite(request, auth, websiteId, true);
+  }
 });

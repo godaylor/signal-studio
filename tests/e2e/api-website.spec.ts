@@ -1,152 +1,84 @@
+import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
-import { uuid } from '../../src/lib/crypto';
-import { teams, websites } from './fixtures';
-import { type Auth, authHeaders, deleteTeam, loginViaApi } from './helpers';
+import { createE2eFixtures } from './fixtures';
+import { authHeaders, deleteTeam, deleteWebsite, loginViaApi } from './helpers';
 
-test.describe('Website API tests', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  let auth: Auth;
-  let websiteId = '';
+test('website API CRUD owns and cleans unique retry-safe state', async ({ request }, testInfo) => {
+  const auth = await loginViaApi(request);
+  const fixture = createE2eFixtures(testInfo, 'api-website');
   let teamId = '';
+  const websiteIds = new Set<string>();
 
-  test.beforeAll(async ({ request }) => {
-    auth = await loginViaApi(request);
-
-    const response = await request.post('/api/teams', {
+  try {
+    const teamResponse = await request.post('/api/teams', {
       headers: authHeaders(auth),
-      data: teams.teamCreate,
+      data: fixture.team.create,
     });
-    const body = await response.json();
+    expect(teamResponse.status()).toBe(200);
+    teamId = (await teamResponse.json())[0].id;
 
-    teamId = body[0].id;
-
-    expect(response.status()).toBe(200);
-    expect(body[0]).toHaveProperty('name', 'playwright');
-    expect(body[1]).toHaveProperty('role', 'team-owner');
-  });
-
-  test.afterAll(async ({ request }) => {
-    if (teamId) {
-      await deleteTeam(request, auth, teamId);
-    }
-  });
-
-  test('creates a website for user', async ({ request }) => {
-    const response = await request.post('/api/websites', {
+    const createResponse = await request.post('/api/websites', {
       headers: authHeaders(auth),
-      data: websites.websiteCreate,
+      data: fixture.website.create,
     });
-    const body = await response.json();
+    const created = await createResponse.json();
+    expect(createResponse.status()).toBe(200);
+    websiteIds.add(created.id);
+    expect(created).toMatchObject(fixture.website.create);
 
-    websiteId = body.id;
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('name', 'Playwright Website');
-    expect(body).toHaveProperty('domain', 'playwright.com');
-  });
-
-  test('creates a website for team', async ({ request }) => {
-    const response = await request.post('/api/websites', {
+    const teamWebsiteResponse = await request.post('/api/websites', {
       headers: authHeaders(auth),
       data: {
-        name: 'Team Website',
-        domain: 'teamwebsite.com',
+        name: `${fixture.website.create.name} team`,
+        domain: `team-${fixture.website.create.domain}`,
         teamId,
       },
     });
-    const body = await response.json();
+    expect(teamWebsiteResponse.status()).toBe(200);
+    websiteIds.add((await teamWebsiteResponse.json()).id);
 
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('name', 'Team Website');
-    expect(body).toHaveProperty('domain', 'teamwebsite.com');
-  });
-
-  test('creates a website with a fixed ID', async ({ request }) => {
-    const fixedId = uuid();
-    const response = await request.post('/api/websites', {
+    const fixedId = randomUUID();
+    const fixedResponse = await request.post('/api/websites', {
       headers: authHeaders(auth),
-      data: { ...websites.websiteCreate, id: fixedId },
+      data: { ...fixture.website.create, id: fixedId },
     });
-    const body = await response.json();
+    expect(fixedResponse.status()).toBe(200);
+    websiteIds.add(fixedId);
 
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('id', fixedId);
-    expect(body).toHaveProperty('name', 'Playwright Website');
-    expect(body).toHaveProperty('domain', 'playwright.com');
+    const listResponse = await request.get('/api/websites', { headers: authHeaders(auth) });
+    expect(listResponse.status()).toBe(200);
+    expect((await listResponse.json()).data.some(item => item.id === created.id)).toBe(true);
 
-    await request.delete(`/api/websites/${fixedId}`, {
+    const getResponse = await request.get(`/api/websites/${created.id}`, {
       headers: authHeaders(auth),
     });
-  });
+    await expect(getResponse.json()).resolves.toMatchObject(fixture.website.create);
 
-  test('returns all tracked websites', async ({ request }) => {
-    const response = await request.get('/api/websites', {
+    const updateResponse = await request.post(`/api/websites/${created.id}`, {
+      headers: authHeaders(auth),
+      data: fixture.website.update,
+    });
+    await expect(updateResponse.json()).resolves.toMatchObject(fixture.website.update);
+
+    const shareResponse = await request.post(`/api/websites/${created.id}`, {
+      headers: authHeaders(auth),
+      data: { shareId: `PW${testInfo.retry}${testInfo.workerIndex}` },
+    });
+    expect(shareResponse.status()).toBe(200);
+
+    const resetResponse = await request.post(`/api/websites/${created.id}/reset`, {
       headers: authHeaders(auth),
     });
-    const body = await response.json();
+    await expect(resetResponse.json()).resolves.toMatchObject({ ok: true });
 
-    expect(response.status()).toBe(200);
-    expect(body.data[0]).toHaveProperty('id');
-    expect(body.data[0]).toHaveProperty('name');
-    expect(body.data[0]).toHaveProperty('domain');
-  });
-
-  test('gets a website by ID', async ({ request }) => {
-    const response = await request.get(`/api/websites/${websiteId}`, {
-      headers: authHeaders(auth),
-    });
-    const body = await response.json();
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('name', 'Playwright Website');
-    expect(body).toHaveProperty('domain', 'playwright.com');
-  });
-
-  test('updates a website', async ({ request }) => {
-    const response = await request.post(`/api/websites/${websiteId}`, {
-      headers: authHeaders(auth),
-      data: websites.websiteUpdate,
-    });
-    const body = await response.json();
-
-    websiteId = body.id;
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('name', 'Playwright Website Updated');
-    expect(body).toHaveProperty('domain', 'playwrightupdated.com');
-  });
-
-  test('updates a website with only shareId', async ({ request }) => {
-    const response = await request.post(`/api/websites/${websiteId}`, {
-      headers: authHeaders(auth),
-      data: { shareId: 'ABCDEF' },
-    });
-    const body = await response.json();
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('shareId', 'ABCDEF');
-  });
-
-  test('resets a website by removing all data related to the website', async ({ request }) => {
-    const response = await request.post(`/api/websites/${websiteId}/reset`, {
-      headers: authHeaders(auth),
-    });
-    const body = await response.json();
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('ok', true);
-  });
-
-  test('deletes a website', async ({ request }) => {
-    const response = await request.delete(`/api/websites/${websiteId}`, {
-      headers: authHeaders(auth),
-    });
-    const body = await response.json();
-
-    websiteId = '';
-
-    expect(response.status()).toBe(200);
-    expect(body).toHaveProperty('ok', true);
-  });
+    for (const websiteId of websiteIds) {
+      await deleteWebsite(request, auth, websiteId);
+    }
+    websiteIds.clear();
+  } finally {
+    for (const websiteId of websiteIds) {
+      await deleteWebsite(request, auth, websiteId, true);
+    }
+    if (teamId) await deleteTeam(request, auth, teamId, true);
+  }
 });

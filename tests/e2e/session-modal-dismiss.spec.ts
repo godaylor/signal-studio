@@ -31,9 +31,10 @@ async function getSheetBox(page: Page) {
 
 test.describe('SessionModal outside-click dismissal', () => {
   let auth: Auth;
-  const websiteId = uuid();
+  let websiteId = '';
 
   test.beforeEach(async ({ page, request }) => {
+    websiteId = uuid();
     auth = await loginPage(page, request);
     await createWebsite(request, auth, websiteId);
     // The modal opens purely from the `session` query param, so a random id is
@@ -43,7 +44,7 @@ test.describe('SessionModal outside-click dismissal', () => {
   });
 
   test.afterEach(async ({ request }) => {
-    await deleteWebsite(request, auth, websiteId);
+    await deleteWebsite(request, auth, websiteId, true);
   });
 
   test('clicking in the left side margin dismisses the modal', async ({ page }) => {

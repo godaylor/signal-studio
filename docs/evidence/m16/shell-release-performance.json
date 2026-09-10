@@ -1,0 +1,39 @@
+{
+  "environment": "Windows; Node 22.22.2; Next 16.3 production standalone; local Chromium 1440x1000; existing synthetic Portfolio Activation Lab; first page cold then shared browser cache; no CPU/network throttling",
+  "samples": [
+    {
+      "usableMs": 412.19999998807907,
+      "cls": 0.029091562499999998,
+      "lcp": 404,
+      "scriptEncodedBytes": 1021849
+    },
+    {
+      "usableMs": 431.40000000596046,
+      "cls": 0.029091562499999998,
+      "lcp": 372,
+      "scriptEncodedBytes": 1021849
+    },
+    {
+      "usableMs": 405.90000000596046,
+      "cls": 0.029091562499999998,
+      "lcp": 336,
+      "scriptEncodedBytes": 1021849
+    },
+    {
+      "usableMs": 404.69999998807907,
+      "cls": 0.029091562499999998,
+      "lcp": 328,
+      "scriptEncodedBytes": 1021849
+    },
+    {
+      "usableMs": 436.09999999403954,
+      "cls": 0.029091562499999998,
+      "lcp": 348,
+      "scriptEncodedBytes": 1021849
+    }
+  ],
+  "shellUsableP75Ms": 431.40000000596046,
+  "lcpP75Ms": 372,
+  "clsP75": 0.029091562499999998,
+  "note": "Lab LCP/CLS only, not field Core Web Vitals or real-device INP."
+}

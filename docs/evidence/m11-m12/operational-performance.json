@@ -1,0 +1,16 @@
+{
+  "environment": "PostgreSQL 15 Alpine in isolated signal-studio-transform Docker; Node v22.15.1; Windows host; fixture vacuumed/analyzed",
+  "dataset": {
+    "trackedUsers": 10000,
+    "sessionEvents": 1000,
+    "replayChunks": 5,
+    "pageSize": 50
+  },
+  "samples": 10,
+  "userPageP50Ms": 3.2,
+  "userPageP95Ms": 19.13,
+  "evidencePageP50Ms": 10.64,
+  "evidencePageP95Ms": 19.46,
+  "replayPayloadReadyP50Ms": 1.14,
+  "replayPayloadReadyP95Ms": 2.78
+}

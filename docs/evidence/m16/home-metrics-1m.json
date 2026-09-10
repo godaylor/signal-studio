@@ -1,0 +1,36 @@
+{
+  "dataset": {
+    "events": 1000000,
+    "trackedUsers": 10000,
+    "accounts": 1000,
+    "sessions": 10000
+  },
+  "samples": 5,
+  "runtime": "v22.22.2",
+  "platform": "win32",
+  "database": "local Docker PostgreSQL 15",
+  "queryCache": "bypassed",
+  "metrics": [
+    {
+      "id": "weekly-users",
+      "p50Ms": 541,
+      "p95Ms": 676
+    },
+    {
+      "id": "weekly-accounts",
+      "p50Ms": 526,
+      "p95Ms": 556
+    },
+    {
+      "id": "activation",
+      "p50Ms": 392,
+      "p95Ms": 440
+    },
+    {
+      "id": "retention",
+      "p50Ms": 333,
+      "p95Ms": 390
+    }
+  ],
+  "measuredAt": "2026-09-08T21:44:43.802Z"
+}

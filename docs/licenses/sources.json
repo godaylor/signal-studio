@@ -1,0 +1,304 @@
+{
+  "@biomejs/cli-win32-x64@2.5.5": {
+    "url": "https://raw.githubusercontent.com/biomejs/biome/412a0e99712d4223b9f10c5f9d6b8977187ab2a2/LICENSE-MIT",
+    "sourceRevision": "412a0e99712d4223b9f10c5f9d6b8977187ab2a2",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT OR Apache-2.0",
+    "sha256": "35365b6285e1f8cac61549f321befdbbe6139bf1e3d7ef6ccf1f1294ab015202"
+  },
+  "@esbuild/win32-x64@0.27.7": {
+    "url": "https://raw.githubusercontent.com/evanw/esbuild/2025c9ff6ab15ba6b0f9d074fd732250cc46e4a3/LICENSE.md",
+    "sourceRevision": "2025c9ff6ab15ba6b0f9d074fd732250cc46e4a3",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+  },
+  "@esbuild/win32-x64@0.28.1": {
+    "url": "https://raw.githubusercontent.com/evanw/esbuild/bb9db84c02433fbe37b3509f53f9f3e3cc48725e/LICENSE.md",
+    "sourceRevision": "bb9db84c02433fbe37b3509f53f9f3e3cc48725e",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681"
+  },
+  "@next/env@16.3.0": {
+    "url": "https://raw.githubusercontent.com/vercel/next.js/dea82ba4ee65606672a3648165da79dc0e792fc6/license.md",
+    "sourceRevision": "dea82ba4ee65606672a3648165da79dc0e792fc6",
+    "exactPublishedRevision": false,
+    "declaredLicense": "MIT",
+    "sha256": "ee765244e2d59f5234d474f62e0766fa0c8b99af967fdd4c0cb8dcb0c76ea224"
+  },
+  "@next/swc-win32-x64-msvc@16.3.0": {
+    "url": "https://raw.githubusercontent.com/vercel/next.js/dea82ba4ee65606672a3648165da79dc0e792fc6/license.md",
+    "sourceRevision": "dea82ba4ee65606672a3648165da79dc0e792fc6",
+    "exactPublishedRevision": false,
+    "declaredLicense": "MIT",
+    "sha256": "ee765244e2d59f5234d474f62e0766fa0c8b99af967fdd4c0cb8dcb0c76ea224"
+  },
+  "@radix-ui/react-compose-refs@1.1.2": {
+    "url": "https://raw.githubusercontent.com/radix-ui/primitives/fcef0668a5c827e5a4baac405474d75680f9a4eb/LICENSE",
+    "sourceRevision": "fcef0668a5c827e5a4baac405474d75680f9a4eb",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+  },
+  "@radix-ui/react-use-layout-effect@1.1.1": {
+    "url": "https://raw.githubusercontent.com/radix-ui/primitives/fcef0668a5c827e5a4baac405474d75680f9a4eb/LICENSE",
+    "sourceRevision": "fcef0668a5c827e5a4baac405474d75680f9a4eb",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+  },
+  "@redis/bloom@5.12.1": {
+    "url": "https://raw.githubusercontent.com/redis/node-redis/838c28d9f55d13a7933e650b9f7782fdb5af4f71/LICENSE",
+    "sourceRevision": "838c28d9f55d13a7933e650b9f7782fdb5af4f71",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+  },
+  "@redis/client@5.12.1": {
+    "url": "https://raw.githubusercontent.com/redis/node-redis/789d6d5c5c774fda24257ce1fc7f4f66b80ae689/LICENSE",
+    "sourceRevision": "789d6d5c5c774fda24257ce1fc7f4f66b80ae689",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+  },
+  "@redis/json@5.12.1": {
+    "url": "https://raw.githubusercontent.com/redis/node-redis/02cfd5ad4c07ef6c1d703e25d3c2076eacfb4b45/LICENSE",
+    "sourceRevision": "02cfd5ad4c07ef6c1d703e25d3c2076eacfb4b45",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+  },
+  "@redis/search@5.12.1": {
+    "url": "https://raw.githubusercontent.com/redis/node-redis/9e7767c5bf2cb06bcce872fe99e5dbb349e3a074/LICENSE",
+    "sourceRevision": "9e7767c5bf2cb06bcce872fe99e5dbb349e3a074",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+  },
+  "@redis/time-series@5.12.1": {
+    "url": "https://raw.githubusercontent.com/redis/node-redis/de70920ecb4caf2a9c871a24cf08f1fcb41b1d2d/LICENSE",
+    "sourceRevision": "de70920ecb4caf2a9c871a24cf08f1fcb41b1d2d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "a57b250a5bf03d7afe55b74063313f2adb7b00d546c0ab149a89398333fe3cc8"
+  },
+  "@rolldown/binding-win32-x64-msvc@1.0.0-rc.18": {
+    "url": "https://raw.githubusercontent.com/rolldown/rolldown/2c4a957beb41b9f896f9cb795da056c6638e2698/LICENSE",
+    "sourceRevision": "2c4a957beb41b9f896f9cb795da056c6638e2698",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "23ecfff35a5a2e80d92142f75228912c3b1abc4b5a8337a821ff4397e2f9f734"
+  },
+  "@rollup/rollup-win32-x64-gnu@4.62.3": {
+    "url": "https://raw.githubusercontent.com/rollup/rollup/a80a1974c584bfa8b694fb5d1a20f3fa75ebaf0a/LICENSE.md",
+    "sourceRevision": "a80a1974c584bfa8b694fb5d1a20f3fa75ebaf0a",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "fa1bd040c5bdeefe65b3821cebf474f2733ce65df13089bd151dda1778e62fe8"
+  },
+  "@rollup/rollup-win32-x64-msvc@4.62.3": {
+    "url": "https://raw.githubusercontent.com/rollup/rollup/a80a1974c584bfa8b694fb5d1a20f3fa75ebaf0a/LICENSE.md",
+    "sourceRevision": "a80a1974c584bfa8b694fb5d1a20f3fa75ebaf0a",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "fa1bd040c5bdeefe65b3821cebf474f2733ce65df13089bd151dda1778e62fe8"
+  },
+  "@rrweb/packer@2.0.1": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/a9198e65069f0c741789842106a419210775074d/LICENSE",
+    "sourceRevision": "a9198e65069f0c741789842106a419210775074d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "e49e62397b603438476e0d6b5ca3b6e6d4f23a80594e596aff29ac04fa3e1b1c"
+  },
+  "@rrweb/replay@2.0.1": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/a9198e65069f0c741789842106a419210775074d/LICENSE",
+    "sourceRevision": "a9198e65069f0c741789842106a419210775074d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "e49e62397b603438476e0d6b5ca3b6e6d4f23a80594e596aff29ac04fa3e1b1c"
+  },
+  "@rrweb/types@2.0.1": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/a9198e65069f0c741789842106a419210775074d/LICENSE",
+    "sourceRevision": "a9198e65069f0c741789842106a419210775074d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "e49e62397b603438476e0d6b5ca3b6e6d4f23a80594e596aff29ac04fa3e1b1c"
+  },
+  "@rrweb/utils@2.0.1": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/a9198e65069f0c741789842106a419210775074d/LICENSE",
+    "sourceRevision": "a9198e65069f0c741789842106a419210775074d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "e49e62397b603438476e0d6b5ca3b6e6d4f23a80594e596aff29ac04fa3e1b1c"
+  },
+  "@schummar/icu-type-parser@1.21.5": {
+    "url": "https://raw.githubusercontent.com/schummar/schummar-translate/de1cde15a76f4f60874dbe9b7c5395ae2d38b610/LICENSE",
+    "sourceRevision": "de1cde15a76f4f60874dbe9b7c5395ae2d38b610",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "872f31f366abf7225ef12fc28320977c6287ed01f6569f40070a48ac890186dd"
+  },
+  "@umami/react-zen@0.249.0": {
+    "url": "https://raw.githubusercontent.com/umami-software/zen/55bb53ab2dfc9ca6038ec89dbbfe972212228c52/LICENSE",
+    "sourceRevision": "55bb53ab2dfc9ca6038ec89dbbfe972212228c52",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "d59f69c3a56253a150adfc42b41acd49e9024410ad087c58a23d506623258dfe"
+  },
+  "babel-plugin-react-compiler@19.1.0-rc.2": {
+    "url": "https://raw.githubusercontent.com/facebook/react/96eb84e493c4ff2c280990659057164c0f16bbb8/LICENSE",
+    "sourceRevision": "96eb84e493c4ff2c280990659057164c0f16bbb8",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+  },
+  "boolbase@1.0.0": {
+    "url": "https://raw.githubusercontent.com/fb55/boolbase/54811f01c797a6bb1c263183ae90b7dd627e0638/LICENSE",
+    "sourceRevision": "54811f01c797a6bb1c263183ae90b7dd627e0638",
+    "exactPublishedRevision": false,
+    "declaredLicense": "ISC",
+    "sha256": "cdf4d87ae0a6c160227263bf4e39a0a10e30e89ae7256e0f7ac7bde0836552c6"
+  },
+  "client-only@0.0.1": {
+    "url": "https://raw.githubusercontent.com/vercel/next.js/dea82ba4ee65606672a3648165da79dc0e792fc6/license.md",
+    "sourceRevision": "dea82ba4ee65606672a3648165da79dc0e792fc6",
+    "exactPublishedRevision": false,
+    "declaredLicense": "MIT",
+    "sha256": "ee765244e2d59f5234d474f62e0766fa0c8b99af967fdd4c0cb8dcb0c76ea224"
+  },
+  "embla-carousel-react@8.6.0": {
+    "url": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+    "sourceRevision": "0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+  },
+  "embla-carousel-reactive-utils@8.6.0": {
+    "url": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+    "sourceRevision": "0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+  },
+  "embla-carousel@8.6.0": {
+    "url": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+    "sourceRevision": "0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+  },
+  "remeda@2.33.4": {
+    "url": "https://raw.githubusercontent.com/remeda/remeda/f9e681a707fd8cac00c43c10591c44e17f577610/LICENSE",
+    "sourceRevision": "f9e681a707fd8cac00c43c10591c44e17f577610",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "acf30083045d768ce20640237313ee31a45d548d66ef76df5bb5fb0745479535"
+  },
+  "rrdom@2.0.1": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/a9198e65069f0c741789842106a419210775074d/LICENSE",
+    "sourceRevision": "a9198e65069f0c741789842106a419210775074d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "e49e62397b603438476e0d6b5ca3b6e6d4f23a80594e596aff29ac04fa3e1b1c"
+  },
+  "rrweb-player@2.0.0-alpha.20": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/77e208076b46b0490bd6a1e6599805d557be2001/LICENSE",
+    "sourceRevision": "77e208076b46b0490bd6a1e6599805d557be2001",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+  },
+  "rrweb-snapshot@2.0.1": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/a9198e65069f0c741789842106a419210775074d/LICENSE",
+    "sourceRevision": "a9198e65069f0c741789842106a419210775074d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "e49e62397b603438476e0d6b5ca3b6e6d4f23a80594e596aff29ac04fa3e1b1c"
+  },
+  "rrweb@2.0.1": {
+    "url": "https://raw.githubusercontent.com/rrweb-io/rrweb/a9198e65069f0c741789842106a419210775074d/LICENSE",
+    "sourceRevision": "a9198e65069f0c741789842106a419210775074d",
+    "exactPublishedRevision": true,
+    "declaredLicense": "MIT",
+    "sha256": "e49e62397b603438476e0d6b5ca3b6e6d4f23a80594e596aff29ac04fa3e1b1c"
+  },
+  "saxes@6.0.0": {
+    "url": "https://raw.githubusercontent.com/lddubeau/saxes/211fa0ebec9b628affc09219199639887174bfc3/LICENSE",
+    "sourceRevision": "211fa0ebec9b628affc09219199639887174bfc3",
+    "exactPublishedRevision": true,
+    "declaredLicense": "ISC",
+    "sha256": "0fac2374380621b22e6b50451057721a9c52935b02d16d106a9f04897f061d0e"
+  },
+  "@swc+counter@0.1.3.txt": {
+    "url": "https://raw.githubusercontent.com/swc-project/pkgs/2cbd4700aaa6c28da488aad098b150c22ba56ff1/packages/counter/LICENSE.txt",
+    "sha256": "d96eba1f1881334d50ffc144276dfa98e147a415e7c591ecdfcb81680361dc91"
+  },
+  "postgres@3.4.7.txt": {
+    "url": "https://raw.githubusercontent.com/porsager/postgres/9b92b65da6a5121545581a6dd5de859c2a70177f/UNLICENSE",
+    "sha256": "b5065838cbac452dfc855ba6e6e031481ad2c68406f70d21ead9321374653e6c"
+  },
+  "standard-MIT.txt": {
+    "url": "https://raw.githubusercontent.com/spdx/license-list-data/3ac5a9c241d97f95b22a5e366c9c841404a35639/text/MIT.txt",
+    "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5"
+  },
+  "standard-ISC.txt": {
+    "url": "https://raw.githubusercontent.com/spdx/license-list-data/3ac5a9c241d97f95b22a5e366c9c841404a35639/text/ISC.txt",
+    "sha256": "521c6f0ed8e64736684f89843d16a4df6b4b7449acbcfc6ca6630a3037ca8c53"
+  },
+  "Datamaps-MIT.txt": {
+    "url": "https://raw.githubusercontent.com/markmarkoh/datamaps/14c1641273bb52e6f115f99db847ec076c62eb4b/LICENSE",
+    "sha256": "e52bc77578bcd1420d87c12216f6527bcb67b28ad5e8689c823161f7cc46c15e"
+  },
+  "country-list-MIT.txt": {
+    "url": "https://raw.githubusercontent.com/umpirsky/country-list/bd490a163ae4709bbe4b54c4f638f24e032828d2/LICENSE",
+    "sha256": "80979ed32b44ace5c2b8d44cbb35702cc59e764bfc306d13b3723f7824fae1d4"
+  },
+  "language-list-MIT.txt": {
+    "url": "https://raw.githubusercontent.com/umpirsky/language-list/7813f6696559496d014acd5dce0e3b09c0766844/LICENSE",
+    "sha256": "80979ed32b44ace5c2b8d44cbb35702cc59e764bfc306d13b3723f7824fae1d4"
+  },
+  "@open-draft/deferred-promise@2.2.0": {
+    "url": "https://registry.npmjs.org/%40open-draft%2Fdeferred-promise/2.2.0",
+    "evidence": "published-license-declaration-and-author-with-standard-SPDX-text",
+    "declaredLicense": "MIT",
+    "tarballIntegrity": "sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==",
+    "sha256": "2431745625a8cd4922964a7d6f1495e4381805531cabfc5fc5813a825c97495d"
+  },
+  "@prisma/dev@0.24.17": {
+    "url": "https://registry.npmjs.org/%40prisma%2Fdev/0.24.17",
+    "evidence": "published-license-declaration-and-author-with-standard-SPDX-text",
+    "declaredLicense": "ISC",
+    "tarballIntegrity": "sha512-UvdZzmpFwknnfreh6Jije84ekkYGPYEJhXG1tFzCsCfQyzJifrOo38eZc0qajzvaC6OLUOrN9ML5XfCnEZL9DA==",
+    "sha256": "df4dbdba4a561e00c5ae38451a627e1a83f3229bc227589dc82e3b9b2f2d07ca"
+  },
+  "eastasianwidth@0.2.0": {
+    "url": "https://registry.npmjs.org/eastasianwidth/0.2.0",
+    "evidence": "published-license-declaration-and-author-with-standard-SPDX-text",
+    "declaredLicense": "MIT",
+    "tarballIntegrity": "sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==",
+    "sha256": "630785048ab768f4579bc90b31a590518d4463c902e5de09fa7d5019b670882c"
+  },
+  "is-node-process@1.2.0": {
+    "url": "https://registry.npmjs.org/is-node-process/1.2.0",
+    "evidence": "published-license-declaration-and-author-with-standard-SPDX-text",
+    "declaredLicense": "MIT",
+    "tarballIntegrity": "sha512-Vg4o6/fqPxIjtxgUH5QLJhwZ7gW5diGCVlXpuUfELC62CuxM1iHcRe51f2W1FDy04Ai4KJkagKjx3XaqyfRKXw==",
+    "sha256": "4836c5b1ce7471d0597c40e017c7b78ec7429df67965dc225886d0a4941b7668"
+  },
+  "stackback@0.0.2": {
+    "url": "https://registry.npmjs.org/stackback/0.0.2",
+    "evidence": "published-license-declaration-and-author-with-standard-SPDX-text",
+    "declaredLicense": "MIT",
+    "tarballIntegrity": "sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==",
+    "sha256": "a4528d62576ae02f8c90056368a71fb7e1917016b3a7baf0bc6f687ecc18610d"
+  },
+  "LGPL-3.0.txt": {
+    "url": "https://raw.githubusercontent.com/spdx/license-list-data/3ac5a9c241d97f95b22a5e366c9c841404a35639/text/LGPL-3.0-only.txt",
+    "sha256": "996af0513df21f7496288951c41428a03c174e9e4a9d63665c57d670f845ccb1"
+  },
+  "GPL-3.0.txt": {
+    "url": "https://raw.githubusercontent.com/spdx/license-list-data/3ac5a9c241d97f95b22a5e366c9c841404a35639/text/GPL-3.0-only.txt",
+    "sha256": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0"
+  }
+}

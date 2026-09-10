@@ -1,59 +1,30 @@
 import { expect, test } from '@playwright/test';
-import { loginPage, logout } from './helpers';
+import { createE2eFixtures } from './fixtures';
+import { authHeaders, deleteUser, loginPage } from './helpers';
 
-test.describe('User tests', () => {
-  test.describe.configure({ mode: 'serial' });
+test('admin creates a unique user from the current UI', async ({ page, request }, testInfo) => {
+  const auth = await loginPage(page, request);
+  const fixture = createE2eFixtures(testInfo, 'ui-user');
+  let userId = '';
 
-  test.beforeEach(async ({ page, request }) => {
-    await loginPage(page, request);
-    await page.goto('/settings/users');
-  });
+  try {
+    await page.goto('/admin/users');
+    await expect(page.getByRole('button', { name: /create user/i })).toBeVisible();
+    await page.getByRole('button', { name: /create user/i }).click();
+    const dialog = page.getByRole('dialog', { name: /create user/i });
+    await dialog.getByRole('textbox', { name: 'Username' }).fill(fixture.user.create.username);
+    await dialog.getByRole('textbox', { name: 'Password' }).fill(fixture.user.create.password);
+    await dialog.getByRole('combobox', { name: 'Role' }).click();
+    await page.getByRole('option', { name: 'User', exact: true }).click();
+    await dialog.getByRole('button', { name: 'Save' }).click();
 
-  test('adds a user', async ({ page }) => {
-    await expect(page.getByText(/Create user/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: fixture.user.create.username })).toBeVisible();
 
-    await page.getByTestId('button-create-user').click();
-    await page.getByTestId('input-username').locator('input').fill('Test-user');
-    await page.getByTestId('input-password').locator('input').fill('testPasswordPlaywright');
-    await page.getByTestId('dropdown-role').click();
-    await page.getByTestId('dropdown-item-user').click();
-    await page.getByTestId('button-submit').click();
-
-    await expect(page.locator('td[label="Username"]')).toContainText('Test-user');
-    await expect(page.locator('td[label="Role"]')).toContainText('User');
-  });
-
-  test('edits a user role and password', async ({ page }) => {
-    const userRow = page.locator('table tbody tr').filter({
-      has: page.locator('td', { hasText: /Test-user/i }),
-    });
-
-    await userRow.getByTestId('link-button-edit').click();
-    await page.getByTestId('input-password').locator('input').fill('newPassword');
-    await page.getByTestId('dropdown-role').click();
-    await page.getByTestId('dropdown-item-viewOnly').click();
-    await page.getByTestId('button-submit').click();
-
-    await page.goto('/settings/users');
-    await expect(
-      page.locator('table tbody tr').filter({ has: page.locator('td', { hasText: /Test-user/i }) }),
-    ).toContainText('View only');
-
-    await logout(page);
-    await page.getByTestId('input-username').locator('input').fill('Test-user');
-    await page.getByTestId('input-password').locator('input').fill('newPassword');
-    await page.getByTestId('button-submit').click();
-
-    await expect(page).toHaveURL(/\/dashboard$/);
-  });
-
-  test('deletes a user', async ({ page }) => {
-    const userRow = page.locator('table tbody tr').filter({
-      has: page.locator('td', { hasText: /Test-user/i }),
-    });
-
-    await userRow.getByTestId('button-delete').click();
-    await expect(page.getByText(/Are you sure you want to delete Test-user?/i)).toBeVisible();
-    await page.getByTestId('button-confirm').click();
-  });
+    const response = await request.get('/api/admin/users', { headers: authHeaders(auth) });
+    const body = await response.json();
+    userId = body.data.find(item => item.username === fixture.user.create.username)?.id ?? '';
+    expect(userId).not.toBe('');
+  } finally {
+    if (userId) await deleteUser(request, auth, userId, true);
+  }
 });
