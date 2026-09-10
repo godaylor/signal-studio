@@ -1,5 +1,5 @@
 name: Signal Studio CI
-on: [push, pull_request, workflow_call]
+on: [push, pull_request, workflow_call, workflow_dispatch]
 permissions:
   contents: read
 env:
