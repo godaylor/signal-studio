@@ -1,27 +1,97 @@
-name: Node.js CI
-
-on: [push]
-
+name: Signal Studio CI
+on: [push, pull_request, workflow_call]
+permissions:
+  contents: read
 env:
-  DATABASE_URL: "postgresql://user:pass@localhost:5432/dummy"
-  SKIP_DB_CHECK: 1
-
+  DATABASE_URL: postgresql://signal_studio:signal_studio@127.0.0.1:32110/signal_studio_test_ci
+  PORT: '32140'
+  PLAYWRIGHT_BASE_URL: http://127.0.0.1:32140
+  SKIP_BUILD_GEO: '1'
+  NEXT_TELEMETRY_DISABLED: '1'
+  EXPORT_STORAGE_PATH: ${{ github.workspace }}/.local/exports
 jobs:
-  build:
-    if: github.repository == 'umami-software/umami'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: signal_studio_test_ci
+          POSTGRES_USER: signal_studio
+          POSTGRES_PASSWORD: signal_studio
+        ports: ['32110:5432']
+        options: >-
+          --health-cmd "pg_isready -U signal_studio -d signal_studio_test_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
           version: 10.15.1
           run_install: false
-      - name: Use Node.js 22
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: "pnpm"
-      - run: pnpm install
+          node-version: 22.22.2
+      - run: pnpm install --frozen-lockfile
+      - run: node --test tests/release-contract.test.mjs
+      - name: Ephemeral random application secrets
+        run: pnpm env:init
+      - run: pnpm build-db
+      - name: Isolated migration and secure bootstrap
+        run: |
+          pnpm db:migrate
+          pnpm db:migrate
+          pnpm admin:bootstrap --local
+          pnpm db:seed
+          pnpm db:seed:portfolio
+      - run: pnpm typecheck
+      - run: pnpm typecheck:e2e
+      - run: pnpm lint
       - run: pnpm test
+      - run: pnpm exec vitest run --config vitest.studio.config.ts
+      - run: pnpm test:integration
       - run: pnpm build
+      - run: node scripts/verify-release-inventory.js
+      - name: No secrets in standalone
+        run: |
+          test ! -f .next/standalone/.env
+          test ! -d .next/standalone/.local
+          test -f .next/standalone/LICENSE
+          test -f .next/standalone/THIRD_PARTY_NOTICES.md
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Start application and export worker
+        run: |
+          pnpm start > .local/ci-app.log 2>&1 &
+          pnpm worker:exports > .local/ci-worker.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:32140/api/ready >/dev/null; then break; fi
+            sleep 2
+          done
+          curl --fail --silent http://127.0.0.1:32140/api/ready
+      - name: Critical browser workflows, access restrictions, RU/EN and axe
+        run: node scripts/run-release-e2e.js tests/e2e/m16-home.spec.ts tests/e2e/explore-workspace.spec.ts tests/e2e/insight-library.spec.ts tests/e2e/dashboard-workspace.spec.ts tests/e2e/audiences-experience.spec.ts tests/e2e/live-workspace.spec.ts tests/e2e/m15-export.spec.ts tests/e2e/m14-viewer-access.spec.ts tests/e2e/m14-public-share.spec.ts tests/e2e/m14-localization.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failure-context
+          path: test-results
+          retention-days: 7
+  image:
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        target: [runner, worker, migration]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --target ${{ matrix.target }} --build-arg SIGNAL_STUDIO_REVISION=${{ github.sha }} --tag signal-studio:ci .
+      - name: Inspect release runtime
+        run: |
+          docker run --rm --entrypoint sh signal-studio:ci -c 'test -f /app/LICENSE && test -f /app/THIRD_PARTY_NOTICES.md && test -f /app/legal/application.cdx.json && test -f /app/legal/BUILD_METADATA.json && test -f /app/legal/DEPENDENCY_LICENSES.txt && test ! -f /app/.env'
+          test "$(docker image inspect signal-studio:ci --format '{{.Config.User}}')" = "nextjs"
+          docker run --rm --entrypoint node signal-studio:ci scripts/verify-release-inventory.js legal --packaged
+      - name: Migration engine works offline as non-root
+        if: matrix.target != 'runner'
+        run: docker run --rm --network none --env DATABASE_URL=postgresql://unused:unused@127.0.0.1:32110/unused --entrypoint ./node_modules/.bin/prisma signal-studio:ci version

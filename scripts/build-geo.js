@@ -2,9 +2,9 @@
 import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
-import https from 'https';
+import https from 'node:https';
 import { list } from 'tar';
-import zlib from 'zlib';
+import zlib from 'node:zlib';
 
 if (process.env.SKIP_BUILD_GEO) {
   console.log('SKIP_BUILD_GEO is set. Skipping geo setup.');
@@ -16,98 +16,65 @@ if (process.env.VERCEL && !process.env.BUILD_GEO) {
   process.exit(0);
 }
 
-const db = 'GeoLite2-City';
-
-// Support custom URL via environment variable
+const database = 'GeoLite2-City';
 let url = process.env.GEO_DATABASE_URL;
 
-// Fallback to default URLs if not provided
+if (!url && process.env.MAXMIND_LICENSE_KEY) {
+  url =
+    `https://download.maxmind.com/app/geoip_download?edition_id=${database}` +
+    `&license_key=${process.env.MAXMIND_LICENSE_KEY}&suffix=tar.gz`;
+}
+
 if (!url) {
-  if (process.env.MAXMIND_LICENSE_KEY) {
-    url =
-      `https://download.maxmind.com/app/geoip_download` +
-      `?edition_id=${db}&license_key=${process.env.MAXMIND_LICENSE_KEY}&suffix=tar.gz`;
-  } else {
-    url = `https://raw.githubusercontent.com/GitSquared/node-geolite2-redist/master/redist/${db}.tar.gz`;
-  }
+  console.log(
+    'No licensed GEO_DATABASE_URL or MAXMIND_LICENSE_KEY is configured; skipping GeoLite2.',
+  );
+  process.exit(0);
 }
 
-const dest = path.resolve(process.cwd(), 'geo');
+const destination = path.resolve(process.cwd(), 'geo');
+fs.mkdirSync(destination, { recursive: true });
+const isDirectDatabase = new URL(url).pathname.endsWith('.mmdb');
 
-if (!fs.existsSync(dest)) {
-  fs.mkdirSync(dest);
-}
-
-// Check if URL points to a direct .mmdb file (already extracted)
-const isDirectMmdb = url.endsWith('.mmdb');
-
-// Download handler for compressed tar.gz files
-const downloadCompressed = url =>
-  new Promise(resolve => {
-    https.get(url, res => {
-      resolve(res.pipe(zlib.createGunzip({})).pipe(list()));
-    });
-  });
-
-// Download handler for direct .mmdb files
-const downloadDirect = (url, originalUrl) =>
-  new Promise((resolve, reject) => {
-    https.get(url, res => {
-      // Follow redirects
-      if (res.statusCode === 301 || res.statusCode === 302) {
-        downloadDirect(res.headers.location, originalUrl || url)
-          .then(resolve)
-          .catch(reject);
-        return;
+function get(urlValue, onResponse) {
+  https.get(urlValue, response => {
+    if (response.statusCode && [301, 302, 307, 308].includes(response.statusCode)) {
+      if (!response.headers.location) {
+        throw new Error('Geo database redirect did not include a location.');
       }
-
-      const filename = path.join(dest, path.basename(originalUrl || url));
-      const fileStream = fs.createWriteStream(filename);
-
-      res.pipe(fileStream);
-
-      fileStream.on('finish', () => {
-        fileStream.close();
-        console.log('Saved geo database:', filename);
-        resolve();
-      });
-
-      fileStream.on('error', e => {
-        reject(e);
-      });
-    });
-  });
-
-// Execute download based on file type
-if (isDirectMmdb) {
-  downloadDirect(url).catch(e => {
-    console.error('Failed to download geo database:', e);
+      get(new URL(response.headers.location, urlValue).toString(), onResponse);
+      return;
+    }
+    if (response.statusCode !== 200) {
+      throw new Error(`Geo database download failed with HTTP ${response.statusCode}.`);
+    }
+    onResponse(response);
+  }).on('error', error => {
+    console.error('Failed to download geo database:', error);
     process.exit(1);
   });
+}
+
+if (isDirectDatabase) {
+  get(url, response => {
+    const filename = path.join(destination, path.basename(new URL(url).pathname));
+    response.pipe(fs.createWriteStream(filename)).on('finish', () => {
+      console.log('Saved geo database:', filename);
+    });
+  });
 } else {
-  downloadCompressed(url)
-    .then(
-      res =>
-        new Promise((resolve, reject) => {
-          res.on('entry', entry => {
-            if (entry.path.endsWith('.mmdb')) {
-              const filename = path.join(dest, path.basename(entry.path));
-              entry.pipe(fs.createWriteStream(filename));
-
-              console.log('Saved geo database:', filename);
-            }
-          });
-
-          res.on('error', e => {
-            reject(e);
-          });
-          res.on('finish', () => {
-            resolve();
-          });
-        }),
-    )
-    .catch(e => {
-      console.error('Failed to download geo database:', e);
+  get(url, response => {
+    const archive = response.pipe(zlib.createGunzip()).pipe(list());
+    archive.on('entry', entry => {
+      if (entry.path.endsWith('.mmdb')) {
+        const filename = path.join(destination, path.basename(entry.path));
+        entry.pipe(fs.createWriteStream(filename));
+        console.log('Saved geo database:', filename);
+      }
+    });
+    archive.on('error', error => {
+      console.error('Failed to extract geo database:', error);
       process.exit(1);
     });
+  });
 }

@@ -1,37 +1,78 @@
----
+name: signal-studio-transform
+
 services:
-  umami:
-    image: ghcr.io/umami-software/umami:latest
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
-      APP_SECRET: replace-me-with-a-random-string
-      # Required for two-factor authentication, generate with: openssl rand -hex 32
-      TWO_FACTOR_ENCRYPTION_KEY: replace-me-with-a-64-character-hex-string
-    depends_on:
-      db:
-        condition: service_healthy
-    init: true
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl http://localhost:3000/api/heartbeat"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami
+      POSTGRES_DB: signal_studio
+      POSTGRES_USER: signal_studio
+      POSTGRES_PASSWORD: signal_studio
     volumes:
-      - umami-db-data:/var/lib/postgresql/data
-    restart: always
+      - signal-studio-db-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${SIGNAL_STUDIO_DB_PORT:-32110}:5432"
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      target: migration
+    environment:
+      DATABASE_URL: postgresql://signal_studio:signal_studio@db:5432/signal_studio
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    image: signal-studio:local
+    build:
+      context: .
+      target: runner
+    ports:
+      - "127.0.0.1:${SIGNAL_STUDIO_APP_PORT:-32109}:3000"
+    environment:
+      DATABASE_URL: postgresql://signal_studio:signal_studio@db:5432/signal_studio
+      APP_SECRET: ${APP_SECRET:?Run node scripts/generate-env.js before docker compose up}
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY:?Run node scripts/generate-env.js before docker compose up}
+      EXPORT_STORAGE_PATH: /app/exports
+    volumes:
+      - signal-studio-export-data:/app/exports
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:3000/api/ready >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    image: signal-studio-worker:local
+    build:
+      context: .
+      target: worker
+    environment:
+      DATABASE_URL: postgresql://signal_studio:signal_studio@db:5432/signal_studio
+      APP_SECRET: ${APP_SECRET:?Run node scripts/generate-env.js before docker compose up}
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY:?Run node scripts/generate-env.js before docker compose up}
+      EXPORT_STORAGE_PATH: /app/exports
+    volumes:
+      - signal-studio-export-data:/app/exports
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 260s
+
 volumes:
-  umami-db-data:
+  signal-studio-db-data:
+  signal-studio-export-data:

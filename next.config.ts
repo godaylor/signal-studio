@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import createNextIntlPlugin from 'next-intl/plugin';
 import pkg from './package.json' with { type: 'json' };
-import { getContentSecurityPolicy } from './src/lib/csp';
+import { getDefaultSecurityHeaders, getManagementCorsHeaders } from './src/lib/security-headers';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
@@ -33,23 +33,7 @@ function normalizePath(url: string) {
   return `/${url.replace(/^\/+|\/+$/g, '')}`;
 }
 
-const defaultHeaders = [
-  {
-    key: 'X-DNS-Prefetch-Control',
-    value: 'on',
-  },
-  {
-    key: 'Content-Security-Policy',
-    value: getContentSecurityPolicy(),
-  },
-];
-
-if (forceSSL) {
-  defaultHeaders.push({
-    key: 'Strict-Transport-Security',
-    value: 'max-age=63072000; includeSubDomains; preload',
-  });
-}
+const defaultHeaders = getDefaultSecurityHeaders(Boolean(forceSSL));
 
 const trackerHeaders = [
   {
@@ -62,7 +46,7 @@ const trackerHeaders = [
   },
 ];
 
-const apiHeaders = [
+const collectionHeaders = [
   {
     key: 'Access-Control-Allow-Origin',
     value: '*',
@@ -85,16 +69,33 @@ const apiHeaders = [
   },
 ];
 
+const managementHeaders = [
+  ...getManagementCorsHeaders(),
+  {
+    key: 'Cache-Control',
+    value: 'no-cache',
+  },
+];
+
 const headers = [
   {
     source: '/api/:path*',
-    headers: apiHeaders,
+    headers: managementHeaders,
   },
   {
     source: '/:path*',
     headers: defaultHeaders,
   },
 ];
+
+for (const source of [
+  '/api/send',
+  '/api/batch',
+  '/api/record',
+  '/api/websites/:websiteId/recorder',
+]) {
+  headers.push({ source, headers: collectionHeaders });
+}
 
 if (isProd) {
   headers.push({
@@ -119,7 +120,7 @@ if (trackerScriptURL) {
 if (collectApiEndpoint) {
   headers.push({
     source: collectApiEndpoint,
-    headers: apiHeaders,
+    headers: collectionHeaders,
   });
 
   rewrites.push({
@@ -134,7 +135,7 @@ if (isRelativeUrl(apiUrl)) {
   if (normalizedApiUrl !== '/' && normalizedApiUrl !== '/api') {
     headers.push({
       source: `${normalizedApiUrl}/:path*`,
-      headers: apiHeaders,
+      headers: managementHeaders,
     });
 
     rewrites.push({
@@ -221,8 +222,11 @@ export default withNextIntl({
   },
   basePath,
   output: isVercel ? undefined : 'standalone',
+  outputFileTracingExcludes: {
+    '/*': ['.env', '.env.*', '.local/**/*', '.git/**/*', 'tests/**/*', 'playwright-report/**/*', 'test-results/**/*'],
+  },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   experimental: {
     useTypeScriptCli: true,

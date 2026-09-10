@@ -7,11 +7,16 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  test: {
-    env: { DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://unit:unit@127.0.0.1:32169/signal_studio_unit' },
-    environment: 'jsdom',
-    include: ['src/**/*.test.{ts,tsx}'],
-    setupFiles: ['./src/test/setup.ts'],
+  css: {
+    postcss: {
+      plugins: [],
+    },
   },
-  css: { postcss: { plugins: [] } },
+  test: {
+    environment: 'jsdom',
+    include: [
+      'src/features/{studio-shell,explore,insights,dashboards,audiences,experience}/**/*.spec.{ts,tsx}',
+    ],
+    setupFiles: ['./src/test/setup.ts', './src/test/studio-setup.ts'],
+  },
 });

@@ -1,0 +1,57 @@
+import 'dotenv/config';
+import { readFile } from 'node:fs/promises';
+import { chromium, request, expect } from '@playwright/test';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:32109';
+const target = new URL(baseURL);
+if (target.hostname !== '127.0.0.1' || Number(target.port) < 32100 || Number(target.port) > 32199) throw new Error('Local Signal Studio ports only.');
+const credentials = JSON.parse(await readFile(process.env.E2E_CREDENTIALS_FILE || '.local/credentials/administrator.json', 'utf8'));
+const api = await request.newContext({ baseURL });
+let browser;
+try {
+  expect((await api.get('/api/ready')).status()).toBe(200);
+  const legacy = await api.post('/api/auth/login', { data: { username: 'admin', password: 'umami' } });
+  expect(legacy.status()).toBe(401);
+  const login = await api.post('/api/auth/login', { data: { username: credentials.username, password: credentials.password } });
+  expect(login.status()).toBe(200);
+  const { token } = await login.json();
+  const headers = { Authorization: 'Bearer ' + token };
+  const projectsResponse = await api.get('/api/websites?includeTeams=1', { headers });
+  const projects = await projectsResponse.json();
+  const list = Array.isArray(projects) ? projects : projects.data;
+  const project = list.find(item => item.name === 'Portfolio · Activation Lab');
+  if (!project) throw new Error('Run explicit portfolio seed first.');
+  const snapshotResponse = await api.get('/api/projects/' + project.id + '/home', { headers });
+  expect(snapshotResponse.status()).toBe(200);
+  const snapshot = await snapshotResponse.json();
+  const activation = snapshot.metrics.find(item => item.id === 'activation');
+  expect(activation.result.data.total.rate).toBe(0.5);
+  expect(activation.result.data.comparisonTotal.rate).toBe(1);
+  expect((await api.get('/api/operations', { headers })).status()).toBe(200);
+  browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.addInitScript(token => {
+    localStorage.setItem('umami.auth', JSON.stringify(token));
+    localStorage.setItem('umami.locale', JSON.stringify('en-US'));
+  }, token);
+  const home = '/studio/' + project.id + '/home';
+  await page.goto(baseURL + home + '?locale=en-US');
+  const open = page.getByRole('link', { name: 'Open definition in Explore', exact: true }).first();
+  await expect(open).toBeVisible();
+  await page.screenshot({ path: '.local/portfolio-release-desktop.png', fullPage: true });
+  await open.click();
+  await expect(page.getByRole('region', { name: 'Range total' })).toContainText('50');
+  await page.reload();
+  await expect(page.getByRole('region', { name: 'Range total' })).toContainText('50');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(baseURL + home + '?locale=ru-RU');
+  await expect(page.getByRole('link', { name: 'Открыть определение в анализе', exact: true }).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '.local/portfolio-release-mobile.png', fullPage: true });
+  expect(errors).toEqual([]);
+  console.log(JSON.stringify({ url: baseURL + home, readiness: 200, oldDemoLogin: legacy.status(), activation: '50% vs 100%', browser: 'EN desktop / RU mobile / Explore URL reload', pageErrors: 0 }));
+} finally {
+  await browser?.close();
+  await api.dispose();
+}
