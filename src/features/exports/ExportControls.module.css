@@ -1,0 +1,54 @@
+.content {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  max-height: 70dvh;
+  overflow: auto;
+}
+.content p {
+  margin: 0;
+}
+.content label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.content select,
+.button,
+.jobs button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-height: 40px;
+}
+.button {
+  cursor: pointer;
+}
+.content button:focus-visible,
+.button:focus-visible,
+.content select:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.jobs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.jobs li {
+  display: grid;
+  gap: 6px;
+  overflow-wrap: anywhere;
+  border-top: 1px solid currentColor;
+  padding-top: 12px;
+}
+.content button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}

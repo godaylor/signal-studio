@@ -191,7 +191,7 @@ export function PropertyDateChart({
             minPropertyDate,
             maxPropertyDate,
             chartUnit,
-            dateLocale,
+            locale,
           ),
           barPercentage: 0.9,
           categoryPercentage: 0.9,

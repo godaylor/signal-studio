@@ -12,7 +12,14 @@ export function ExportButton({ websiteId }: { websiteId: string }) {
   const date = useDateParameters();
   const filters = useFilterParameters();
   const searchParams = useSearchParams();
-  const { get } = useApi();
+  const { get, useQuery } = useApi();
+  const { data: access, isLoading: isAccessLoading } = useQuery({
+    queryKey: ['project-access', websiteId],
+    queryFn: () => get(`/projects/${websiteId}/access`),
+    staleTime: 30_000,
+  });
+
+  if (isAccessLoading || !access?.data?.capabilities?.exportData) return null;
 
   const handleClick = async () => {
     setIsLoading(true);

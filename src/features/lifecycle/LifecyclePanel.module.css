@@ -1,0 +1,45 @@
+.panel {
+  border-block: 1px solid var(--base400);
+  padding-block: 16px;
+}
+.panel summary {
+  cursor: pointer;
+  min-height: 44px;
+  font-weight: 600;
+}
+.panel p {
+  max-width: 80ch;
+  margin-block: 12px;
+}
+.form {
+  display: grid;
+  gap: 16px;
+  max-width: 640px;
+}
+.form label {
+  display: grid;
+  gap: 8px;
+}
+.form input,
+.form select,
+.form button {
+  min-height: 44px;
+  width: 100%;
+  padding: 8px;
+}
+.form code {
+  overflow-wrap: anywhere;
+}
+.table {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+.table th,
+.table td {
+  text-align: start;
+  padding: 8px;
+}
+.panel :focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}

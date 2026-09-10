@@ -25,7 +25,7 @@ export function TwoFactorSuccessModal({ backupCodes, onClose }: TwoFactorSuccess
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'umami-backup-codes.txt';
+    a.download = 'signal-studio-backup-codes.txt';
     a.click();
     URL.revokeObjectURL(url);
   };

@@ -40,7 +40,7 @@ export function PropertyChart({
   const {
     dateRange: { startDate, endDate, unit },
   } = useDateRange({ timezone });
-  const { locale, dateLocale } = useLocale();
+  const { locale } = useLocale();
   const propertySeriesQuery = usePropertySeriesQuery(
     source,
     websiteId,
@@ -97,7 +97,7 @@ export function PropertyChart({
       return {
         datasets: [
           {
-            data: generateTimeSeries([], startDate, endDate, unit, dateLocale),
+            data: generateTimeSeries([], startDate, endDate, unit, locale),
             lineTension: 0,
             borderWidth: 1,
           },
@@ -120,7 +120,7 @@ export function PropertyChart({
             startDate,
             endDate,
             unit,
-            dateLocale,
+            locale,
           ),
           lineTension: 0,
           backgroundColor: color.alpha(0.6).toRgbString(),
@@ -129,7 +129,7 @@ export function PropertyChart({
         };
       }),
     };
-  }, [data, startDate, endDate, unit, dateLocale, valueLabels, colorMap]);
+  }, [data, startDate, endDate, unit, locale, valueLabels, colorMap]);
 
   const renderXLabel = useCallback(renderDateLabels(unit, locale), [unit, locale]);
   const propertySum = useMemo(

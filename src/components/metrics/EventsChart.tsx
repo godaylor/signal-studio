@@ -24,7 +24,7 @@ export function EventsChart({ websiteId, focusLabel, limit }: EventsChartProps) 
   const {
     dateRange: { startDate, endDate, unit },
   } = useDateRange({ timezone: timezone });
-  const { locale, dateLocale } = useLocale();
+  const { locale } = useLocale();
   const { data, isLoading, error } = useWebsiteEventsSeriesQuery(websiteId, { limit });
   const [label, setLabel] = useState<string>(focusLabel);
   const [hiddenLabels, setHiddenLabels] = useState<Set<string>>(() => new Set());
@@ -55,7 +55,7 @@ export function EventsChart({ websiteId, focusLabel, limit }: EventsChartProps) 
       return {
         datasets: [
           {
-            data: generateTimeSeries([], startDate, endDate, unit, dateLocale),
+            data: generateTimeSeries([], startDate, endDate, unit, locale),
             lineTension: 0,
             borderWidth: 1,
           },
@@ -87,7 +87,7 @@ export function EventsChart({ websiteId, focusLabel, limit }: EventsChartProps) 
           const color = colord(colorByKey[key]);
           return {
             label: key,
-            data: generateTimeSeries(map[key], startDate, endDate, unit, dateLocale),
+            data: generateTimeSeries(map[key], startDate, endDate, unit, locale),
             lineTension: 0,
             backgroundColor: color.alpha(0.6).toRgbString(),
             borderColor: color.alpha(0.7).toRgbString(),

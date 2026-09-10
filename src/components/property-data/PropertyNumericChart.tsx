@@ -39,7 +39,7 @@ export function PropertyNumericChart({
   const {
     dateRange: { startDate, endDate, unit },
   } = useDateRange({ timezone });
-  const { locale, dateLocale } = useLocale();
+  const { locale } = useLocale();
   const { colors } = useMemo(() => getThemeColors(theme), [theme]);
 
   const sumQuery = usePropertyNumericSeriesQuery(
@@ -89,7 +89,7 @@ export function PropertyNumericChart({
             startDate,
             endDate,
             unit,
-            dateLocale,
+            locale,
           ),
           barPercentage: 0.9,
           categoryPercentage: 0.9,
@@ -104,7 +104,7 @@ export function PropertyNumericChart({
             startDate,
             endDate,
             unit,
-            dateLocale,
+            locale,
           ),
           barPercentage: 0.9,
           categoryPercentage: 0.9,
@@ -117,7 +117,7 @@ export function PropertyNumericChart({
     avgQuery.data,
     avgRows,
     colors,
-    dateLocale,
+    locale,
     endDate,
     labels.average,
     labels.sum,

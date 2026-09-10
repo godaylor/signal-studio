@@ -1,0 +1,158 @@
+.saveForm,
+.library {
+  display: grid;
+  gap: 16px;
+  padding: 8px 22px 24px;
+  color: var(--studio-ink);
+}
+.saveForm label,
+.filters label {
+  display: grid;
+  gap: 6px;
+  color: var(--studio-ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.saveForm input,
+.saveForm textarea,
+.filters input,
+.filters select,
+.insightList input {
+  min-height: 38px;
+  padding: 8px 10px;
+  color: var(--studio-ink);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-grid-strong);
+  border-radius: 6px;
+  font: inherit;
+}
+.saveForm textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.dialogActions,
+.itemActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.dialogActions button,
+.itemActions button,
+.library > button {
+  min-height: 36px;
+  padding: 7px 11px;
+  color: var(--studio-ink);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-grid-strong);
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dialogActions button[type="submit"] {
+  color: white;
+  background: var(--studio-cobalt);
+  border-color: var(--studio-cobalt);
+}
+.filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 12px;
+  align-items: end;
+}
+.search {
+  position: relative;
+}
+.search svg {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  width: 16px;
+}
+.search input {
+  padding-left: 34px;
+}
+.filters .check {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+}
+.filters .check input {
+  min-height: auto;
+}
+.insightList {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.insightList > li {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-grid);
+  border-radius: 8px;
+}
+.insightList header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+.insightList h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.insightList header p {
+  margin: 4px 0 0;
+  color: var(--studio-ink-muted);
+  font-size: 12px;
+}
+.insightList header > button {
+  width: 36px;
+  height: 36px;
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
+  background: transparent;
+  border: 0;
+}
+.insightList header svg,
+.itemActions svg {
+  width: 15px;
+  height: 15px;
+}
+.insightList dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+}
+.insightList dl div {
+  display: flex;
+  gap: 5px;
+  font-size: 11px;
+}
+.insightList dt {
+  color: var(--studio-ink-muted);
+}
+.insightList dd {
+  margin: 0;
+}
+.itemActions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+@media (max-width: 680px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+  .itemActions {
+    justify-content: stretch;
+  }
+  .itemActions button {
+    flex: 1 1 42%;
+    justify-content: center;
+  }
+}

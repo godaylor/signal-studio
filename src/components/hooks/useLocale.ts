@@ -1,49 +1,37 @@
 import { useEffect } from 'react';
 import { LOCALE_CONFIG } from '@/lib/constants';
-import { httpGet } from '@/lib/fetch';
-import { getDateLocale, getTextDirection } from '@/lib/lang';
-import { setItem } from '@/lib/storage';
+import { getDateLocale, getTextDirection, normalizePublicLocale } from '@/lib/lang';
+import { getItem, setItem } from '@/lib/storage';
 import { setLocale, useApp } from '@/store/app';
 import enUS from '../../../public/intl/messages/en-US.json';
+import ruRU from '../../../public/intl/messages/ru-RU.json';
 import { useForceUpdate } from './useForceUpdate';
 
 const messages = {
+  'ru-RU': ruRU,
   'en-US': enUS,
 };
 
 const selector = (state: { locale: string }) => state.locale;
 
 export function useLocale() {
-  const locale = useApp(selector);
+  const storedLocale = useApp(selector);
+  const locale = normalizePublicLocale(storedLocale);
   const forceUpdate = useForceUpdate();
   const dir = getTextDirection(locale);
   const dateLocale = getDateLocale(locale);
 
-  async function loadMessages(locale: string) {
-    const { data } = await httpGet(`${process.env.basePath || ''}/intl/messages/${locale}.json`);
-
-    messages[locale] = data;
-  }
-
   async function saveLocale(value: string) {
-    if (!messages[value]) {
-      await loadMessages(value);
-    }
+    const nextLocale = normalizePublicLocale(value);
 
-    setItem(LOCALE_CONFIG, value);
+    setItem(LOCALE_CONFIG, nextLocale);
 
-    if (locale !== value) {
-      setLocale(value);
+    if (locale !== nextLocale) {
+      setLocale(nextLocale);
     } else {
       forceUpdate();
     }
   }
-
-  useEffect(() => {
-    if (!messages[locale]) {
-      saveLocale(locale);
-    }
-  }, [locale]);
 
   useEffect(() => {
     document.documentElement.lang = locale.split('-')[0];
@@ -52,11 +40,11 @@ export function useLocale() {
 
   useEffect(() => {
     const url = new URL(window?.location?.href);
-    const locale = url.searchParams.get('locale');
-
-    if (locale) {
-      saveLocale(locale);
-    }
+    const requestedLocale = url.searchParams.get('locale');
+    const persistedLocale = getItem(LOCALE_CONFIG);
+    const nextLocale = normalizePublicLocale(requestedLocale ?? persistedLocale);
+    setItem(LOCALE_CONFIG, nextLocale);
+    setLocale(nextLocale);
   }, []);
 
   return { locale, saveLocale, messages, dir, dateLocale };

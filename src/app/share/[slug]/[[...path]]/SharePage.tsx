@@ -28,6 +28,7 @@ import { ENTITY_TYPE } from '@/lib/constants';
 import { getShareTheme } from '@/lib/share';
 import { ShareFooter } from './ShareFooter';
 import { ShareNav } from './ShareNav';
+import { StudioSharePage } from './StudioSharePage';
 
 const PAGE_COMPONENTS: Record<string, React.ComponentType<{ websiteId: string }>> = {
   '': WebsitePage,
@@ -102,6 +103,10 @@ export function SharePage() {
       router.replace(`/share/${slug}`);
     }
   }, [isAllowed, slug, router]);
+
+  if (shareType === ENTITY_TYPE.insight || shareType === ENTITY_TYPE.dashboard) {
+    return <StudioSharePage />;
+  }
 
   if (entityPage) {
     return (

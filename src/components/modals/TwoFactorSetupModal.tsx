@@ -22,6 +22,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { ControlledDialog } from '@/components/common/ControlledDialog';
 import { OtpInput } from '@/components/common/OtpInput';
 import { useMessages, useUpdateQuery } from '@/components/hooks';
+import { setClientAuthToken } from '@/lib/client';
 import styles from './TwoFactorSetupModal.module.css';
 import { TwoFactorSuccessModal } from './TwoFactorSuccessModal';
 
@@ -90,6 +91,9 @@ export function TwoFactorSetupModal({ required, onClose }: TwoFactorSetupModalPr
     setError(null);
     try {
       const data: any = await confirm({ token });
+      if (data.token) {
+        setClientAuthToken(data.token);
+      }
       setBackupCodes(data.backupCodes);
     } catch (err: any) {
       setError(getErrorMessage(err) || t(messages.error));

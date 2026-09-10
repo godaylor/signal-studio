@@ -1,9 +1,9 @@
 import { getRequestConfig } from 'next-intl/server';
-import enUS from '../../public/intl/messages/en-US.json';
+import ruRU from '../../public/intl/messages/ru-RU.json';
 
 export default getRequestConfig(async () => {
   return {
-    locale: 'en-US',
-    messages: enUS,
+    locale: 'ru-RU',
+    messages: ruRU,
   };
 });

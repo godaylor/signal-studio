@@ -1,0 +1,33 @@
+.page { display: grid; gap: 24px; padding: clamp(20px, 4vw, 48px); max-width: 1480px; margin: 0 auto; }
+.heading { max-width: 760px; }
+.heading > p, .sectionHeading p { color: var(--base700); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 8px; }
+.heading h1 { font-size: clamp(30px, 4vw, 48px); letter-spacing: -.04em; margin: 0 0 10px; }
+.heading > span, .sectionHeading p { color: var(--base600); line-height: 1.6; }
+.warning { align-items: flex-start; background: color-mix(in srgb, var(--yellow400) 12%, var(--base50)); border: 1px solid color-mix(in srgb, var(--yellow700) 28%, var(--base200)); display: flex; gap: 12px; padding: 16px; }
+.warning p { color: var(--base700); line-height: 1.5; margin: 4px 0 0; }
+.section { border-top: 1px solid var(--base300); display: grid; gap: 18px; padding-top: 24px; }
+.sectionHeading { display: flex; justify-content: space-between; }
+.sectionHeading h2 { font-size: 24px; margin: 4px 0 0; }
+.sectionHeading p { max-width: 850px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.inlineForm, .shareForm { align-items: end; display: grid; gap: 12px; grid-template-columns: minmax(220px, 2fr) minmax(150px, 1fr) auto; }
+.shareForm { grid-template-columns: repeat(5, minmax(140px, 1fr)) auto; }
+.inlineForm label, .shareForm label, .capabilityGrid label { display: grid; gap: 6px; }
+.inlineForm label > span, .shareForm label > span, .capabilityGrid label > span { color: var(--base700); font-size: 12px; font-weight: 650; }
+.inlineForm input, .inlineForm select, .shareForm input, .shareForm select, .tableScroll td select, .capabilityGrid select { background: var(--base50); border: 1px solid var(--base300); border-radius: 4px; color: var(--base900); min-height: 38px; padding: 7px 9px; width: 100%; }
+.inlineForm button, .shareForm button { align-items: center; background: var(--base900); border: 0; border-radius: 4px; color: var(--base50); display: inline-flex; gap: 8px; justify-content: center; min-height: 38px; padding: 8px 14px; }
+.page button:disabled, .page select:disabled { cursor: not-allowed; opacity: .55; }
+.tableScroll { border: 1px solid var(--base300); overflow-x: auto; }
+.tableScroll:focus-visible { outline: 2px solid var(--base900); outline-offset: 3px; }
+.tableScroll table { border-collapse: collapse; min-width: 900px; width: 100%; }
+.tableScroll th { background: var(--base100); color: var(--base600); font-size: 11px; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+.tableScroll th, .tableScroll td { border-bottom: 1px solid var(--base200); padding: 12px; vertical-align: top; }
+.tableScroll tr:last-child td { border-bottom: 0; }
+.tableScroll td strong, .tableScroll td small { display: block; }
+.tableScroll td small { color: var(--base600); margin-top: 3px; }
+.capabilityGrid { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(150px, 1fr)); min-width: 360px; }
+.actions { white-space: nowrap; }
+.actions a, .actions button { align-items: center; background: transparent; border: 1px solid var(--base300); border-radius: 4px; color: var(--base800); display: inline-flex; height: 34px; justify-content: center; margin-right: 6px; width: 34px; }
+.error { color: var(--red600); margin: 0; }
+@media (max-width: 1100px) { .shareForm { grid-template-columns: repeat(2, minmax(180px, 1fr)); } }
+@media (max-width: 720px) { .page { padding: 20px 16px; } .inlineForm, .shareForm { grid-template-columns: 1fr; } .capabilityGrid { grid-template-columns: 1fr; min-width: 220px; } }
+@media (prefers-reduced-motion: reduce) { .page * { scroll-behavior: auto !important; transition-duration: .01ms !important; } }

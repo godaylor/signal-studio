@@ -61,7 +61,7 @@ export function Performance({ websiteId, startDate, endDate, unit }: Performance
   const [selectedMetric, setSelectedMetric] = useState<string>('lcp');
   const [selectedPercentile, setSelectedPercentile] = useState<'p50' | 'p75' | 'p95'>('p75');
   const { t, labels } = useMessages();
-  const { locale, dateLocale } = useLocale();
+  const { locale } = useLocale();
 
   const { data, error, isLoading } = useResultQuery<any>('performance', {
     websiteId,
@@ -86,7 +86,7 @@ export function Performance({ websiteId, startDate, endDate, unit }: Performance
             startDate,
             endDate,
             unit,
-            dateLocale,
+            locale,
           ),
           type: 'line',
           borderColor: p50Color.alpha(0.8).toRgbString(),
@@ -103,7 +103,7 @@ export function Performance({ websiteId, startDate, endDate, unit }: Performance
             startDate,
             endDate,
             unit,
-            dateLocale,
+            locale,
           ),
           type: 'line',
           borderColor: p75Color.alpha(0.8).toRgbString(),
@@ -120,7 +120,7 @@ export function Performance({ websiteId, startDate, endDate, unit }: Performance
             startDate,
             endDate,
             unit,
-            dateLocale,
+            locale,
           ),
           type: 'line',
           borderColor: p95Color.alpha(0.8).toRgbString(),

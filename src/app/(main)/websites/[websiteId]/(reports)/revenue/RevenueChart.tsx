@@ -24,7 +24,7 @@ export function RevenueChart({
   currency,
 }: RevenueChartProps) {
   const { t, labels } = useMessages();
-  const { locale, dateLocale } = useLocale();
+  const { locale } = useLocale();
   const isCumulative = mode === 'cumulative';
 
   const chartData: any = useMemo(() => {
@@ -32,8 +32,8 @@ export function RevenueChart({
 
     if (isCumulative) {
       const cumulativeMaxDate = maxDate > new Date() ? new Date() : maxDate;
-      const cutoff = formatDate(cumulativeMaxDate, DATE_FORMATS[unit], dateLocale);
-      const bucketDates = getBucketDates(minDate, maxDate, unit, dateLocale);
+      const cutoff = formatDate(cumulativeMaxDate, DATE_FORMATS[unit], locale);
+      const bucketDates = getBucketDates(minDate, maxDate, unit, locale);
       const totals = data.reduce(
         (obj, { t, y }) => {
           obj[t] = (obj[t] || 0) + y;
@@ -48,7 +48,7 @@ export function RevenueChart({
         minDate,
         maxDate,
         unit,
-        dateLocale,
+        locale,
       ).map(point => {
         const d = point.d ?? bucketDates.get(point.x);
 
@@ -115,14 +115,14 @@ export function RevenueChart({
         const color = colord(CHART_COLORS[index % CHART_COLORS.length]);
         return {
           label: key,
-          data: generateTimeSeries(map[key], minDate, maxDate, unit, dateLocale),
+          data: generateTimeSeries(map[key], minDate, maxDate, unit, locale),
           backgroundColor: color.alpha(0.6).toRgbString(),
           borderColor: color.alpha(0.7).toRgbString(),
           borderWidth: 1,
         };
       }),
     };
-  }, [data, minDate, maxDate, unit, dateLocale, isCumulative, t, labels.revenue]);
+  }, [data, minDate, maxDate, unit, locale, isCumulative, t, labels.revenue]);
 
   const renderXLabel = useCallback(renderDateLabels(unit, locale), [unit, locale]);
 

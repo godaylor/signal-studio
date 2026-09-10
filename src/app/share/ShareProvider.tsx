@@ -16,6 +16,11 @@ export interface ShareData {
   boardId?: string;
   pixelId?: string;
   linkId?: string;
+  projectId?: string;
+  resourceType?: 'insight' | 'dashboard';
+  scope?: Record<string, unknown>;
+  expiresAt?: string;
+  resource?: Record<string, any>;
   parameters: ShareParameters;
   token: string;
   whiteLabel?: WhiteLabel;

@@ -30,7 +30,7 @@ import {
   UserCircle,
 } from '@/components/icons';
 import { DOCS_URL } from '@/lib/constants';
-import { languages } from '@/lib/lang';
+import { languages, PUBLIC_LOCALES } from '@/lib/lang';
 
 export interface UserButtonProps {
   showText?: boolean;
@@ -72,7 +72,7 @@ export function UserButton({ showText = true, onClose }: UserButtonProps) {
     onClose?.();
   };
 
-  const languageItems = Object.keys(languages).map(key => ({
+  const languageItems = PUBLIC_LOCALES.map(key => ({
     value: key,
     label: languages[key].label,
   }));

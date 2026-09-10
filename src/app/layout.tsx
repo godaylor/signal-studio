@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import { headers } from 'next/headers';
 import { Suspense } from 'react';
 import { getBaseUrl } from '@/lib/get-base-url';
@@ -7,8 +7,9 @@ import { Providers } from './Providers';
 import '@umami/react-zen/styles.full.css';
 import './global.css';
 
-const inter = Inter({
-  subsets: ['latin'],
+const inter = localFont({
+  src: '../assets/fonts/InterVariable.woff2',
+  weight: '100 900',
   display: 'swap',
   variable: '--font-inter',
 });
@@ -23,7 +24,7 @@ export default function ({ children }) {
   }
 
   return (
-    <html lang="en" className={`${inter.className} ${inter.variable}`}>
+    <html lang="ru" className={`${inter.className} ${inter.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -51,8 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: getBaseUrl(headerStore),
     title: {
-      template: '%s | Umami',
-      default: 'Umami',
+      template: '%s | Signal Studio',
+      default: 'Signal Studio — продуктовая аналитика',
     },
+    description: 'Рабочее пространство продуктовой аналитики Signal Studio для продуктовых команд.',
   };
 }
