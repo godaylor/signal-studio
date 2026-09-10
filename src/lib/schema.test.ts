@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { z } from 'zod';
 import {
   attributionReportSchema,
+  dateBoundaryParam,
   filterParams,
   funnelReportSchema,
   goalReportSchema,
@@ -47,17 +48,41 @@ describe('withDateRange', () => {
     const result = schema.parse({ startAt: '5', endAt: '10' });
     expect(result.startAt).toBe(5);
     expect(result.endAt).toBe(10);
+    expect(result.timezone).toBe('UTC');
   });
 
   test('accepts a startDate/endDate range and coerces to dates', () => {
-    const result = schema.parse({ startDate: '2024-01-01', endDate: '2024-01-31' });
+    const result = schema.parse({
+      startDate: '2024-01-01T00:00:00.000Z',
+      endDate: '2024-01-31T00:00:00.000Z',
+    });
     expect(result.startDate).toBeInstanceOf(Date);
     expect(result.endDate).toBeInstanceOf(Date);
+  });
+
+  test('rejects offsetless date strings before coercion', () => {
+    expect(() => schema.parse({ startDate: '2024-01-01', endDate: '2024-01-31' })).toThrow(
+      'explicit timezone offset',
+    );
+  });
+
+  test('accepts already parsed Date boundaries but not numeric startDate/endDate aliases', () => {
+    const startDate = new Date('2024-01-01T00:00:00.000Z');
+    const endDate = new Date('2024-01-31T00:00:00.000Z');
+
+    expect(dateBoundaryParam.parse(startDate)).toBe(startDate);
+    expect(dateBoundaryParam.parse(endDate)).toBe(endDate);
+    expect(() => dateBoundaryParam.parse(startDate.getTime())).toThrow();
   });
 
   test('rejects when neither range is fully provided', () => {
     expect(() => schema.parse({})).toThrow();
     expect(() => schema.parse({ startAt: 5 })).toThrow();
+  });
+
+  test('rejects empty and reversed half-open ranges', () => {
+    expect(() => schema.parse({ startAt: 10, endAt: 10 })).toThrow();
+    expect(() => schema.parse({ startAt: 11, endAt: 10 })).toThrow();
   });
 
   test('merges an additional shape into the schema', () => {
@@ -174,8 +199,8 @@ describe('goalReportSchema', () => {
     const result = goalReportSchema.parse({
       type: 'goal',
       parameters: {
-        startDate: '2024-01-01',
-        endDate: '2024-01-31',
+        startDate: '2024-01-01T00:00:00.000Z',
+        endDate: '2024-01-31T00:00:00.000Z',
         type: 'event',
         value: 'signup',
       },
@@ -188,7 +213,12 @@ describe('goalReportSchema', () => {
     expect(() =>
       goalReportSchema.parse({
         type: 'funnel',
-        parameters: { startDate: '2024-01-01', endDate: '2024-01-31', type: 'event', value: 'x' },
+        parameters: {
+          startDate: '2024-01-01T00:00:00.000Z',
+          endDate: '2024-01-31T00:00:00.000Z',
+          type: 'event',
+          value: 'x',
+        },
       }),
     ).toThrow();
   });
@@ -198,8 +228,8 @@ describe('funnelReportSchema', () => {
   const valid = {
     type: 'funnel' as const,
     parameters: {
-      startDate: '2024-01-01',
-      endDate: '2024-01-31',
+      startDate: '2024-01-01T00:00:00.000Z',
+      endDate: '2024-01-31T00:00:00.000Z',
       window: '30',
       steps: [
         { type: 'path', value: '/home' },
@@ -229,8 +259,8 @@ describe('reportTypeSchema', () => {
     const result = reportTypeSchema.parse({
       type: 'attribution',
       parameters: {
-        startDate: '2024-01-01',
-        endDate: '2024-01-31',
+        startDate: '2024-01-01T00:00:00.000Z',
+        endDate: '2024-01-31T00:00:00.000Z',
         model: 'first-click',
         type: 'event',
         step: 'purchase',
@@ -250,8 +280,8 @@ describe('attributionReportSchema', () => {
       attributionReportSchema.parse({
         type: 'attribution',
         parameters: {
-          startDate: '2024-01-01',
-          endDate: '2024-01-31',
+          startDate: '2024-01-01T00:00:00.000Z',
+          endDate: '2024-01-31T00:00:00.000Z',
           model: 'middle-click',
           type: 'event',
           step: 'purchase',

@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { getUserByUsername } from './user';
+import { getUserByUsername, updateUser } from './user';
 
-const { findUniqueMock } = vi.hoisted(() => ({
+const { findUniqueMock, updateMock } = vi.hoisted(() => ({
   findUniqueMock: vi.fn(),
+  updateMock: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -10,6 +11,7 @@ vi.mock('@/lib/prisma', () => ({
     client: {
       user: {
         findUnique: findUniqueMock,
+        update: updateMock,
       },
     },
   },
@@ -33,6 +35,7 @@ describe('getUserByUsername', () => {
         id: true,
         username: true,
         password: true,
+        sessionVersion: false,
         role: true,
         createdAt: true,
         twoFactorRequired: true,
@@ -51,10 +54,39 @@ describe('getUserByUsername', () => {
         id: true,
         username: true,
         password: false,
+        sessionVersion: false,
         role: true,
         createdAt: true,
         twoFactorRequired: true,
       },
     });
+  });
+});
+
+describe('updateUser session revocation', () => {
+  beforeEach(() => {
+    updateMock.mockReset();
+  });
+
+  test('increments session version whenever a password is changed', async () => {
+    await updateUser('user-1', { password: 'new-password-hash' });
+
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'user-1' },
+        data: {
+          password: 'new-password-hash',
+          sessionVersion: { increment: 1 },
+        },
+      }),
+    );
+  });
+
+  test('does not revoke sessions for unrelated profile updates', async () => {
+    await updateUser('user-1', { displayName: 'Alice' });
+
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { displayName: 'Alice' } }),
+    );
   });
 });

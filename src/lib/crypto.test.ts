@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
-import { decrypt, encrypt, hash, md5, uuid } from './crypto';
+import { decrypt, encrypt, hash, md5, secret, uuid } from './crypto';
 
 describe('encrypt/decrypt', () => {
   test('round-trips a value with the same secret', () => {
@@ -83,6 +83,27 @@ describe('uuid', () => {
     vi.stubEnv('APP_SECRET', 'test-secret');
 
     expect(uuid('a')).not.toBe(uuid('b'));
+
+    vi.unstubAllEnvs();
+  });
+});
+
+describe('secret', () => {
+  test('never falls back to DATABASE_URL outside explicit development/test mode', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('APP_SECRET', '');
+    vi.stubEnv('DATABASE_URL', 'postgresql://contains-sensitive-credentials');
+
+    expect(() => secret()).toThrow(/APP_SECRET is required/);
+
+    vi.unstubAllEnvs();
+  });
+
+  test('uses a dedicated deterministic secret only in explicit development mode', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('APP_SECRET', '');
+
+    expect(secret()).toBe(hash('signal-studio-explicit-development-secret'));
 
     vi.unstubAllEnvs();
   });

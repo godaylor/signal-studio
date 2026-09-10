@@ -109,6 +109,15 @@ const TIMEZONE_MAPPINGS: Record<string, string> = {
   'Asia/Calcutta': 'Asia/Kolkata',
 };
 
+const EXPLICIT_TIMEZONE_OFFSET = /(?:Z|[+-]\d{2}:\d{2})$/i;
+
+export const DATE_BOUNDARY_OFFSET_MESSAGE =
+  'Date boundaries must be ISO instants with an explicit timezone offset';
+
+export function hasExplicitTimezoneOffset(value: string) {
+  return EXPLICIT_TIMEZONE_OFFSET.test(value);
+}
+
 export function normalizeTimezone(timezone: string): string {
   return TIMEZONE_MAPPINGS[timezone] || timezone;
 }
@@ -129,6 +138,12 @@ export function isValidTimezone(timezone: string) {
 
 export function getTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+export function isWithinDateRange(value: string | number | Date, startDate: Date, endDate: Date) {
+  const timestamp = new Date(value).getTime();
+
+  return timestamp >= startDate.getTime() && timestamp < endDate.getTime();
 }
 
 export function parseDateValue(value: string) {

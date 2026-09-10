@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => {
       deleteMany: vi.fn(),
       createMany: vi.fn(),
     },
+    user: {
+      update: vi.fn(),
+    },
   };
 
   return {
@@ -26,6 +29,9 @@ const mocks = vi.hoisted(() => {
     isOtpReplayed: vi.fn(),
     markOtpUsed: vi.fn(),
     verifyTotp: vi.fn(),
+    getUser: vi.fn(),
+    issueAuth: vi.fn(),
+    audit: vi.fn(),
   };
 });
 
@@ -72,6 +78,10 @@ vi.mock('@/lib/two-factor/totp', () => ({
   verifyTotp: mocks.verifyTotp,
 }));
 
+vi.mock('@/queries/prisma/user', () => ({ getUser: mocks.getUser }));
+vi.mock('@/server/auth/tokens', () => ({ issueAuthToken: mocks.issueAuth }));
+vi.mock('@/server/auth/audit', () => ({ recordSecurityAuditEvent: mocks.audit }));
+
 beforeEach(() => {
   mocks.parseRequest.mockReset();
   mocks.findUnique.mockReset();
@@ -79,6 +89,7 @@ beforeEach(() => {
   mocks.tx.twoFactorAuth.update.mockReset();
   mocks.tx.twoFactorBackupCode.deleteMany.mockReset();
   mocks.tx.twoFactorBackupCode.createMany.mockReset();
+  mocks.tx.user.update.mockReset();
   mocks.generateBackupCodes.mockReset();
   mocks.decryptSecret.mockReset();
   mocks.isTwoFactorConfigured.mockReset();
@@ -88,6 +99,9 @@ beforeEach(() => {
   mocks.isOtpReplayed.mockReset();
   mocks.markOtpUsed.mockReset();
   mocks.verifyTotp.mockReset();
+  mocks.getUser.mockReset();
+  mocks.issueAuth.mockReset();
+  mocks.audit.mockReset();
 
   mocks.parseRequest.mockResolvedValue({
     auth: { user: { id: 'user-1' } },
@@ -108,9 +122,17 @@ beforeEach(() => {
   mocks.isOtpReplayed.mockResolvedValue(false);
   mocks.markOtpUsed.mockResolvedValue(undefined);
   mocks.verifyTotp.mockResolvedValue(true);
+  mocks.getUser.mockResolvedValue({
+    id: 'user-1',
+    role: 'admin',
+    password: 'hash',
+    sessionVersion: 2,
+  });
+  mocks.issueAuth.mockReturnValue('full-token');
   mocks.tx.twoFactorAuth.update.mockResolvedValue(undefined);
   mocks.tx.twoFactorBackupCode.deleteMany.mockResolvedValue(undefined);
   mocks.tx.twoFactorBackupCode.createMany.mockResolvedValue(undefined);
+  mocks.tx.user.update.mockResolvedValue(undefined);
 });
 
 test('POST confirms setup, enables 2FA, stores backup codes, and resets the rate limit', async () => {
@@ -135,10 +157,16 @@ test('POST confirms setup, enables 2FA, stores backup codes, and resets the rate
     ],
   });
   expect(mocks.markOtpUsed).toHaveBeenCalledWith('user-1', '123456', mocks.tx);
+  expect(mocks.tx.user.update).toHaveBeenCalledWith({
+    where: { id: 'user-1' },
+    data: { sessionVersion: { increment: 1 } },
+  });
   expect(mocks.resetRateLimit).toHaveBeenCalledWith('user-1');
   await expect(response.json()).resolves.toEqual({
     backupCodes: ['code-1', 'code-2'],
+    token: 'full-token',
   });
+  expect(mocks.issueAuth).toHaveBeenCalledWith(expect.any(Object), 2);
   expect(response.status).toBe(200);
 });
 
@@ -167,6 +195,12 @@ test('POST records a failed attempt and skips writes when the token is invalid',
   );
 
   expect(mocks.recordFailedAttempt).toHaveBeenCalledWith('user-1');
+  expect(mocks.audit).toHaveBeenCalledWith({
+    actorUserId: 'user-1',
+    eventType: 'auth.two_factor.setup',
+    outcome: 'failure',
+    metadata: { reason: 'invalid_otp' },
+  });
   expect(mocks.transaction).not.toHaveBeenCalled();
   expect(mocks.resetRateLimit).not.toHaveBeenCalled();
   await expect(response.json()).resolves.toMatchObject({

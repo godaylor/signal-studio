@@ -84,7 +84,8 @@ async function relationalQuery(
           select 1 from event_data _ed${stepIndex}_${fi}
           where _ed${stepIndex}_${fi}.website_event_id = ${eventAlias}.event_id
             and _ed${stepIndex}_${fi}.website_id = {{websiteId::uuid}}
-            and _ed${stepIndex}_${fi}.created_at between {{startDate}} and {{endDate}}
+            and _ed${stepIndex}_${fi}.created_at >= {{startDate}}
+            and _ed${stepIndex}_${fi}.created_at < {{endDate}}
             and _ed${stepIndex}_${fi}.data_key = {{${keyParam}}}
             and case when _ed${stepIndex}_${fi}.data_type = 2 then replace(_ed${stepIndex}_${fi}.string_value, '.0000', '') else _ed${stepIndex}_${fi}.string_value end ${op} {{${valParam}}}
         )`;
@@ -136,7 +137,8 @@ async function relationalQuery(
             ${cohortQuery}
             ${joinSessionQuery}
             where website_event.website_id = {{websiteId::uuid}}
-              and website_event.created_at between {{startDate}} and {{endDate}}
+              and website_event.created_at >= {{startDate}}
+              and website_event.created_at < {{endDate}}
               and ${column} ${operator} {{${i}}}
               ${filterQuery}
               ${existsClause}
@@ -154,7 +156,7 @@ async function relationalQuery(
                   `${window} minute`,
                 )}
                 and we.${column} ${operator} {{${i}}}
-                and we.created_at <= {{endDate}}
+                and we.created_at < {{endDate}}
                 ${existsClause}
           )`;
         }
@@ -236,7 +238,8 @@ async function clickhouseQuery(
         return `and ${eventAlias}.event_id in (
           select event_id from event_data
           where website_id = {websiteId:UUID}
-            and created_at between {startDate:DateTime64} and {endDate:DateTime64}
+            and created_at >= {startDate:DateTime64}
+            and created_at < {endDate:DateTime64}
             and data_key = {${keyParam}:String}
             and multiIf(data_type = 2, replaceAll(string_value, '.0000', ''), string_value) ${op} {${valParam}:String}
         )`;
@@ -330,7 +333,8 @@ async function clickhouseQuery(
       ${cohortQuery}
       where (${stepFilterQuery})
         and website_id = {websiteId:UUID}
-        and created_at between {startDate:DateTime64} and {endDate:DateTime64}
+        and created_at >= {startDate:DateTime64}
+        and created_at < {endDate:DateTime64}
        ${filterQuery}
     ),
     ${levelOneQuery}

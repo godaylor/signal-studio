@@ -1,4 +1,4 @@
-import { serializeError } from 'serialize-error';
+import { safeFailure } from '@/server/operations/telemetry';
 
 export function ok() {
   return Response.json({ ok: true });
@@ -64,19 +64,16 @@ export function serviceUnavailable(error?: Record<string, any>) {
 }
 
 export function serverError(error?: unknown) {
-  if (error && typeof error !== 'string') {
-    // eslint-disable-next-line no-console
-    console.log(serializeError(error));
-  }
+  const id = safeFailure('server-error');
 
   return Response.json(
     {
       error: {
-        message: typeof error === 'string' ? error : 'Server error',
+        message: 'Server error',
         code: 'server-error',
         status: 500,
       },
     },
-    { status: 500 },
+    { status: 500, headers: { 'x-request-id': id } },
   );
 }

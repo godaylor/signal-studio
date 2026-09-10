@@ -1,16 +1,10 @@
 import debug from 'debug';
-import {
-  ROLE_PERMISSIONS,
-  ROLES,
-  SHARE_CONTEXT_HEADER,
-  SHARE_TOKEN_HEADER,
-  SHARE_TOKEN_TYPE,
-} from '@/lib/constants';
-import { createAuthKey, hash, secret } from '@/lib/crypto';
-import { createSecureToken, parseSecureToken, parseToken } from '@/lib/jwt';
-import redis from '@/lib/redis';
+import { ROLE_PERMISSIONS, ROLES } from '@/lib/constants';
 import { ensureArray } from '@/lib/utils';
 import { getUser } from '@/queries/prisma/user';
+import { AUTH_SETUP_TOKEN_TYPE } from '@/server/auth/constants';
+import { parseAuthSessionToken, tokenMatchesUser } from '@/server/auth/tokens';
+import { getTwoFactorPolicy } from '@/server/auth/two-factor-policy';
 
 const log = debug('umami:auth');
 
@@ -22,99 +16,57 @@ export function getBearerToken(request: Request) {
 
 export async function checkAuth(request: Request) {
   const token = getBearerToken(request);
-  const payload = parseSecureToken(token, secret());
-  const shareToken = await parseShareToken(request);
+  const payload = parseAuthSessionToken(token);
+  // Shares never authenticate management/legacy analytics endpoints. Studio
+  // shares have a dedicated resolver which validates the live share record.
+  const shareToken = null;
 
   let user = null;
-  const { userId, authKey } = payload || {};
+  let assuranceRequired = false;
+  const { userId } = payload || {};
 
   if (userId) {
-    user = await getUser(userId, { includePassword: true });
+    user = await getUser(userId, { includePassword: true, includeSessionVersion: true });
 
-    // Reject tokens issued before the current password.
-    // Allow legacy stateless tokens that were minted without a password fingerprint.
-    if (user && payload.pwd && hash(user.password) !== payload.pwd) {
+    if (!user || !tokenMatchesUser(payload, user)) {
       user = null;
-    }
-  } else if (redis.enabled && authKey) {
-    const key = await redis.client.get(authKey);
-
-    if (key?.userId) {
-      user = await getUser(key.userId, { includePassword: true });
-
-      // Only enforce password-change invalidation for sessions that include a password fingerprint.
-      if (user && key.pwd && hash(user.password) !== key.pwd) {
-        user = null;
-      }
+    } else {
+      const policy = await getTwoFactorPolicy(userId, user.twoFactorRequired);
+      assuranceRequired =
+        payload.type === AUTH_SETUP_TOKEN_TYPE ||
+        (policy.required && (!policy.enabled || payload.aal < 2));
     }
   }
 
   log({
     hasToken: !!token,
     hasPayload: !!payload,
-    hasAuthKey: !!authKey,
     hasShareToken: !!shareToken,
     userId: user?.id,
+    assuranceRequired,
   });
 
-  if (!user?.id && !shareToken) {
+  if (!user?.id) {
     log('User not authorized');
     return null;
   }
 
-  if (!user?.id && shareToken) {
-    const shareContext = request.headers.get(SHARE_CONTEXT_HEADER);
-    if (!shareContext) {
-      log('Share token used outside share context');
-      return null;
-    }
-  }
-
   if (user) {
     delete user.password;
+    delete user.sessionVersion;
     user.isAdmin = user.role === ROLES.admin;
   }
 
   return {
     token,
-    authKey,
+    sessionId: payload?.sid,
+    assuranceLevel: payload?.aal,
+    assuranceRequired,
     shareToken,
     user,
   };
 }
 
-export async function saveAuth(data: any, expire = 0) {
-  const authKey = `auth:${createAuthKey()}`;
-
-  if (redis.enabled) {
-    await redis.client.set(authKey, data);
-
-    if (expire) {
-      await redis.client.expire(authKey, expire);
-    }
-  }
-
-  return createSecureToken({ authKey }, secret());
-}
-
 export async function hasPermission(role: string, permission: string | string[]) {
   return ensureArray(permission).some(e => ROLE_PERMISSIONS[role]?.includes(e));
-}
-
-export function parseShareToken(request: Request) {
-  try {
-    const token: any = parseToken(request.headers.get(SHARE_TOKEN_HEADER), secret());
-
-    // Only accept tokens explicitly minted as share tokens. This prevents other
-    // tokens signed with the same secret (e.g. the cache token from /api/send)
-    // from being replayed as share tokens to gain analytics access.
-    if (token?.type !== SHARE_TOKEN_TYPE) {
-      return null;
-    }
-
-    return token;
-  } catch (e) {
-    log(e);
-    return null;
-  }
 }

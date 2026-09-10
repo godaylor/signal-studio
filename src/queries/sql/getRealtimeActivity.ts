@@ -26,6 +26,8 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
         website_event.session_id as "sessionId",
         website_event.event_name as "eventName",
         website_event.created_at as "createdAt",
+        tracked_user.tracked_user_id as "trackedUserId",
+        account_membership.tracked_account_id as "trackedAccountId",
         session.browser,
         session.os,
         session.device,
@@ -38,6 +40,12 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
     inner join session
       on session.session_id = website_event.session_id
         and session.website_id = website_event.website_id
+    left join tracked_user
+      on tracked_user.project_id = website_event.website_id
+        and tracked_user.external_id = session.distinct_id
+    left join account_membership
+      on account_membership.project_id = website_event.website_id
+        and account_membership.tracked_user_id = tracked_user.tracked_user_id
     where website_event.website_id = {{websiteId::uuid}}
       and website_event.event_type != ${EVENT_TYPE.performance}
     ${filterQuery}
@@ -63,6 +71,8 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters): Promis
             session_id as sessionId,
             event_name as eventName,
             created_at as createdAt,
+            NULL as trackedUserId,
+            NULL as trackedAccountId,
             browser,
             os,
             device,

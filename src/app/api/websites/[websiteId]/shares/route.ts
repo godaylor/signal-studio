@@ -1,12 +1,10 @@
 import { z } from 'zod';
-import { ENTITY_TYPE } from '@/lib/constants';
-import { uuid } from '@/lib/crypto';
-import { getRandomChars } from '@/lib/generate';
 import { parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { anyObjectParam, filterParams, pagingParams } from '@/lib/schema';
 import { canUpdateWebsite, canViewAuthenticatedWebsite } from '@/permissions';
-import { createShare, getSharesByEntityId } from '@/queries/prisma';
+import { getSharesByEntityId } from '@/queries/prisma';
+import { legacyShareCreationDisabled } from '@/server/shares/legacy';
 
 export async function GET(
   request: Request,
@@ -48,30 +46,16 @@ export async function POST(
     parameters: anyObjectParam.optional(),
   });
 
-  const { auth, body, error } = await parseRequest(request, schema);
+  const { auth, error } = await parseRequest(request, schema);
 
   if (error) {
     return error();
   }
 
   const { websiteId } = await params;
-  const { name, parameters } = body;
-  const shareParameters = parameters ?? {};
-
   if (!(await canUpdateWebsite(auth, websiteId))) {
     return unauthorized();
   }
 
-  const slug = getRandomChars(16);
-
-  const share = await createShare({
-    id: uuid(),
-    entityId: websiteId,
-    shareType: ENTITY_TYPE.website,
-    name,
-    slug,
-    parameters: shareParameters,
-  });
-
-  return json(share);
+  return legacyShareCreationDisabled();
 }

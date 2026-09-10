@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DOMAIN_REGEX, ENTITY_TYPE } from '@/lib/constants';
+import { DOMAIN_REGEX } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { fetchAccount, fetchTeam } from '@/lib/load';
 import { getQueryFilters, parseRequest } from '@/lib/request';
@@ -7,8 +7,9 @@ import { json, unauthorized } from '@/lib/response';
 import { pagingParams, searchParams, sortingParams } from '@/lib/schema';
 import { getCloudWebsiteLimit } from '@/lib/subscription';
 import { canCreateTeamWebsite, canCreateWebsite } from '@/permissions';
-import { createShare, createWebsite, getTeamWebsiteCount, getWebsiteCount } from '@/queries/prisma';
+import { createWebsite, getTeamWebsiteCount, getWebsiteCount } from '@/queries/prisma';
 import { getAllUserWebsitesIncludingTeamAccess, getUserWebsites } from '@/queries/prisma/website';
+import { legacyShareCreationDisabled } from '@/server/shares/legacy';
 
 export async function GET(request: Request) {
   const schema = z.object({
@@ -71,6 +72,10 @@ export async function POST(request: Request) {
     return unauthorized();
   }
 
+  if (shareId) {
+    return legacyShareCreationDisabled();
+  }
+
   const data: any = {
     id: id ?? uuid(),
     createdBy: auth.user.id,
@@ -85,19 +90,8 @@ export async function POST(request: Request) {
 
   const website = await createWebsite(data);
 
-  const share = shareId
-    ? await createShare({
-        id: uuid(),
-        entityId: website.id,
-        shareType: ENTITY_TYPE.website,
-        name: website.name,
-        slug: shareId,
-        parameters: { overview: true, events: true },
-      })
-    : null;
-
   return json({
     ...website,
-    shareId: share?.slug ?? null,
+    shareId: null,
   });
 }

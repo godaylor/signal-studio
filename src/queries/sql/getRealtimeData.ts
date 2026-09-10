@@ -21,6 +21,16 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
   ]);
 
   const uniques = new Set();
+  const activeUsers = new Set<string>();
+  const activeAccounts = new Set<string>();
+
+  for (const event of activity as Array<{
+    trackedUserId?: string | null;
+    trackedAccountId?: string | null;
+  }>) {
+    if (event.trackedUserId) activeUsers.add(event.trackedUserId);
+    if (event.trackedAccountId) activeAccounts.add(event.trackedAccountId);
+  }
 
   const { countries, urls, referrers, events } = activity.reverse().reduce(
     (
@@ -72,6 +82,8 @@ export async function getRealtimeData(websiteId: string, filters: QueryFilters) 
       visitors: sessions.reduce((sum: number, { y }: { y: number }) => Number(sum) + Number(y), 0),
       events: activity.filter(e => e.eventName).length,
       countries: Object.keys(countries).length,
+      activeUsers: activeUsers.size,
+      activeAccounts: activeAccounts.size,
     },
     timestamp: Date.now(),
   };

@@ -17,6 +17,7 @@ model User {
   logoUrl           String?   @map("logo_url") @db.VarChar(2183)
   displayName       String?   @map("display_name") @db.VarChar(255)
   twoFactorRequired Boolean   @default(false) @map("two_factor_required")
+  sessionVersion    Int       @default(0) @map("session_version")
   createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6)
@@ -32,6 +33,9 @@ model User {
   twoFactorBackupCodes TwoFactorBackupCode[]
   twoFactorOtpUseds    TwoFactorOtpUsed[]
   twoFactorRateLimit   TwoFactorRateLimit?
+  insights              Insight[]              @relation("insightOwner")
+  dashboards            StudioDashboard[]      @relation("dashboardOwner")
+  exportJobs            ExportJob[]
 
   @@map("user")
 }
@@ -65,6 +69,7 @@ model Session {
   @@index([websiteId, createdAt, country])
   @@index([websiteId, createdAt, region])
   @@index([websiteId, createdAt, city])
+  @@index([websiteId, distinctId, createdAt, id])
   @@map("session")
 }
 
@@ -105,12 +110,82 @@ model Website {
   sessionReplays      SessionReplay[]
   sessionReplaysSaved SessionReplaySaved[]
   heatmapEvents       HeatmapEvent[]
+  trackedUsers        TrackedUser[]
+  trackedAccounts     TrackedAccount[]
+  accountMemberships  AccountMembership[]
+  insights            Insight[]
+  studioDashboards    StudioDashboard[]
+  exportJobs          ExportJob[]
 
   @@index([userId])
   @@index([teamId])
   @@index([createdAt])
   @@index([createdBy])
   @@map("website")
+}
+
+model TrackedUser {
+  id                String             @id() @map("tracked_user_id") @db.Uuid
+  projectId         String             @map("project_id") @db.Uuid
+  externalId        String             @map("external_id") @db.VarChar(50)
+  displayName       String?            @map("display_name") @db.VarChar(255)
+  traits            Json               @default("{}")
+  sensitiveTraits   Json               @default("{}") @map("sensitive_traits")
+  lifecycleStage    String             @default("identified") @map("lifecycle_stage") @db.VarChar(40)
+  definitionVersion String             @default("signal-studio.activation.v1") @map("definition_version") @db.VarChar(80)
+  activatedAt       DateTime?          @map("activated_at") @db.Timestamptz(6)
+  firstSeenAt       DateTime           @map("first_seen_at") @db.Timestamptz(6)
+  lastSeenAt        DateTime           @map("last_seen_at") @db.Timestamptz(6)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project           Website            @relation(fields: [projectId], references: [id])
+  membership        AccountMembership?
+
+  @@unique([projectId, externalId])
+  @@index([projectId, lastSeenAt, id])
+  @@index([projectId, firstSeenAt, id])
+  @@index([projectId, lifecycleStage, lastSeenAt, id])
+  @@map("tracked_user")
+}
+
+model TrackedAccount {
+  id                String              @id() @map("tracked_account_id") @db.Uuid
+  projectId         String              @map("project_id") @db.Uuid
+  externalId        String              @map("external_id") @db.VarChar(100)
+  name              String?             @db.VarChar(255)
+  traits            Json                @default("{}")
+  sensitiveTraits   Json                @default("{}") @map("sensitive_traits")
+  lifecycleStage    String              @default("identified") @map("lifecycle_stage") @db.VarChar(40)
+  definitionVersion String              @default("signal-studio.activation.v1") @map("definition_version") @db.VarChar(80)
+  activatedAt       DateTime?           @map("activated_at") @db.Timestamptz(6)
+  firstSeenAt       DateTime            @map("first_seen_at") @db.Timestamptz(6)
+  lastSeenAt        DateTime            @map("last_seen_at") @db.Timestamptz(6)
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project           Website             @relation(fields: [projectId], references: [id])
+  memberships       AccountMembership[]
+
+  @@unique([projectId, externalId])
+  @@index([projectId, lastSeenAt, id])
+  @@index([projectId, firstSeenAt, id])
+  @@index([projectId, lifecycleStage, lastSeenAt, id])
+  @@map("tracked_account")
+}
+
+model AccountMembership {
+  id               String         @id() @map("account_membership_id") @db.Uuid
+  projectId        String         @map("project_id") @db.Uuid
+  trackedUserId    String         @unique @map("tracked_user_id") @db.Uuid
+  trackedAccountId String         @map("tracked_account_id") @db.Uuid
+  observedAt       DateTime       @map("observed_at") @db.Timestamptz(6)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project          Website        @relation(fields: [projectId], references: [id])
+  user             TrackedUser    @relation(fields: [trackedUserId], references: [id])
+  account          TrackedAccount @relation(fields: [trackedAccountId], references: [id])
+
+  @@index([projectId, trackedAccountId, trackedUserId])
+  @@map("account_membership")
 }
 
 model WebsiteEvent {
@@ -159,6 +234,7 @@ model WebsiteEvent {
   @@index([websiteId, createdAt, referrerDomain])
   @@index([websiteId, createdAt, pageTitle])
   @@index([websiteId, createdAt, eventName])
+  @@index([websiteId, eventName, createdAt])
   @@index([websiteId, createdAt, tag])
   @@index([websiteId, sessionId, createdAt])
   @@index([websiteId, visitId, createdAt])
@@ -233,12 +309,14 @@ model Team {
 }
 
 model TeamUser {
-  id        String    @id() @map("team_user_id") @db.Uuid
-  teamId    String    @map("team_id") @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  role      String    @db.VarChar(50)
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                  String    @id() @map("team_user_id") @db.Uuid
+  teamId              String    @map("team_id") @db.Uuid
+  userId              String    @map("user_id") @db.Uuid
+  role                String    @db.VarChar(50)
+  studioRole          String?   @map("studio_role") @db.VarChar(20)
+  capabilityOverrides Json      @default("{}") @map("capability_overrides")
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   team Team @relation(fields: [teamId], references: [id])
   user User @relation(fields: [userId], references: [id])
@@ -366,16 +444,26 @@ model Board {
 }
 
 model Share {
-  id         String    @id() @map("share_id") @db.Uuid
-  entityId   String    @map("entity_id") @db.Uuid
-  name       String    @db.VarChar(200)
-  shareType  Int       @map("share_type") @db.Integer
-  slug       String    @unique() @db.VarChar(100)
-  parameters Json
-  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id           String    @id() @map("share_id") @db.Uuid
+  entityId     String    @map("entity_id") @db.Uuid
+  projectId    String?   @map("project_id") @db.Uuid
+  createdBy    String?   @map("created_by") @db.Uuid
+  name         String    @db.VarChar(200)
+  shareType    Int       @map("share_type") @db.Integer
+  resourceType String?   @map("resource_type") @db.VarChar(20)
+  visibility   String    @default("public") @db.VarChar(20)
+  slug         String    @unique() @db.VarChar(100)
+  parameters   Json
+  scope        Json      @default("{}")
+  tokenVersion Int       @default(1) @map("token_version")
+  expiresAt    DateTime? @map("expires_at") @db.Timestamptz(6)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([entityId])
+  @@index([projectId, createdAt])
+  @@index([expiresAt])
   @@map("share")
 }
 
@@ -498,4 +586,145 @@ model AppSetting {
   value String
 
   @@map("app_setting")
+}
+
+model LoginRateLimit {
+  key             String    @id @db.VarChar(128)
+  attempts        Int       @default(0)
+  windowStartedAt DateTime  @map("window_started_at") @db.Timestamptz(6)
+  lockedUntil     DateTime? @map("locked_until") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([lockedUntil])
+  @@index([updatedAt])
+  @@map("login_rate_limit")
+}
+
+model Insight {
+  id            String   @id @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  ownerId       String   @map("owner_id") @db.Uuid
+  title         String   @db.VarChar(200)
+  description   String   @default("") @db.VarChar(500)
+  queryVersion  Int      @map("query_version")
+  query         Json
+  visualization Json     @default("{}")
+  status        String   @default("active") @db.VarChar(20)
+  favorite      Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  project Website @relation(fields: [projectId], references: [id])
+  owner   User    @relation("insightOwner", fields: [ownerId], references: [id])
+  dashboardWidgets StudioDashboardWidget[]
+
+  @@index([projectId, status, updatedAt, id])
+  @@index([projectId, ownerId, updatedAt, id])
+  @@index([projectId, favorite, updatedAt, id])
+  @@map("insight")
+}
+model StudioDashboard {
+  id            String   @id @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  ownerId       String   @map("owner_id") @db.Uuid
+  title         String   @db.VarChar(200)
+  description   String   @default("") @db.VarChar(500)
+  globalContext Json     @default("{}") @map("global_context")
+  sharePolicy   Json     @default("{}") @map("share_policy")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  project Website                @relation(fields: [projectId], references: [id])
+  owner   User                   @relation("dashboardOwner", fields: [ownerId], references: [id])
+  widgets StudioDashboardWidget[]
+
+  @@index([projectId, updatedAt, id])
+  @@index([projectId, ownerId, updatedAt, id])
+  @@map("studio_dashboard")
+}
+
+model StudioDashboardWidget {
+  id          String   @id @db.Uuid
+  dashboardId String   @map("dashboard_id") @db.Uuid
+  insightId   String?  @map("insight_id") @db.Uuid
+  kind        String   @db.VarChar(20)
+  title       String   @default("") @db.VarChar(200)
+  body        String   @default("") @db.VarChar(2000)
+  position    Int
+  width       Int      @default(1)
+  height      Int      @default(1)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  dashboard StudioDashboard @relation(fields: [dashboardId], references: [id])
+  insight   Insight?        @relation(fields: [insightId], references: [id])
+
+  @@index([dashboardId, position, id])
+  @@index([insightId])
+  @@map("studio_dashboard_widget")
+}
+model SecurityAuditEvent {
+  id          String   @id @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  eventType   String   @map("event_type") @db.VarChar(80)
+  outcome     String   @db.VarChar(20)
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([actorUserId, createdAt])
+  @@index([eventType, createdAt])
+  @@map("security_audit_event")
+}
+
+model ExportJob {
+  id              String   @id @db.Uuid
+  projectId       String   @map("project_id") @db.Uuid
+  requesterId     String   @map("requester_id") @db.Uuid
+  idempotencyKey  String   @map("idempotency_key") @db.Uuid
+  definitionHash String   @map("definition_hash") @db.VarChar(64)
+  definition     Json
+  permissionScope String  @map("permission_scope") @db.VarChar(40)
+  sessionVersion Int      @map("session_version")
+  status         String   @default("queued") @db.VarChar(20)
+  attempts       Int      @default(0)
+  leaseId        String?  @map("lease_id") @db.Uuid
+  artifactKey    String?  @map("artifact_key") @db.VarChar(100)
+  filename       String   @db.VarChar(240)
+  rowCount       Int      @default(0) @map("row_count")
+  byteCount      Int      @default(0) @map("byte_count")
+  errorCode      String?  @map("error_code") @db.VarChar(80)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  startedAt      DateTime? @map("started_at") @db.Timestamptz(6)
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(6)
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(6)
+  project        Website  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requester      User     @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, requesterId, idempotencyKey])
+  @@index([requesterId, projectId, createdAt, id])
+  @@index([status, createdAt])
+  @@index([expiresAt])
+  @@index([projectId])
+  @@map("export_job")
+}
+
+// No cascading relations: audited job status survives erasure of its source.
+model DataLifecycleJob {
+  id String @id @db.Uuid
+  projectId String @map("project_id") @db.Uuid
+  requesterId String @map("requester_id") @db.Uuid
+  sessionVersion Int @map("session_version")
+  idempotencyKey String @map("idempotency_key") @db.Uuid
+  definition Json
+  status String @default("queued") @db.VarChar(20)
+  step Int @default(0)
+  deletedRows Int @default(0) @map("deleted_rows")
+  errorCode String? @map("error_code") @db.VarChar(80)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  @@unique([projectId, requesterId, idempotencyKey], map: "data_lifecycle_request")
+  @@index([status, createdAt], map: "data_lifecycle_queue")
+  @@index([projectId, createdAt], map: "data_lifecycle_project")
+  @@map("data_lifecycle_job")
 }

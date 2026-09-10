@@ -1,11 +1,9 @@
 import z from 'zod';
-import { uuid } from '@/lib/crypto';
-import { getRandomChars } from '@/lib/generate';
 import { parseRequest } from '@/lib/request';
-import { json, unauthorized } from '@/lib/response';
+import { unauthorized } from '@/lib/response';
 import { anyObjectParam } from '@/lib/schema';
 import { canUpdateEntity } from '@/permissions';
-import { createShare } from '@/queries/prisma';
+import { legacyShareCreationDisabled } from '@/server/shares/legacy';
 
 export async function POST(request: Request) {
   const schema = z.object({
@@ -22,21 +20,11 @@ export async function POST(request: Request) {
     return error();
   }
 
-  const { entityId, shareType, name, slug, parameters } = body;
-  const shareParameters = parameters ?? {};
+  const { entityId } = body;
 
   if (!(await canUpdateEntity(auth, entityId))) {
     return unauthorized();
   }
 
-  const share = await createShare({
-    id: uuid(),
-    entityId,
-    shareType,
-    name,
-    slug: slug || getRandomChars(16),
-    parameters: shareParameters,
-  });
-
-  return json(share);
+  return legacyShareCreationDisabled();
 }

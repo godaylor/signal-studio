@@ -1,12 +1,10 @@
 import { z } from 'zod';
-import { ENTITY_TYPE } from '@/lib/constants';
-import { uuid } from '@/lib/crypto';
-import { getRandomChars } from '@/lib/generate';
 import { parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
 import { anyObjectParam, filterParams, pagingParams } from '@/lib/schema';
 import { canUpdateBoard, canViewBoard } from '@/permissions';
-import { createShare, getSharesByEntityId } from '@/queries/prisma';
+import { getSharesByEntityId } from '@/queries/prisma';
+import { legacyShareCreationDisabled } from '@/server/shares/legacy';
 
 export async function GET(request: Request, { params }: { params: Promise<{ boardId: string }> }) {
   const schema = z.object({
@@ -42,28 +40,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ boa
     parameters: anyObjectParam.optional(),
   });
 
-  const { auth, body, error } = await parseRequest(request, schema);
+  const { auth, error } = await parseRequest(request, schema);
 
   if (error) {
     return error();
   }
 
   const { boardId } = await params;
-  const { name, parameters } = body;
-  const shareParameters = parameters ?? {};
-
   if (!(await canUpdateBoard(auth, boardId))) {
     return unauthorized();
   }
 
-  const share = await createShare({
-    id: uuid(),
-    entityId: boardId,
-    shareType: ENTITY_TYPE.board,
-    name,
-    slug: getRandomChars(16),
-    parameters: shareParameters,
-  });
-
-  return json(share);
+  return legacyShareCreationDisabled();
 }

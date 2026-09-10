@@ -1,21 +1,5 @@
 import ipaddr from 'ipaddr.js';
 
-export const IP_ADDRESS_HEADERS = [
-  ...(process.env.CLOUD_MODE ? ['x-umami-client-ip'] : []), // Umami custom header (cloud mode only)
-  'true-client-ip', // CDN
-  'cf-connecting-ip', // Cloudflare
-  'fastly-client-ip', // Fastly
-  'x-nf-client-connection-ip', // Netlify
-  'do-connecting-ip', // Digital Ocean
-  'x-real-ip', // Reverse proxy
-  'x-appengine-user-ip', // Google App Engine
-  'x-forwarded-for',
-  'forwarded',
-  'x-client-ip',
-  'x-cluster-client-ip',
-  'x-forwarded',
-];
-
 function normalizeIp(ip?: string | null) {
   if (!ip) return ip;
 
@@ -28,8 +12,7 @@ function normalizeIp(ip?: string | null) {
 
     return parsed.toString();
   } catch {
-    // Fallback: return original if parsing fails
-    return ip;
+    return undefined;
   }
 }
 
@@ -50,7 +33,7 @@ function resolveIp(ip?: string | null) {
         ipaddr.parse(normalizedStripped);
         return normalizedStripped;
       } catch {
-        return normalizedStripped;
+        return undefined;
       }
     }
 
@@ -73,18 +56,20 @@ function parseHeaderValue(header: string, value: string) {
 }
 
 export function getIpAddress(headers: Headers) {
-  const customHeader = process.env.CLIENT_IP_HEADER;
+  const customHeader = process.env.CLIENT_IP_HEADER?.trim().toLowerCase();
 
-  if (customHeader && headers.get(customHeader)) {
-    return parseHeaderValue(customHeader.toLowerCase(), headers.get(customHeader));
-  }
-
-  const header = IP_ADDRESS_HEADERS.find(name => headers.get(name));
-  if (!header) {
+  // Request proxy headers are caller-controlled in direct deployments. Only a
+  // header explicitly configured for a trusted, overwriting proxy is accepted.
+  if (!customHeader) {
     return undefined;
   }
 
-  return parseHeaderValue(header, headers.get(header));
+  const value = headers.get(customHeader);
+  if (!value) {
+    return undefined;
+  }
+
+  return parseHeaderValue(customHeader, value);
 }
 
 export function stripPort(ip?: string | null) {
@@ -95,7 +80,7 @@ export function stripPort(ip?: string | null) {
   if (ip.startsWith('[')) {
     const endBracket = ip.indexOf(']');
     if (endBracket !== -1) {
-      return ip.slice(0, endBracket + 1);
+      return ip.slice(1, endBracket);
     }
   }
 

@@ -1,10 +1,10 @@
 import JSZip from 'jszip';
 import Papa from 'papaparse';
 import { getQueryFilters, parseRequest } from '@/lib/request';
-import { json, unauthorized } from '@/lib/response';
+import { forbidden, json } from '@/lib/response';
 import { pagingParams, withDateRange } from '@/lib/schema';
-import { canViewAuthenticatedWebsite } from '@/permissions';
 import { getEventMetrics, getPageviewMetrics, getSessionMetrics } from '@/queries/sql';
+import { resolveProjectAccess } from '@/server/permissions/capabilities';
 
 export async function GET(
   request: Request,
@@ -22,8 +22,9 @@ export async function GET(
 
   const { websiteId } = await params;
 
-  if (!(await canViewAuthenticatedWebsite(auth, websiteId))) {
-    return unauthorized();
+  const access = await resolveProjectAccess(auth, websiteId);
+  if (!access?.capabilities.exportData) {
+    return forbidden({ code: 'project-export-access-denied' });
   }
 
   const filters = await getQueryFilters(query, websiteId);

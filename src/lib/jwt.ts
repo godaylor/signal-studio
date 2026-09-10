@@ -5,9 +5,9 @@ export function createToken(payload: any, secret: any, options?: any) {
   return jwt.sign(payload, secret, options);
 }
 
-export function parseToken(token: string, secret: any) {
+export function parseToken(token: string, secret: any, options?: any) {
   try {
-    return jwt.verify(token, secret);
+    return jwt.verify(token, secret, options);
   } catch {
     return null;
   }
@@ -17,9 +17,9 @@ export function createSecureToken(payload: any, secret: any, options?: any) {
   return encrypt(createToken(payload, secret, options), secret);
 }
 
-export function parseSecureToken(token: string, secret: any) {
+export function parseSecureToken(token: string, secret: any, options?: any) {
   try {
-    return jwt.verify(decrypt(token, secret), secret);
+    return jwt.verify(decrypt(token, secret), secret, options);
   } catch {
     return null;
   }

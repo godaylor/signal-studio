@@ -1,15 +1,33 @@
 import { z } from 'zod';
-import { saveAuth } from '@/lib/auth';
 import { ROLES } from '@/lib/constants';
-import { hash, secret } from '@/lib/crypto';
-import { createSecureToken } from '@/lib/jwt';
 import { checkPassword } from '@/lib/password';
-import prisma from '@/lib/prisma';
-import redis from '@/lib/redis';
 import { parseRequest } from '@/lib/request';
 import { json, serviceUnavailable, unauthorized } from '@/lib/response';
 import { getTwoFactorConfigurationError, isTwoFactorConfigured } from '@/lib/two-factor/crypto';
 import { getAllUserTeams, getUserByUsername } from '@/queries/prisma';
+import { recordSecurityAuditEvent } from '@/server/auth/audit';
+import {
+  checkLoginRateLimit,
+  getLoginRateLimitKey,
+  recordLoginFailure,
+  resetLoginRateLimit,
+} from '@/server/auth/login-rate-limit';
+import { issueAuthToken, issuePartialAuthToken } from '@/server/auth/tokens';
+import { getTwoFactorPolicy } from '@/server/auth/two-factor-policy';
+
+function rateLimited(retryAfterSeconds: number) {
+  return Response.json(
+    {
+      error: {
+        message: 'Too many login attempts. Try again later.',
+        code: 'login-rate-limited',
+        status: 429,
+        retryAfterSeconds,
+      },
+    },
+    { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } },
+  );
+}
 
 export async function POST(request: Request) {
   const schema = z.object({
@@ -24,46 +42,84 @@ export async function POST(request: Request) {
   }
 
   const { username, password } = body;
+  const rateLimitKey = getLoginRateLimitKey(request, username);
+  const rateCheck = await checkLoginRateLimit(rateLimitKey);
 
-  const user = await getUserByUsername(username, { includePassword: true });
+  if (!rateCheck.allowed) {
+    await recordSecurityAuditEvent({
+      eventType: 'auth.login',
+      outcome: 'blocked',
+      metadata: { reason: 'rate_limited' },
+    });
+    return rateLimited(rateCheck.retryAfterSeconds);
+  }
+
+  const user = await getUserByUsername(username, {
+    includePassword: true,
+    includeSessionVersion: true,
+  });
 
   if (!user || !checkPassword(password, user.password)) {
+    const lockedUntil = await recordLoginFailure(rateLimitKey);
+    await recordSecurityAuditEvent({
+      actorUserId: user?.id,
+      eventType: 'auth.login',
+      outcome: lockedUntil ? 'blocked' : 'failure',
+      metadata: { reason: lockedUntil ? 'rate_limited' : 'invalid_credentials' },
+    });
+
+    if (lockedUntil) {
+      return rateLimited(Math.max(1, Math.ceil((lockedUntil.getTime() - Date.now()) / 1000)));
+    }
+
     return unauthorized({ code: 'incorrect-username-password' });
   }
 
+  await resetLoginRateLimit(rateLimitKey);
+
   const { id, role, createdAt } = user;
-  const cloudMode = !!process.env.CLOUD_MODE;
+  const twoFactor = await getTwoFactorPolicy(id, user.twoFactorRequired);
 
-  // Check if 2FA is enabled for this user
-  const twoFactor = !cloudMode
-    ? await prisma.client.twoFactorAuth.findUnique({ where: { userId: id } })
-    : null;
+  if ((twoFactor.enabled || twoFactor.required) && !isTwoFactorConfigured()) {
+    await recordSecurityAuditEvent({
+      actorUserId: id,
+      eventType: 'auth.login',
+      outcome: 'blocked',
+      metadata: { reason: 'two_factor_not_configured' },
+    });
+    return serviceUnavailable(getTwoFactorConfigurationError());
+  }
 
-  if (twoFactor?.isEnabled) {
+  if (twoFactor.enabled) {
     if (!isTwoFactorConfigured()) {
       return serviceUnavailable(getTwoFactorConfigurationError());
     }
 
-    const partialToken = createSecureToken({ userId: id, type: 'partial-auth' }, secret(), {
-      expiresIn: '5m',
+    const partialToken = issuePartialAuthToken(user);
+    await recordSecurityAuditEvent({
+      actorUserId: id,
+      eventType: 'auth.login',
+      outcome: 'success',
+      metadata: { assurance: 'pending_two_factor' },
     });
     return json({ requiresTwoFactor: true, partialToken });
   }
-  // Bind token to password hash so a password change invalidates old tokens.
-  const pwd = hash(user.password);
 
-  let token: string;
-
-  if (redis.enabled) {
-    token = await saveAuth({ userId: id, role, pwd });
-  } else {
-    token = createSecureToken({ userId: user.id, role, pwd }, secret());
-  }
+  const setupOnly = twoFactor.required;
+  const token = issueAuthToken(user, 1, { setupOnly });
 
   const teams = await getAllUserTeams(id);
 
+  await recordSecurityAuditEvent({
+    actorUserId: id,
+    eventType: 'auth.login',
+    outcome: 'success',
+    metadata: { assurance: setupOnly ? 'setup_only' : 'single_factor' },
+  });
+
   return json({
     token,
+    requiresTwoFactorSetup: setupOnly,
     user: { id, username, role, createdAt, isAdmin: role === ROLES.admin, teams },
   });
 }

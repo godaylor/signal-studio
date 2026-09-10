@@ -12,11 +12,12 @@ const USER_SORT_FIELDS = ['username', 'role', 'createdAt'] as const;
 
 export interface GetUserOptions {
   includePassword?: boolean;
+  includeSessionVersion?: boolean;
   showDeleted?: boolean;
 }
 
 async function findUser(criteria: Prisma.UserFindUniqueArgs, options: GetUserOptions = {}) {
-  const { includePassword = false, showDeleted = false } = options;
+  const { includePassword = false, includeSessionVersion = false, showDeleted = false } = options;
 
   return prisma.client.user.findUnique({
     ...criteria,
@@ -28,6 +29,7 @@ async function findUser(criteria: Prisma.UserFindUniqueArgs, options: GetUserOpt
       id: true,
       username: true,
       password: includePassword,
+      sessionVersion: includeSessionVersion,
       role: true,
       createdAt: true,
       twoFactorRequired: true,
@@ -90,11 +92,16 @@ export async function createUser(data: {
 }
 
 export async function updateUser(userId: string, data: Prisma.UserUpdateInput) {
+  const updateData: Prisma.UserUpdateInput =
+    'password' in data && data.password !== undefined
+      ? { ...data, sessionVersion: { increment: 1 } }
+      : data;
+
   return prisma.client.user.update({
     where: {
       id: userId,
     },
-    data,
+    data: updateData,
     select: {
       id: true,
       username: true,

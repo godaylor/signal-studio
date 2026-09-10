@@ -21,7 +21,7 @@ export const FAVICON_URL = 'https://icons.duckduckgo.com/ip3/{{domain}}.ico';
 export const LINKS_URL = `${globalThis?.location?.origin}/q`;
 export const PIXELS_URL = `${globalThis?.location?.origin}/p`;
 
-export const DEFAULT_LOCALE = 'en-US';
+export const DEFAULT_LOCALE = 'ru-RU';
 export const DEFAULT_THEME = 'light';
 export const DEFAULT_ANIMATION_DURATION = 300;
 export const DEFAULT_DATE_RANGE_VALUE = '24hour';
@@ -133,6 +133,8 @@ export const ENTITY_TYPE = {
   link: 2,
   pixel: 3,
   board: 4,
+  insight: 5,
+  dashboard: 6,
 } as const;
 
 export const DATA_TYPE = {

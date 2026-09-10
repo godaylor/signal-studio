@@ -102,10 +102,18 @@ export const languages = {
   'zh-TW': { label: '中文(繁體)', dateLocale: zhTW },
 };
 
-export function getDateLocale(locale: string) {
-  return languages[locale]?.dateLocale || enUS;
+export const PUBLIC_LOCALES = ['ru-RU', 'en-US'] as const;
+export type PublicLocale = (typeof PUBLIC_LOCALES)[number];
+
+export function normalizePublicLocale(locale?: string | null): PublicLocale {
+  return locale === 'en-US' ? 'en-US' : 'ru-RU';
 }
 
-export function getTextDirection(locale: string) {
-  return languages[locale]?.dir || 'ltr';
+export function getDateLocale(locale: string) {
+  return languages[normalizePublicLocale(locale)].dateLocale || ru;
+}
+
+export function getTextDirection(locale: string): 'ltr' | 'rtl' {
+  const language = languages[normalizePublicLocale(locale)];
+  return 'dir' in language && language.dir === 'rtl' ? 'rtl' : 'ltr';
 }

@@ -28,9 +28,14 @@ describe('setTimezone', () => {
 });
 
 describe('setLocale', () => {
-  test('updates the locale', () => {
+  test('accepts the public English locale', () => {
+    setLocale('en-US');
+    expect(useApp.getState().locale).toBe('en-US');
+  });
+
+  test('normalizes an upstream locale to the safe Russian default', () => {
     setLocale('fr-FR');
-    expect(useApp.getState().locale).toBe('fr-FR');
+    expect(useApp.getState().locale).toBe('ru-RU');
   });
 });
 

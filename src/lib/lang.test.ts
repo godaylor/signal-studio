@@ -1,35 +1,39 @@
-import { enUS, fr } from 'date-fns/locale';
+import { enUS, ru } from 'date-fns/locale';
 import { describe, expect, test } from 'vitest';
-import { getDateLocale, getTextDirection } from './lang';
+import { getDateLocale, getTextDirection, normalizePublicLocale } from './lang';
 
 describe('getDateLocale', () => {
-  test('returns the configured date-fns locale', () => {
-    expect(getDateLocale('fr-FR')).toBe(fr);
+  test('returns the configured public date-fns locales', () => {
+    expect(getDateLocale('ru-RU')).toBe(ru);
+    expect(getDateLocale('en-US')).toBe(enUS);
   });
 
-  test('falls back to en-US for unknown locales', () => {
-    expect(getDateLocale('xx-XX')).toBe(enUS);
+  test('falls back to Russian for unknown locales', () => {
+    expect(getDateLocale('xx-XX')).toBe(ru);
   });
 
-  test('falls back to en-US when a language has no dateLocale', () => {
-    expect(getDateLocale('fo-FO')).toBe(enUS);
+  test('falls back to Russian for retained upstream locales', () => {
+    expect(getDateLocale('fo-FO')).toBe(ru);
   });
 });
 
 describe('getTextDirection', () => {
-  test('returns rtl for right-to-left languages', () => {
-    expect(getTextDirection('ar-SA')).toBe('rtl');
-    expect(getTextDirection('fa-IR')).toBe('rtl');
-    expect(getTextDirection('he-IL')).toBe('rtl');
-    expect(getTextDirection('ur-PK')).toBe('rtl');
-  });
-
-  test('returns ltr for left-to-right languages', () => {
+  test('returns ltr for both public locales', () => {
+    expect(getTextDirection('ru-RU')).toBe('ltr');
     expect(getTextDirection('en-US')).toBe('ltr');
-    expect(getTextDirection('fr-FR')).toBe('ltr');
   });
 
-  test('falls back to ltr for unknown locales', () => {
+  test('uses the safe Russian fallback for non-public locales', () => {
+    expect(getTextDirection('ar-SA')).toBe('ltr');
     expect(getTextDirection('xx-XX')).toBe('ltr');
+  });
+});
+
+describe('normalizePublicLocale', () => {
+  test('exposes only en-US and Russian as the safe default', () => {
+    expect(normalizePublicLocale('en-US')).toBe('en-US');
+    expect(normalizePublicLocale('ru-RU')).toBe('ru-RU');
+    expect(normalizePublicLocale('fr-FR')).toBe('ru-RU');
+    expect(normalizePublicLocale(undefined)).toBe('ru-RU');
   });
 });

@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { isValidTimezone, normalizeTimezone } from '@/lib/date';
+import {
+  DATE_BOUNDARY_OFFSET_MESSAGE,
+  hasExplicitTimezoneOffset,
+  isValidTimezone,
+  normalizeTimezone,
+} from '@/lib/date';
 import { UNIT_TYPES } from './constants';
 
 export const timezoneParam = z
@@ -13,12 +18,21 @@ export const unitParam = z.string().refine(value => UNIT_TYPES.includes(value), 
   message: 'Invalid unit',
 });
 
+export const dateBoundaryParam = z.union([
+  z.date(),
+  z
+    .string()
+    .refine(hasExplicitTimezoneOffset, { message: DATE_BOUNDARY_OFFSET_MESSAGE })
+    .pipe(z.coerce.date()),
+]);
+
+// Legacy epoch-millisecond boundaries remain available only through startAt/endAt.
 export const dateRangeParams = {
   startAt: z.coerce.number().optional(),
   endAt: z.coerce.number().optional(),
-  startDate: z.coerce.date().optional(),
-  endDate: z.coerce.date().optional(),
-  timezone: timezoneParam.optional(),
+  startDate: dateBoundaryParam.optional(),
+  endDate: dateBoundaryParam.optional(),
+  timezone: timezoneParam.optional().default('UTC'),
   unit: unitParam.optional(),
   compare: z.enum(['prev', 'yoy']).optional(),
 };
@@ -37,6 +51,17 @@ export function withDateRange<T extends z.ZodRawShape>(shape?: T) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: 'Either startAt+endAt or startDate+endDate must be provided',
+        });
+        return;
+      }
+
+      const start = hasTimestamps ? Number(data.startAt) : (data.startDate as Date).getTime();
+      const end = hasTimestamps ? Number(data.endAt) : (data.endDate as Date).getTime();
+
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Date range must have valid boundaries with start before end',
         });
       }
     });
@@ -176,8 +201,8 @@ export const operatorParam = z.enum([
 export const goalReportSchema = z.object({
   type: z.literal('goal'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     type: z.string(),
     value: z.string(),
   }),
@@ -186,8 +211,8 @@ export const goalReportSchema = z.object({
 export const funnelReportSchema = z.object({
   type: z.literal('funnel'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     window: z.coerce.number().positive(),
     steps: z
       .array(
@@ -213,8 +238,8 @@ export const funnelReportSchema = z.object({
 export const journeyReportSchema = z.object({
   type: z.literal('journey'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     steps: z.coerce.number().min(2).max(7),
     startStep: z.string().optional(),
     endStep: z.string().optional(),
@@ -225,8 +250,8 @@ export const journeyReportSchema = z.object({
 export const retentionReportSchema = z.object({
   type: z.literal('retention'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     timezone: timezoneParam.optional(),
   }),
 });
@@ -234,16 +259,16 @@ export const retentionReportSchema = z.object({
 export const utmReportSchema = z.object({
   type: z.literal('utm'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
   }),
 });
 
 export const performanceReportSchema = z.object({
   type: z.literal('performance'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     unit: unitParam.optional(),
     timezone: timezoneParam.optional(),
     metric: z.enum(['lcp', 'inp', 'cls', 'fcp', 'ttfb']).optional(),
@@ -253,8 +278,8 @@ export const performanceReportSchema = z.object({
 export const revenueReportSchema = z.object({
   type: z.literal('revenue'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     unit: unitParam.optional(),
     timezone: timezoneParam.optional(),
     currency: z.string(),
@@ -265,8 +290,8 @@ export const revenueReportSchema = z.object({
 export const attributionReportSchema = z.object({
   type: z.literal('attribution'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     model: z.enum(['first-click', 'last-click']),
     type: z.enum(['path', 'event']),
     step: z.string(),
@@ -277,8 +302,8 @@ export const attributionReportSchema = z.object({
 export const breakdownReportSchema = z.object({
   type: z.literal('breakdown'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     fields: z.array(fieldsParam),
   }),
 });
@@ -286,8 +311,8 @@ export const breakdownReportSchema = z.object({
 export const heatmapReportSchema = z.object({
   type: z.literal('heatmap'),
   parameters: z.object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
+    startDate: dateBoundaryParam,
+    endDate: dateBoundaryParam,
     urlPath: z.string().max(500).optional(),
     mode: z.enum(['click', 'scroll']).optional(),
   }),

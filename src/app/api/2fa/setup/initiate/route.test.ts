@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   isTwoFactorConfigured: vi.fn(),
   generateOtpAuthUri: vi.fn(),
   generateQrCodeDataUrl: vi.fn(),
+  audit: vi.fn(),
 }));
 
 vi.mock('@/lib/request', () => ({
@@ -46,6 +47,7 @@ vi.mock('@/lib/two-factor/totp', () => ({
   generateQrCodeDataUrl: mocks.generateQrCodeDataUrl,
   generateTotpSecret: mocks.generateTotpSecret,
 }));
+vi.mock('@/server/auth/audit', () => ({ recordSecurityAuditEvent: mocks.audit }));
 
 beforeEach(() => {
   mocks.parseRequest.mockReset();
@@ -57,6 +59,7 @@ beforeEach(() => {
   mocks.isTwoFactorConfigured.mockReset();
   mocks.generateOtpAuthUri.mockReset();
   mocks.generateQrCodeDataUrl.mockReset();
+  mocks.audit.mockReset();
 
   mocks.isTwoFactorConfigured.mockReturnValue(true);
   mocks.parseRequest.mockResolvedValue({
@@ -88,6 +91,11 @@ test('POST creates a pending 2FA setup and returns the manual key and QR data', 
     qrCodeDataUrl: 'data:image/png;base64,qr',
   });
   expect(response.status).toBe(200);
+  expect(mocks.audit).toHaveBeenCalledWith({
+    actorUserId: 'user-1',
+    eventType: 'auth.two_factor.setup.initiate',
+    outcome: 'success',
+  });
 });
 
 test('POST reports a configuration error when the encryption key is missing', async () => {
@@ -120,4 +128,10 @@ test('POST rejects setup when 2FA is already enabled for the user', async () => 
     },
   });
   expect(response.status).toBe(400);
+  expect(mocks.audit).toHaveBeenCalledWith({
+    actorUserId: 'user-1',
+    eventType: 'auth.two_factor.setup.initiate',
+    outcome: 'failure',
+    metadata: { reason: 'already_enabled' },
+  });
 });

@@ -68,6 +68,17 @@ export type EventDataValue = boolean | number | string | null | EventData | Even
 export interface EventData {
   [key: string]: EventDataValue;
 }
+export interface IdentifyAccount {
+  id: string;
+  name?: string;
+  traits?: EventData;
+}
+export interface VersionedIdentity {
+  identityVersion: 1;
+  id: string;
+  data?: EventData;
+  account?: IdentifyAccount;
+}
 export type EventProperties = {
   /**
    * NOTE: event names will be truncated past 50 characters
@@ -149,6 +160,10 @@ export type UmamiTracker = {
      * ```
      */
     (id: string, data?: EventData): Promise<void>;
+    /**
+     * Identify a tracked user and optional account through the versioned Signal Studio contract.
+     */
+    (identity: VersionedIdentity): Promise<void>;
     /**
      * Associate data with the current visitor. An `id` string sets the Distinct ID.
      *

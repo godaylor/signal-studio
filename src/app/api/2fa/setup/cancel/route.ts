@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { parseRequest } from '@/lib/request';
 import { json, notFound } from '@/lib/response';
+import { recordSecurityAuditEvent } from '@/server/auth/audit';
 
 export async function POST(request: Request) {
   if (process.env.CLOUD_MODE) {
@@ -15,8 +16,15 @@ export async function POST(request: Request) {
 
   const userId = auth.user.id;
 
-  await prisma.client.twoFactorAuth.deleteMany({
+  const result = await prisma.client.twoFactorAuth.deleteMany({
     where: { userId, isEnabled: false },
+  });
+
+  await recordSecurityAuditEvent({
+    actorUserId: userId,
+    eventType: 'auth.two_factor.setup.cancel',
+    outcome: 'success',
+    metadata: { pendingSetupRemoved: result.count > 0 },
   });
 
   return json({ ok: true });

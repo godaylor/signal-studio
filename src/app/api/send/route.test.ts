@@ -7,7 +7,7 @@ process.env.APP_SECRET = 'route-send-test-secret';
 import { isbot } from 'isbot';
 import clickhouse from '@/lib/clickhouse';
 import { CACHE_TOKEN_TYPE, EVENT_TYPE } from '@/lib/constants';
-import { getSalt, secret, uuid } from '@/lib/crypto';
+import { getSalt, hash, secret, uuid } from '@/lib/crypto';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
 import { createToken, parseToken } from '@/lib/jwt';
 import { fetchWebsite } from '@/lib/load';
@@ -19,7 +19,11 @@ import {
   saveSessionLink,
   updateSession,
 } from '@/queries/sql';
+import { COLLECTION_TOKEN_AUDIENCE } from '@/server/auth/constants';
+import { upsertTrackedIdentity } from '@/server/identities/upsert';
 import { POST } from './route';
+
+vi.mock('@/server/lifecycle/ingestion', () => ({ withLifecycleIngestion: (_projectId: string, action: () => Promise<Response>) => action() }));
 
 vi.mock('@/lib/clickhouse', () => ({ default: { enabled: false } }));
 
@@ -44,6 +48,10 @@ vi.mock('@/queries/sql', () => ({
   updateSession: vi.fn(),
 }));
 
+vi.mock('@/server/identities/upsert', () => ({
+  upsertTrackedIdentity: vi.fn(),
+}));
+
 vi.mock('isbot', () => ({
   isbot: vi.fn(),
 }));
@@ -58,6 +66,7 @@ const saveEventMock = vi.mocked(saveEvent);
 const saveSessionDataMock = vi.mocked(saveSessionData);
 const saveSessionLinkMock = vi.mocked(saveSessionLink);
 const updateSessionMock = vi.mocked(updateSession);
+const upsertTrackedIdentityMock = vi.mocked(upsertTrackedIdentity);
 
 const WEBSITE_ID = '11111111-1111-4111-8111-111111111111';
 const LINK_ID = '22222222-2222-4222-8222-222222222222';
@@ -73,6 +82,13 @@ const defaultClientInfo = {
   region: 'US-CA',
   city: 'San Francisco',
 };
+
+const collectionContext = hash(
+  'collection-context',
+  WEBSITE_ID,
+  defaultClientInfo.ip,
+  defaultClientInfo.userAgent,
+);
 
 /**
  * Drives POST by making parseRequest resolve to the given body. Because the
@@ -116,6 +132,11 @@ beforeEach(() => {
   saveSessionDataMock.mockResolvedValue(undefined as any);
   saveSessionLinkMock.mockResolvedValue(undefined as any);
   updateSessionMock.mockResolvedValue(undefined as any);
+  upsertTrackedIdentityMock.mockResolvedValue({
+    trackedUserId: 'tracked-user-id',
+    trackedAccountId: null,
+    membershipObservedAt: null,
+  });
 });
 
 describe('parseRequest error handling', () => {
@@ -224,6 +245,43 @@ describe('schema validation', () => {
       schema.safeParse({ type: 'performance', payload: { website: WEBSITE_ID, lcp: 2500 } })
         .success,
     ).toBe(true);
+  });
+
+  test('validates the versioned tracked user and account contract', async () => {
+    const schema = await getSchema();
+    const valid = {
+      type: 'identify',
+      payload: {
+        website: WEBSITE_ID,
+        identityVersion: 1,
+        id: 'user-42',
+        data: { plan: 'pro' },
+        account: { id: 'acme', name: 'Acme', traits: { industry: 'software' } },
+      },
+    };
+
+    expect(schema.safeParse(valid).success).toBe(true);
+    expect(
+      schema.safeParse({ ...valid, payload: { ...valid.payload, id: 'x'.repeat(51) } }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        type: 'identify',
+        payload: { website: WEBSITE_ID, identityVersion: 1 },
+      }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        type: 'event',
+        payload: { website: WEBSITE_ID, identityVersion: 1, id: 'user-42' },
+      }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        type: 'identify',
+        payload: { website: WEBSITE_ID, id: 'user-42', account: { id: 'acme' } },
+      }).success,
+    ).toBe(false);
   });
 });
 
@@ -541,9 +599,11 @@ describe('cache token handling', () => {
         sessionId: 'cached-session',
         visitId: 'cached-visit',
         iat: Math.floor(Date.now() / 1000),
+        context: collectionContext,
         ...overrides,
       },
       secret(),
+      { audience: COLLECTION_TOKEN_AUDIENCE, expiresIn: 2_678_400 },
     );
   }
 
@@ -631,6 +691,17 @@ describe('cache token handling', () => {
     expect(fetchWebsiteMock).toHaveBeenCalledTimes(1);
   });
 
+  test('a cache token cannot be reused for another website', async () => {
+    const token = makeCacheToken({ websiteId: LINK_ID });
+
+    await callPOST(
+      { type: 'event', payload: { website: WEBSITE_ID, url: '/' } },
+      { headers: { 'x-umami-cache': token } },
+    );
+
+    expect(fetchWebsiteMock).toHaveBeenCalledWith(WEBSITE_ID);
+  });
+
   test('a token with a non-cache type is ignored', async () => {
     const token = createToken(
       { type: 'share', websiteId: WEBSITE_ID, sessionId: 's', visitId: 'v', iat: 1 },
@@ -681,6 +752,9 @@ describe('cache token handling', () => {
     expect(decoded.sessionId).toBe(body.sessionId);
     expect(decoded.visitId).toBe(body.visitId);
     expect(decoded.websiteId).toBe(WEBSITE_ID);
+    expect(decoded.aud).toBe(COLLECTION_TOKEN_AUDIENCE);
+    expect(decoded.context).toBe(collectionContext);
+    expect(decoded.exp).toBeGreaterThan(decoded.iat);
   });
 });
 
@@ -716,8 +790,10 @@ describe('30-minute visit expiry', () => {
         sessionId: makeComputedSessionId(WEBSITE_ID),
         visitId: 'cached-visit',
         iat: recentIat,
+        context: collectionContext,
       },
       secret(),
+      { audience: COLLECTION_TOKEN_AUDIENCE, expiresIn: 2_678_400 },
     );
 
     const response = await callPOST(
@@ -738,8 +814,10 @@ describe('30-minute visit expiry', () => {
         sessionId: makeComputedSessionId(WEBSITE_ID, timestamp),
         visitId: 'cached-visit',
         iat: oldIat,
+        context: collectionContext,
       },
       secret(),
+      { audience: COLLECTION_TOKEN_AUDIENCE, expiresIn: 2_678_400 },
     );
 
     const response = await callPOST(
@@ -779,6 +857,74 @@ describe('identify collection', () => {
     expect(saveSessionDataMock.mock.calls[0][0]).toMatchObject({
       websiteId: WEBSITE_ID,
       sessionData: { plan: 'pro' },
+    });
+  });
+
+  test('projects a versioned user and account inside the Project boundary', async () => {
+    await callPOST({
+      type: 'identify',
+      payload: {
+        website: WEBSITE_ID,
+        identityVersion: 1,
+        id: 'user-42',
+        data: { plan: 'pro' },
+        account: { id: 'acme', name: 'Acme', traits: { industry: 'software' } },
+      },
+    });
+
+    expect(upsertTrackedIdentityMock).toHaveBeenCalledWith({
+      projectId: WEBSITE_ID,
+      externalId: 'user-42',
+      traits: { plan: 'pro' },
+      account: { id: 'acme', name: 'Acme', traits: { industry: 'software' } },
+      observedAt: expect.any(Date),
+    });
+  });
+
+  test('keeps legacy identify best-effort when the identity projection fails', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    upsertTrackedIdentityMock.mockRejectedValue(new Error('projection failed'));
+
+    const response = await callPOST({
+      type: 'identify',
+      payload: { website: WEBSITE_ID, id: 'legacy-user', data: { plan: 'pro' } },
+    });
+
+    expect(response.status).toBe(200);
+    expect(saveSessionDataMock).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalledWith(
+      'Tracked identity projection failed for legacy identify.',
+    );
+    consoleError.mockRestore();
+  });
+
+  test('returns a safe 500 when explicit v1 projection fails', async () => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
+    upsertTrackedIdentityMock.mockRejectedValue(new Error('projection failed'));
+
+    const response = await callPOST({
+      type: 'identify',
+      payload: { website: WEBSITE_ID, identityVersion: 1, id: 'user-42' },
+    });
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: 'server-error', status: 500 },
+    });
+    consoleLog.mockRestore();
+  });
+
+  test('returns a stable 400 when explicit v1 targets a deleted Project', async () => {
+    upsertTrackedIdentityMock.mockResolvedValue(null);
+
+    const response = await callPOST({
+      type: 'identify',
+      payload: { website: WEBSITE_ID, identityVersion: 1, id: 'user-42' },
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: 'identity-project-not-found', status: 400 },
     });
   });
 

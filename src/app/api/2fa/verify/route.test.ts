@@ -2,185 +2,167 @@ import { beforeEach, expect, test, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getBearerToken: vi.fn(),
-  saveAuth: vi.fn(),
-  parseSecureToken: vi.fn(),
-  createSecureToken: vi.fn(),
+  parsePartial: vi.fn(),
+  tokenMatchesUser: vi.fn(),
+  issueAuth: vi.fn(),
   getUser: vi.fn(),
-  getAllUserTeams: vi.fn(),
-  findTwoFactorAuth: vi.fn(),
+  getTeams: vi.fn(),
+  findTwoFactor: vi.fn(),
   findBackupCodes: vi.fn(),
-  updateBackupCodes: vi.fn(),
+  consumeBackupCode: vi.fn(),
   verifyBackupCode: vi.fn(),
-  decryptSecret: vi.fn(),
-  isTwoFactorConfigured: vi.fn(),
+  parseRequest: vi.fn(),
+  isConfigured: vi.fn(),
   checkRateLimit: vi.fn(),
   recordFailedAttempt: vi.fn(),
   resetRateLimit: vi.fn(),
   isOtpReplayed: vi.fn(),
   markOtpUsed: vi.fn(),
+  decryptSecret: vi.fn(),
   verifyTotp: vi.fn(),
-  secret: vi.fn(),
+  audit: vi.fn(),
 }));
 
-vi.mock('@/lib/auth', () => ({
-  getBearerToken: mocks.getBearerToken,
-  saveAuth: mocks.saveAuth,
+vi.mock('@/lib/auth', () => ({ getBearerToken: mocks.getBearerToken }));
+vi.mock('@/server/auth/tokens', () => ({
+  parsePartialAuthToken: mocks.parsePartial,
+  tokenMatchesUser: mocks.tokenMatchesUser,
+  issueAuthToken: mocks.issueAuth,
 }));
-
-vi.mock('@/lib/crypto', () => ({
-  secret: mocks.secret,
-}));
-
-vi.mock('@/lib/jwt', () => ({
-  createSecureToken: mocks.createSecureToken,
-  parseSecureToken: mocks.parseSecureToken,
-}));
-
 vi.mock('@/queries/prisma', () => ({
-  getAllUserTeams: mocks.getAllUserTeams,
   getUser: mocks.getUser,
+  getAllUserTeams: mocks.getTeams,
 }));
-
 vi.mock('@/lib/prisma', () => ({
   default: {
     client: {
-      twoFactorAuth: {
-        findUnique: mocks.findTwoFactorAuth,
-      },
+      twoFactorAuth: { findUnique: mocks.findTwoFactor },
       twoFactorBackupCode: {
         findMany: mocks.findBackupCodes,
-        updateMany: mocks.updateBackupCodes,
+        updateMany: mocks.consumeBackupCode,
       },
     },
   },
 }));
-
-vi.mock('@/lib/two-factor/backup-codes', () => ({
-  verifyBackupCode: mocks.verifyBackupCode,
-}));
-
+vi.mock('@/lib/request', () => ({ parseRequest: mocks.parseRequest }));
 vi.mock('@/lib/two-factor/crypto', () => ({
   decryptSecret: mocks.decryptSecret,
-  getTwoFactorConfigurationError: () => ({
-    code: 'two-factor-error-not-configured',
-    message: 'TWO_FACTOR_ENCRYPTION_KEY is missing or invalid',
-  }),
-  isTwoFactorConfigured: mocks.isTwoFactorConfigured,
+  getTwoFactorConfigurationError: () => ({ code: 'two-factor-error-not-configured' }),
+  isTwoFactorConfigured: mocks.isConfigured,
 }));
-
 vi.mock('@/lib/two-factor/rate-limit', () => ({
   checkRateLimit: mocks.checkRateLimit,
   recordFailedAttempt: mocks.recordFailedAttempt,
   resetRateLimit: mocks.resetRateLimit,
 }));
-
 vi.mock('@/lib/two-factor/replay-prevention', () => ({
   isOtpReplayed: mocks.isOtpReplayed,
   markOtpUsed: mocks.markOtpUsed,
 }));
-
-vi.mock('@/lib/two-factor/totp', () => ({
-  verifyTotp: mocks.verifyTotp,
-}));
-
-vi.mock('@/lib/redis', () => ({
-  default: {
-    enabled: false,
-  },
-}));
+vi.mock('@/lib/two-factor/totp', () => ({ verifyTotp: mocks.verifyTotp }));
+vi.mock('@/lib/two-factor/backup-codes', () => ({ verifyBackupCode: mocks.verifyBackupCode }));
+vi.mock('@/server/auth/audit', () => ({ recordSecurityAuditEvent: mocks.audit }));
 
 import { POST } from './route';
 
 beforeEach(() => {
-  mocks.getBearerToken.mockReset();
-  mocks.saveAuth.mockReset();
-  mocks.parseSecureToken.mockReset();
-  mocks.createSecureToken.mockReset();
-  mocks.getUser.mockReset();
-  mocks.getAllUserTeams.mockReset();
-  mocks.findTwoFactorAuth.mockReset();
-  mocks.findBackupCodes.mockReset();
-  mocks.updateBackupCodes.mockReset();
-  mocks.verifyBackupCode.mockReset();
-  mocks.decryptSecret.mockReset();
-  mocks.isTwoFactorConfigured.mockReset();
-  mocks.checkRateLimit.mockReset();
-  mocks.recordFailedAttempt.mockReset();
-  mocks.resetRateLimit.mockReset();
-  mocks.isOtpReplayed.mockReset();
-  mocks.markOtpUsed.mockReset();
-  mocks.verifyTotp.mockReset();
-  mocks.secret.mockReset();
-
+  vi.clearAllMocks();
   mocks.getBearerToken.mockReturnValue('partial-token');
-  mocks.secret.mockReturnValue('app-secret');
-  mocks.parseSecureToken.mockReturnValue({ type: 'partial-auth', userId: 'user-1' });
+  mocks.parsePartial.mockReturnValue({ userId: 'user-1', pwd: 'pwd', sv: 2 });
+  mocks.tokenMatchesUser.mockReturnValue(true);
   mocks.getUser.mockResolvedValue({
     id: 'user-1',
     username: 'alice',
     role: 'admin',
-    createdAt: new Date('2026-07-23T00:00:00.000Z'),
+    password: 'hash',
+    sessionVersion: 2,
+    createdAt: new Date('2026-08-01T00:00:00.000Z'),
   });
-  mocks.getAllUserTeams.mockResolvedValue([]);
-  mocks.findTwoFactorAuth.mockResolvedValue({ userId: 'user-1', isEnabled: true, secret: 'encrypted' });
-  mocks.createSecureToken.mockReturnValue('full-auth-token');
-  mocks.decryptSecret.mockReturnValue('plain-secret');
-  mocks.isTwoFactorConfigured.mockReturnValue(true);
+  mocks.getTeams.mockResolvedValue([]);
+  mocks.findTwoFactor.mockResolvedValue({ isEnabled: true, secret: 'encrypted' });
+  mocks.findBackupCodes.mockResolvedValue([{ id: 'backup-1', codeHash: 'hash-1' }]);
+  mocks.consumeBackupCode.mockResolvedValue({ count: 1 });
+  mocks.verifyBackupCode.mockResolvedValue(0);
+  mocks.parseRequest.mockResolvedValue({ body: { token: '123456' }, error: undefined });
+  mocks.isConfigured.mockReturnValue(true);
   mocks.checkRateLimit.mockResolvedValue({ allowed: true });
-  mocks.recordFailedAttempt.mockResolvedValue({ lockedUntil: undefined });
-  mocks.resetRateLimit.mockResolvedValue(undefined);
+  mocks.recordFailedAttempt.mockResolvedValue({});
   mocks.isOtpReplayed.mockResolvedValue(false);
-  mocks.markOtpUsed.mockResolvedValue(undefined);
+  mocks.decryptSecret.mockReturnValue('plain-secret');
   mocks.verifyTotp.mockResolvedValue(true);
-  mocks.findBackupCodes.mockResolvedValue([]);
-  mocks.updateBackupCodes.mockResolvedValue({ count: 0 });
-  mocks.verifyBackupCode.mockResolvedValue(null);
+  mocks.issueAuth.mockReturnValue('full-token');
 });
 
-test('POST accepts a token-only payload and completes 2FA verification', async () => {
+test('rotates a current partial token into an AAL2 full token after OTP', async () => {
   const response = await POST(
     new Request('http://localhost/api/2fa/verify', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer partial-token',
-      },
-      body: JSON.stringify({ token: '123456' }),
+      headers: { authorization: 'Bearer partial-token' },
     }),
   );
 
-  expect(mocks.verifyTotp).toHaveBeenCalledWith('123456', 'plain-secret');
+  expect(mocks.issueAuth).toHaveBeenCalledWith(expect.any(Object), 2);
   expect(mocks.markOtpUsed).toHaveBeenCalledWith('user-1', '123456');
-  expect(mocks.resetRateLimit).toHaveBeenCalledWith('user-1');
-  await expect(response.json()).resolves.toMatchObject({
-    token: 'full-auth-token',
-    user: {
-      id: 'user-1',
-      username: 'alice',
-    },
-  });
-  expect(response.status).toBe(200);
+  await expect(response.json()).resolves.toMatchObject({ token: 'full-token' });
 });
 
-test('POST returns a configuration error when the encryption key is missing', async () => {
-  mocks.isTwoFactorConfigured.mockReturnValue(false);
+test('rejects a partial token invalidated by password/session version change', async () => {
+  mocks.tokenMatchesUser.mockReturnValue(false);
 
-  const response = await POST(
-    new Request('http://localhost/api/2fa/verify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer partial-token',
-      },
-      body: JSON.stringify({ token: '123456' }),
-    }),
-  );
+  const response = await POST(new Request('http://localhost/api/2fa/verify', { method: 'POST' }));
 
-  expect(mocks.findTwoFactorAuth).not.toHaveBeenCalled();
+  expect(response.status).toBe(401);
+  expect(mocks.verifyTotp).not.toHaveBeenCalled();
+});
+
+test('rejects replay of an already used OTP before issuing full authorization', async () => {
+  mocks.isOtpReplayed.mockResolvedValue(true);
+
+  const response = await POST(new Request('http://localhost/api/2fa/verify', { method: 'POST' }));
+
+  expect(response.status).toBe(400);
   await expect(response.json()).resolves.toMatchObject({
-    error: {
-      code: 'two-factor-error-not-configured',
-    },
+    error: { code: 'two-factor-error-code-used' },
   });
-  expect(response.status).toBe(503);
+  expect(mocks.issueAuth).not.toHaveBeenCalled();
+  expect(mocks.audit).toHaveBeenCalledWith({
+    actorUserId: 'user-1',
+    eventType: 'auth.two_factor.verify',
+    outcome: 'failure',
+    metadata: { reason: 'otp_replayed' },
+  });
+});
+
+test('consumes an unused backup code before issuing an AAL2 full token', async () => {
+  mocks.parseRequest.mockResolvedValue({
+    body: { backupCode: 'BACKUP-CODE' },
+    error: undefined,
+  });
+
+  const response = await POST(new Request('http://localhost/api/2fa/verify', { method: 'POST' }));
+
+  expect(mocks.verifyBackupCode).toHaveBeenCalledWith('BACKUP-CODE', ['hash-1']);
+  expect(mocks.consumeBackupCode).toHaveBeenCalledWith({
+    where: { id: 'backup-1', used: false },
+    data: { used: true },
+  });
+  expect(mocks.issueAuth).toHaveBeenCalledWith(expect.any(Object), 2);
+  await expect(response.json()).resolves.toMatchObject({ token: 'full-token' });
+});
+
+test('rejects a backup code lost to a concurrent one-time consumption race', async () => {
+  mocks.parseRequest.mockResolvedValue({
+    body: { backupCode: 'BACKUP-CODE' },
+    error: undefined,
+  });
+  mocks.consumeBackupCode.mockResolvedValue({ count: 0 });
+
+  const response = await POST(new Request('http://localhost/api/2fa/verify', { method: 'POST' }));
+
+  expect(response.status).toBe(400);
+  await expect(response.json()).resolves.toMatchObject({
+    error: { code: 'two-factor-error-invalid-backup-code' },
+  });
+  expect(mocks.recordFailedAttempt).toHaveBeenCalledWith('user-1');
+  expect(mocks.issueAuth).not.toHaveBeenCalled();
 });

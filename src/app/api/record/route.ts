@@ -1,9 +1,8 @@
 import { isbot } from 'isbot';
-import { serializeError } from 'serialize-error';
 import { z } from 'zod';
-import { HEATMAP_EVENT_TYPE } from '@/lib/constants';
+import { CACHE_TOKEN_TYPE, HEATMAP_EVENT_TYPE } from '@/lib/constants';
 import { corsPreflight, withCorsHeaders } from '@/lib/cors';
-import { secret } from '@/lib/crypto';
+import { hash, secret } from '@/lib/crypto';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
 import { parseToken } from '@/lib/jwt';
 import { fetchAccount, fetchTeam } from '@/lib/load';
@@ -14,10 +13,16 @@ import { badRequest, forbidden, json, payloadTooLarge, serverError } from '@/lib
 import { getWebsite } from '@/queries/prisma';
 import { saveRecording } from '@/queries/sql';
 import { saveHeatmapEvents } from '@/queries/sql/heatmap/saveHeatmapEvents';
+import { COLLECTION_TOKEN_AUDIENCE } from '@/server/auth/constants';
+import { observeIngestion, safeFailure } from '@/server/operations/telemetry';
+import { withLifecycleIngestion } from '@/server/lifecycle/ingestion';
 
 interface Cache {
+  websiteId: string;
   sessionId: string;
   visitId: string;
+  context: string;
+  type: string;
 }
 
 const MAX_RECORD_REQUEST_BYTES = 1_000_000;
@@ -102,6 +107,10 @@ export function OPTIONS() {
 }
 
 export async function POST(request: Request) {
+  return observeIngestion('ingestion.record', request, handleRecord);
+}
+
+async function handleRecord(request: Request) {
   try {
     const requestBodySize = await getRequestBodySize(request);
 
@@ -122,130 +131,144 @@ export async function POST(request: Request) {
     }
 
     const { website: websiteId } = body.payload;
-    const events = body.payload.events;
-    const timestamp = body.payload.timestamp;
+    return await withLifecycleIngestion(websiteId, async () => {
+      const events = body.payload.events;
+      const timestamp = body.payload.timestamp;
 
-    if (!events?.length) {
+      if (!events?.length) {
+        return withCorsHeaders(json({ ok: true }));
+      }
+
+      // Parse cache token to get session info
+      const cacheHeader = request.headers.get('x-umami-cache');
+
+      if (!cacheHeader) {
+        return withCorsHeaders(badRequest({ message: 'Missing session token.' }));
+      }
+
+      const cache = (await parseToken(cacheHeader, secret(), {
+        audience: COLLECTION_TOKEN_AUDIENCE,
+      })) as Cache | null;
+
+      if (
+        !cache?.sessionId ||
+        !cache?.visitId ||
+        cache.type !== CACHE_TOKEN_TYPE ||
+        cache.websiteId !== websiteId
+      ) {
+        return withCorsHeaders(badRequest({ message: 'Invalid session token.' }));
+      }
+
+      const { sessionId, visitId } = cache;
+
+      // Query directly to avoid stale Redis cache for recorderEnabled
+      const website = await getWebsite(websiteId);
+
+      if (!website) {
+        return withCorsHeaders(badRequest({ message: 'Website not found.' }));
+      }
+
+      const recorderConfig = getRecorderConfig(website.replayConfig);
+      const replayEnabled = recorderConfig.replayEnabled === true;
+      const heatmapEnabled = recorderConfig.heatmapEnabled === true;
+
+      if (!website.recorderEnabled) {
+        return withCorsHeaders(json({ ok: false, reason: 'recorder_disabled' }));
+      }
+
+      if (process.env.CLOUD_MODE) {
+        const account = website.teamId
+          ? await fetchTeam(website.teamId)
+          : website.userId
+            ? await fetchAccount(website.userId)
+            : null;
+
+        if (!account?.isBusiness && !account?.isNoBilling) {
+          return withCorsHeaders(forbidden({ message: 'Business subscription required.' }));
+        }
+      }
+
+      // Client info for bot/IP checks
+      const { ip, userAgent } = await getClientInfo(request, {});
+      const expectedContext = hash('collection-context', websiteId, ip || '', userAgent || '');
+
+      if (!cache.context || cache.context !== expectedContext) {
+        return withCorsHeaders(badRequest({ message: 'Invalid session token.' }));
+      }
+
+      if (!process.env.DISABLE_BOT_CHECK && isbot(userAgent)) {
+        return withCorsHeaders(json({ beep: 'boop' }));
+      }
+
+      if (hasBlockedIp(ip)) {
+        return withCorsHeaders(forbidden());
+      }
+
+      if (body.type === 'record') {
+        if (!replayEnabled) {
+          return withCorsHeaders(json({ ok: false, reason: 'replay_disabled' }));
+        }
+
+        const eventTimestamps = events
+          .map((e: any) => Number(e?.timestamp))
+          .filter((t: number) => Number.isFinite(t) && t > 0);
+
+        const fallbackMs = (timestamp || Math.floor(Date.now() / 1000)) * 1000;
+        const minTimestamp = eventTimestamps.length ? Math.min(...eventTimestamps) : fallbackMs;
+        const maxTimestamp = eventTimestamps.length ? Math.max(...eventTimestamps) : fallbackMs;
+
+        const startedAt = new Date(minTimestamp);
+        const endedAt = new Date(maxTimestamp);
+        const chunkIndex = timestamp || Math.floor(Date.now() / 1000);
+
+        await saveRecording({
+          websiteId,
+          sessionId,
+          visitId,
+          chunkIndex,
+          events,
+          eventCount: getReplayEventCount(events),
+          startedAt,
+          endedAt,
+        });
+
+        return withCorsHeaders(json({ ok: true }));
+      }
+
+      if (!heatmapEnabled) {
+        return withCorsHeaders(json({ ok: false, reason: 'heatmap_disabled' }));
+      }
+
+      try {
+        const fallbackMs = (timestamp || Math.floor(Date.now() / 1000)) * 1000;
+        const heatmapRows = events.map(event => ({
+          websiteId,
+          sessionId,
+          visitId,
+          eventType: event.type === 'click' ? HEATMAP_EVENT_TYPE.click : HEATMAP_EVENT_TYPE.scroll,
+          x: event.type === 'click' ? (event.x ?? null) : null,
+          y: event.type === 'click' ? (event.y ?? null) : null,
+          pageX: event.type === 'click' ? (event.pageX ?? null) : null,
+          pageY: event.type === 'click' ? (event.pageY ?? null) : null,
+          pageW: event.pageW ?? null,
+          viewportW: event.viewportW ?? null,
+          viewportH: event.viewportH ?? null,
+          pageH: event.pageH ?? null,
+          scrollPct: event.type === 'scroll' ? (event.scrollPct ?? null) : null,
+          urlPath: getUrlPath(event.url),
+          createdAt: new Date(event.timestamp ?? fallbackMs),
+        }));
+
+        if (heatmapRows.length) {
+          await saveHeatmapEvents(heatmapRows);
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        safeFailure('heatmap-save-failed');
+      }
+
       return withCorsHeaders(json({ ok: true }));
-    }
-
-    // Parse cache token to get session info
-    const cacheHeader = request.headers.get('x-umami-cache');
-
-    if (!cacheHeader) {
-      return withCorsHeaders(badRequest({ message: 'Missing session token.' }));
-    }
-
-    const cache = (await parseToken(cacheHeader, secret())) as Cache | null;
-
-    if (!cache?.sessionId || !cache?.visitId) {
-      return withCorsHeaders(badRequest({ message: 'Invalid session token.' }));
-    }
-
-    const { sessionId, visitId } = cache;
-
-    // Query directly to avoid stale Redis cache for recorderEnabled
-    const website = await getWebsite(websiteId);
-
-    if (!website) {
-      return withCorsHeaders(badRequest({ message: 'Website not found.' }));
-    }
-
-    const recorderConfig = getRecorderConfig(website.replayConfig);
-    const replayEnabled = recorderConfig.replayEnabled === true;
-    const heatmapEnabled = recorderConfig.heatmapEnabled === true;
-
-    if (!website.recorderEnabled) {
-      return withCorsHeaders(json({ ok: false, reason: 'recorder_disabled' }));
-    }
-
-    if (process.env.CLOUD_MODE) {
-      const account = website.teamId
-        ? await fetchTeam(website.teamId)
-        : website.userId
-          ? await fetchAccount(website.userId)
-          : null;
-
-      if (!account?.isBusiness && !account?.isNoBilling) {
-        return withCorsHeaders(forbidden({ message: 'Business subscription required.' }));
-      }
-    }
-
-    // Client info for bot/IP checks
-    const { ip, userAgent } = await getClientInfo(request, {});
-
-    if (!process.env.DISABLE_BOT_CHECK && isbot(userAgent)) {
-      return withCorsHeaders(json({ beep: 'boop' }));
-    }
-
-    if (hasBlockedIp(ip)) {
-      return withCorsHeaders(forbidden());
-    }
-
-    if (body.type === 'record') {
-      if (!replayEnabled) {
-        return withCorsHeaders(json({ ok: false, reason: 'replay_disabled' }));
-      }
-
-      const eventTimestamps = events
-        .map((e: any) => Number(e?.timestamp))
-        .filter((t: number) => Number.isFinite(t) && t > 0);
-
-      const fallbackMs = (timestamp || Math.floor(Date.now() / 1000)) * 1000;
-      const minTimestamp = eventTimestamps.length ? Math.min(...eventTimestamps) : fallbackMs;
-      const maxTimestamp = eventTimestamps.length ? Math.max(...eventTimestamps) : fallbackMs;
-
-      const startedAt = new Date(minTimestamp);
-      const endedAt = new Date(maxTimestamp);
-      const chunkIndex = timestamp || Math.floor(Date.now() / 1000);
-
-      await saveRecording({
-        websiteId,
-        sessionId,
-        visitId,
-        chunkIndex,
-        events,
-        eventCount: getReplayEventCount(events),
-        startedAt,
-        endedAt,
-      });
-
-      return withCorsHeaders(json({ ok: true }));
-    }
-
-    if (!heatmapEnabled) {
-      return withCorsHeaders(json({ ok: false, reason: 'heatmap_disabled' }));
-    }
-
-    try {
-      const fallbackMs = (timestamp || Math.floor(Date.now() / 1000)) * 1000;
-      const heatmapRows = events.map(event => ({
-        websiteId,
-        sessionId,
-        visitId,
-        eventType: event.type === 'click' ? HEATMAP_EVENT_TYPE.click : HEATMAP_EVENT_TYPE.scroll,
-        x: event.type === 'click' ? (event.x ?? null) : null,
-        y: event.type === 'click' ? (event.y ?? null) : null,
-        pageX: event.type === 'click' ? (event.pageX ?? null) : null,
-        pageY: event.type === 'click' ? (event.pageY ?? null) : null,
-        pageW: event.pageW ?? null,
-        viewportW: event.viewportW ?? null,
-        viewportH: event.viewportH ?? null,
-        pageH: event.pageH ?? null,
-        scrollPct: event.type === 'scroll' ? (event.scrollPct ?? null) : null,
-        urlPath: getUrlPath(event.url),
-        createdAt: new Date(event.timestamp ?? fallbackMs),
-      }));
-
-      if (heatmapRows.length) {
-        await saveHeatmapEvents(heatmapRows);
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('heatmap save failed', serializeError(e));
-    }
-
-    return withCorsHeaders(json({ ok: true }));
+    });
   } catch (e) {
     return withCorsHeaders(serverError(e));
   }

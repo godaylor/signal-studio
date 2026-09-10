@@ -22,12 +22,12 @@ export async function getEventMetrics(
   ...args: [websiteId: string, parameters: EventMetricParameters, filters: QueryFilters]
 ): Promise<EventMetricData[]> {
   return runQuery({
-    [PRISMA]: () => relationalQuery(...args),
+    [PRISMA]: () => getEventMetricsPostgresql(...args),
     [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
-async function relationalQuery(
+export async function getEventMetricsPostgresql(
   websiteId: string,
   parameters: EventMetricParameters,
   filters: QueryFilters,
@@ -52,7 +52,8 @@ async function relationalQuery(
     ${cohortQuery}
     ${joinSessionQuery}
     where website_event.website_id = {{websiteId::uuid}}
-      and website_event.created_at between {{startDate}} and {{endDate}}
+      and website_event.created_at >= {{startDate}}
+      and website_event.created_at < {{endDate}}
       ${filterQuery}
     group by 1
     order by 2 desc

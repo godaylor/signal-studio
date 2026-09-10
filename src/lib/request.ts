@@ -2,14 +2,21 @@ import { startOfMonth, subMonths } from 'date-fns';
 import { z } from 'zod';
 import { checkAuth } from '@/lib/auth';
 import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS } from '@/lib/constants';
-import { getAllowedUnits, getMinimumUnit, maxDate, parseDateRange } from '@/lib/date';
+import {
+  DATE_BOUNDARY_OFFSET_MESSAGE,
+  getAllowedUnits,
+  getMinimumUnit,
+  hasExplicitTimezoneOffset,
+  maxDate,
+  parseDateRange,
+} from '@/lib/date';
 import { fetchAccount, fetchWebsite } from '@/lib/load';
 import {
   filtersArrayToObject,
   parseSessionPropertyFilters,
   parseUniversalEventPropertyFilters,
 } from '@/lib/params';
-import { badRequest, unauthorized } from '@/lib/response';
+import { badRequest, forbidden, unauthorized } from '@/lib/response';
 import type { QueryFilters } from '@/lib/types';
 import { getWebsiteSegment } from '@/queries/prisma';
 
@@ -53,10 +60,26 @@ export async function parseRequest(
 
     if (!auth) {
       error = () => unauthorized();
+    } else if (auth.assuranceRequired && !isAssuranceRoute(url.pathname)) {
+      error = () =>
+        forbidden({
+          code: 'two-factor-assurance-required',
+          message: 'Two-factor authentication is required before this action.',
+        });
     }
   }
 
   return { url, query, body, auth, error };
+}
+
+function isAssuranceRoute(pathname: string) {
+  return [
+    '/api/auth/verify',
+    '/api/auth/logout',
+    '/api/2fa/status',
+    '/api/2fa/setup/initiate',
+    '/api/2fa/setup/confirm',
+  ].some(path => pathname.endsWith(path));
 }
 
 export async function getJsonBody(request: Request) {
@@ -67,11 +90,49 @@ export async function getJsonBody(request: Request) {
   }
 }
 
-export function getRequestDateRange(query: Record<string, string>) {
-  const { startAt, endAt, unit, timezone } = query;
+type RequestDateRangeInput = {
+  startAt?: string | number;
+  endAt?: string | number;
+  startDate?: string | Date;
+  endDate?: string | Date;
+  timezone?: string;
+  unit?: string;
+};
 
-  const startDate = new Date(+startAt);
-  const endDate = new Date(+endAt);
+function parseRequestDateBoundary(value: string | Date) {
+  if (typeof value === 'string' && !hasExplicitTimezoneOffset(value)) {
+    throw new TypeError(DATE_BOUNDARY_OFFSET_MESSAGE);
+  }
+
+  return value instanceof Date ? new Date(value.getTime()) : new Date(value);
+}
+
+export function getRequestDateRange(query: RequestDateRangeInput) {
+  const { startAt, endAt, unit, timezone = 'UTC' } = query;
+  const hasTimestamps = startAt != null && endAt != null;
+  const hasDates = query.startDate != null && query.endDate != null;
+
+  if (!hasTimestamps && !hasDates) {
+    if (startAt != null || endAt != null || query.startDate != null || query.endDate != null) {
+      throw new TypeError('Date range requires both start and end boundaries');
+    }
+
+    return { startDate: undefined, endDate: undefined, timezone, unit };
+  }
+
+  // timezone controls query bucketing only. It never reinterprets offsetless wall-clock strings.
+  const startDate = hasTimestamps
+    ? new Date(Number(startAt))
+    : parseRequestDateBoundary(query.startDate);
+  const endDate = hasTimestamps ? new Date(Number(endAt)) : parseRequestDateBoundary(query.endDate);
+
+  if (
+    Number.isNaN(startDate.getTime()) ||
+    Number.isNaN(endDate.getTime()) ||
+    startDate.getTime() >= endDate.getTime()
+  ) {
+    throw new TypeError('Date range must have valid boundaries with start before end');
+  }
 
   return {
     startDate,

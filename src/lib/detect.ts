@@ -3,7 +3,7 @@ import { browserName, detectOS } from 'detect-browser';
 import ipaddr from 'ipaddr.js';
 import isLocalhost from 'is-localhost-ip';
 import maxmind from 'maxmind';
-import { UAParser } from 'ua-parser-js';
+import UAParser from 'ua-parser-js';
 import { getIpAddress, stripPort } from '@/lib/ip';
 import { safeDecodeURIComponent } from '@/lib/url';
 
@@ -113,9 +113,16 @@ export async function getLocation(ip: string = '', headers: Headers, skipHeaders
   if (!globalThis[MAXMIND]) {
     const dir = path.join(process.cwd(), 'geo');
 
-    globalThis[MAXMIND] = await maxmind.open(
-      process.env.GEOLITE_DB_PATH || path.resolve(dir, 'GeoLite2-City.mmdb'),
-    );
+    try {
+      globalThis[MAXMIND] = await maxmind.open(
+        process.env.GEOLITE_DB_PATH || path.resolve(dir, 'GeoLite2-City.mmdb'),
+      );
+    } catch (error) {
+      // The default build intentionally ships without licensed GeoLite data.
+      // Missing optional enrichment must not reject an otherwise valid event.
+      if (!process.env.GEOLITE_DB_PATH && (error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+      throw error;
+    }
   }
 
   const result = globalThis[MAXMIND]?.get(cleanIp);

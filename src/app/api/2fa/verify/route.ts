@@ -1,18 +1,21 @@
 import { z } from 'zod';
-import prisma from '@/lib/prisma';
-import { getBearerToken, saveAuth } from '@/lib/auth';
+import { getBearerToken } from '@/lib/auth';
 import { ROLES } from '@/lib/constants';
-import { secret } from '@/lib/crypto';
-import { createSecureToken, parseSecureToken } from '@/lib/jwt';
+import prisma from '@/lib/prisma';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, notFound, serviceUnavailable, unauthorized } from '@/lib/response';
 import { verifyBackupCode } from '@/lib/two-factor/backup-codes';
-import { decryptSecret, getTwoFactorConfigurationError, isTwoFactorConfigured } from '@/lib/two-factor/crypto';
+import {
+  decryptSecret,
+  getTwoFactorConfigurationError,
+  isTwoFactorConfigured,
+} from '@/lib/two-factor/crypto';
 import { checkRateLimit, recordFailedAttempt, resetRateLimit } from '@/lib/two-factor/rate-limit';
 import { isOtpReplayed, markOtpUsed } from '@/lib/two-factor/replay-prevention';
 import { verifyTotp } from '@/lib/two-factor/totp';
 import { getAllUserTeams, getUser } from '@/queries/prisma';
-import redis from '@/lib/redis';
+import { recordSecurityAuditEvent } from '@/server/auth/audit';
+import { issueAuthToken, parsePartialAuthToken, tokenMatchesUser } from '@/server/auth/tokens';
 
 export async function POST(request: Request) {
   if (process.env.CLOUD_MODE) {
@@ -26,15 +29,31 @@ export async function POST(request: Request) {
 
   const rawToken = getBearerToken(request);
   if (!rawToken) {
+    await recordSecurityAuditEvent({
+      eventType: 'auth.two_factor.verify',
+      outcome: 'failure',
+      metadata: { reason: 'missing_partial_token' },
+    });
     return unauthorized({ code: 'two-factor-error-missing-token' });
   }
 
-  const payload = parseSecureToken(rawToken, secret()) as any;
-  if (!payload || payload.type !== 'partial-auth' || !payload.userId) {
+  const payload = parsePartialAuthToken(rawToken);
+  if (!payload) {
+    await recordSecurityAuditEvent({
+      eventType: 'auth.two_factor.verify',
+      outcome: 'failure',
+      metadata: { reason: 'invalid_partial_token' },
+    });
     return unauthorized({ code: 'two-factor-error-invalid-partial-token' });
   }
 
   if (!isTwoFactorConfigured()) {
+    await recordSecurityAuditEvent({
+      actorUserId: payload.userId,
+      eventType: 'auth.two_factor.verify',
+      outcome: 'blocked',
+      metadata: { reason: 'two_factor_not_configured' },
+    });
     return serviceUnavailable(getTwoFactorConfigurationError());
   }
 
@@ -44,15 +63,27 @@ export async function POST(request: Request) {
   }
 
   const userId = payload.userId as string;
-  const user = await getUser(userId);
+  const user = await getUser(userId, { includePassword: true, includeSessionVersion: true });
 
-  if (!user) {
+  if (!user || !tokenMatchesUser(payload, user)) {
+    await recordSecurityAuditEvent({
+      actorUserId: userId,
+      eventType: 'auth.two_factor.verify',
+      outcome: 'failure',
+      metadata: { reason: 'revoked_partial_token' },
+    });
     return unauthorized();
   }
 
   const twoFactor = await prisma.client.twoFactorAuth.findUnique({ where: { userId } });
 
   if (!twoFactor?.isEnabled) {
+    await recordSecurityAuditEvent({
+      actorUserId: userId,
+      eventType: 'auth.two_factor.verify',
+      outcome: 'failure',
+      metadata: { reason: 'two_factor_not_enabled' },
+    });
     return badRequest({
       code: 'two-factor-error-not-enabled',
       message: '2FA not enabled for this user',
@@ -61,6 +92,12 @@ export async function POST(request: Request) {
 
   const rateCheck = await checkRateLimit(userId);
   if (!rateCheck.allowed) {
+    await recordSecurityAuditEvent({
+      actorUserId: userId,
+      eventType: 'auth.two_factor.verify',
+      outcome: 'blocked',
+      metadata: { reason: 'rate_limited' },
+    });
     return Response.json(
       {
         error: {
@@ -82,6 +119,12 @@ export async function POST(request: Request) {
 
     if (matchIndex === null) {
       const { lockedUntil } = await recordFailedAttempt(userId);
+      await recordSecurityAuditEvent({
+        actorUserId: userId,
+        eventType: 'auth.two_factor.verify',
+        outcome: lockedUntil ? 'blocked' : 'failure',
+        metadata: { reason: 'invalid_backup_code' },
+      });
       return badRequest({
         code: 'two-factor-error-invalid-backup-code',
         message: 'Invalid backup code',
@@ -96,6 +139,12 @@ export async function POST(request: Request) {
 
     if (consumed.count === 0) {
       const { lockedUntil } = await recordFailedAttempt(userId);
+      await recordSecurityAuditEvent({
+        actorUserId: userId,
+        eventType: 'auth.two_factor.verify',
+        outcome: lockedUntil ? 'blocked' : 'failure',
+        metadata: { reason: 'backup_code_already_used' },
+      });
       return badRequest({
         code: 'two-factor-error-invalid-backup-code',
         message: 'Invalid backup code',
@@ -108,6 +157,12 @@ export async function POST(request: Request) {
     const { token } = body;
 
     if (await isOtpReplayed(userId, token)) {
+      await recordSecurityAuditEvent({
+        actorUserId: userId,
+        eventType: 'auth.two_factor.verify',
+        outcome: 'failure',
+        metadata: { reason: 'otp_replayed' },
+      });
       return badRequest({ code: 'two-factor-error-code-used', message: 'Code already used' });
     }
 
@@ -115,6 +170,12 @@ export async function POST(request: Request) {
 
     if (!(await verifyTotp(token, decryptedSecret))) {
       const { lockedUntil } = await recordFailedAttempt(userId);
+      await recordSecurityAuditEvent({
+        actorUserId: userId,
+        eventType: 'auth.two_factor.verify',
+        outcome: lockedUntil ? 'blocked' : 'failure',
+        metadata: { reason: 'invalid_otp' },
+      });
       return badRequest({
         code: 'two-factor-error-invalid-code',
         message: 'Invalid verification code',
@@ -128,14 +189,15 @@ export async function POST(request: Request) {
 
   const { id, role, createdAt, username } = user;
 
-  let fullToken: string;
-  if (redis.enabled) {
-    fullToken = await saveAuth({ userId: id, role });
-  } else {
-    fullToken = createSecureToken({ userId: id, role }, secret());
-  }
+  const fullToken = issueAuthToken(user, 2);
 
   const teams = await getAllUserTeams(id);
+
+  await recordSecurityAuditEvent({
+    actorUserId: id,
+    eventType: 'auth.two_factor.verify',
+    outcome: 'success',
+  });
 
   return json({
     token: fullToken,

@@ -53,7 +53,8 @@ async function relationalQuery(
       ${cohortQuery}
       ${joinSessionQuery}
       where website_event.website_id = {{websiteId::uuid}}
-        and website_event.created_at between {{startDate}} and {{endDate}}
+        and website_event.created_at >= {{startDate}}
+        and website_event.created_at < {{endDate}}
         ${filterQuery}
       group by website_event.session_id
     ),
@@ -65,7 +66,8 @@ async function relationalQuery(
       join cohort_items
       on website_event.session_id = cohort_items.session_id
       where website_id = {{websiteId::uuid}}
-          and created_at between {{startDate}} and {{endDate}}
+          and created_at >= {{startDate}}
+          and created_at < {{endDate}}
           
       ),
     cohort_size as (
@@ -126,7 +128,8 @@ async function clickhouseQuery(
       from website_event
       ${cohortQuery}
       where website_id = {websiteId:UUID}
-        and created_at between {startDate:DateTime64} and {endDate:DateTime64}
+        and created_at >= {startDate:DateTime64}
+        and created_at < {endDate:DateTime64}
         ${filterQuery}
       group by session_id
     ),
@@ -138,7 +141,8 @@ async function clickhouseQuery(
       join cohort_items
       on website_event.session_id = cohort_items.session_id
       where website_id = {websiteId:UUID}
-        and created_at between {startDate:DateTime64} and {endDate:DateTime64}
+        and created_at >= {startDate:DateTime64}
+        and created_at < {endDate:DateTime64}
     ),
     cohort_size as (
       select cohort_date,

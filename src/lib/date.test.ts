@@ -33,6 +33,7 @@ import {
   getTimezone,
   isInvalidDate,
   isValidTimezone,
+  isWithinDateRange,
   maxDate,
   minDate,
   normalizeTimezone,
@@ -454,6 +455,21 @@ describe('timezone helpers', () => {
   test('getTimezone returns a non-empty string', () => {
     expect(typeof getTimezone()).toBe('string');
     expect(getTimezone().length).toBeGreaterThan(0);
+  });
+
+  test('assigns an adjacent boundary instant to only the following half-open range', () => {
+    const boundary = new Date('2026-03-09T00:00:00.000Z');
+    const previous = {
+      startDate: new Date('2026-03-08T00:00:00.000Z'),
+      endDate: boundary,
+    };
+    const next = {
+      startDate: boundary,
+      endDate: new Date('2026-03-10T00:00:00.000Z'),
+    };
+
+    expect(isWithinDateRange(boundary, previous.startDate, previous.endDate)).toBe(false);
+    expect(isWithinDateRange(boundary, next.startDate, next.endDate)).toBe(true);
   });
 });
 

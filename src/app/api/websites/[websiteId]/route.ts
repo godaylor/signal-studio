@@ -1,19 +1,18 @@
 import { z } from 'zod';
 import type { Prisma } from '@/generated/prisma/client';
-import { DOMAIN_REGEX, ENTITY_TYPE } from '@/lib/constants';
-import { uuid } from '@/lib/crypto';
+import { DOMAIN_REGEX } from '@/lib/constants';
 import { getRecorderConfig, getRecorderEnabled } from '@/lib/recorder';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, ok, serverError, unauthorized } from '@/lib/response';
 import { canDeleteWebsite, canUpdateWebsite, canViewSharedWebsite } from '@/permissions';
 import {
-  createShare,
   deleteSharesByEntityId,
   deleteWebsite,
   getShareByEntityId,
   getWebsite,
   updateWebsite,
 } from '@/queries/prisma';
+import { legacyShareCreationDisabled } from '@/server/shares/legacy';
 
 export async function GET(
   request: Request,
@@ -78,6 +77,11 @@ export async function POST(
       return badRequest({ message: 'Website not found.' });
     }
 
+    const currentShare = await getShareByEntityId(websiteId);
+    if (shareId && currentShare?.slug !== shareId) {
+      return legacyShareCreationDisabled();
+    }
+
     const nextReplayConfig = getRecorderConfig(
       replayConfig === null
         ? {}
@@ -100,16 +104,7 @@ export async function POST(
       await deleteSharesByEntityId(website.id);
     }
 
-    const share = shareId
-      ? await createShare({
-          id: uuid(),
-          entityId: websiteId,
-          shareType: ENTITY_TYPE.website,
-          name: website.name,
-          slug: shareId,
-          parameters: { overview: true, events: true },
-        })
-      : await getShareByEntityId(websiteId);
+    const share = shareId === null ? null : currentShare;
 
     return json({
       ...website,
@@ -140,7 +135,11 @@ export async function DELETE(
     return unauthorized();
   }
 
-  await deleteWebsite(websiteId);
+  try { await deleteWebsite(websiteId); }
+  catch (error) {
+    const code = error instanceof Error && error.message.startsWith('lifecycle-') ? error.message : 'delete-unavailable';
+    return Response.json({ error: { code } }, { status: code.startsWith('lifecycle-') ? 409 : 500 });
+  }
 
   return ok();
 }

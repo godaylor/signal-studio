@@ -25,6 +25,23 @@ vi.mock('@/lib/redis', () => ({
 
 function createDeleteTx(calls: string[]) {
   return {
+    $queryRaw: vi.fn().mockResolvedValue([]),
+    exportJob: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
+    accountMembership: {
+      deleteMany: vi.fn(async () => {
+        calls.push('accountMembership');
+      }),
+    },
+    trackedUser: {
+      deleteMany: vi.fn(async () => {
+        calls.push('trackedUser');
+      }),
+    },
+    trackedAccount: {
+      deleteMany: vi.fn(async () => {
+        calls.push('trackedAccount');
+      }),
+    },
     sessionReplaySaved: {
       deleteMany: vi.fn(async () => {
         calls.push('sessionReplaySaved');
@@ -136,6 +153,9 @@ describe('website delete dependencies', () => {
       'website-1',
     );
     expect(calls).toEqual([
+      'accountMembership',
+      'trackedUser',
+      'trackedAccount',
       'sessionReplaySaved',
       'sessionReplay',
       'heatmapEvent',
@@ -175,6 +195,9 @@ describe('website delete dependencies', () => {
       'website-1',
     );
     expect(calls).toEqual([
+      'accountMembership',
+      'trackedUser',
+      'trackedAccount',
       'sessionReplaySaved',
       'sessionReplay',
       'heatmapEvent',

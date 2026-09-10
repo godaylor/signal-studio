@@ -24,7 +24,7 @@ describe('relationalQuery', () => {
     await relationalQuery({
       websiteId: 'website-1',
       sessionId: 'session-1',
-      sessionData: { plan: 'pro' },
+      sessionData: { plan: 'pro', seats: 3 },
       distinctId: 'distinct-1',
       createdAt,
     });
@@ -34,26 +34,32 @@ describe('relationalQuery', () => {
     const [query, params, tag] = writeRawQueryMock.mock.calls[0];
 
     expect(query).toContain('insert into session_data');
+    expect(query).toContain('jsonb_to_recordset({{rows}}::jsonb)');
     expect(query).toContain('on conflict (session_id, data_key)');
     expect(query).toContain('do update set');
     expect(query).toContain('coalesce({{createdAt}}, now())');
     expect(query).toContain('created_at = coalesce({{createdAt}}, session_data.created_at)');
-    expect(query).toContain('{{id}}');
-    expect(query).toContain('{{websiteId}}');
-    expect(query).toContain('{{sessionId}}');
-    expect(query).toContain('{{dataKey}}');
     expect(params).toEqual({
-      id: expect.any(String),
       websiteId: 'website-1',
       sessionId: 'session-1',
-      dataKey: 'plan',
-      stringValue: 'pro',
-      numberValue: null,
-      dateValue: null,
-      dataType: DATA_TYPE.string,
       distinctId: 'distinct-1',
       createdAt,
+      rows: expect.any(String),
     });
+    expect(JSON.parse(params.rows)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          data_key: 'plan',
+          string_value: 'pro',
+          data_type: DATA_TYPE.string,
+        }),
+        expect.objectContaining({
+          data_key: 'seats',
+          number_value: 3,
+          data_type: DATA_TYPE.number,
+        }),
+      ]),
+    );
     expect(tag).toBe('saveSessionData');
   });
 
@@ -70,5 +76,16 @@ describe('relationalQuery', () => {
     expect(query).toContain('coalesce({{createdAt}}, now())');
     expect(query).toContain('created_at = coalesce({{createdAt}}, session_data.created_at)');
     expect(params.createdAt).toBeUndefined();
+  });
+
+  test('does not issue a query for empty flattened input', async () => {
+    await relationalQuery({
+      websiteId: 'website-1',
+      sessionId: 'session-1',
+      sessionData: {},
+      distinctId: 'distinct-1',
+    });
+
+    expect(writeRawQueryMock).not.toHaveBeenCalled();
   });
 });

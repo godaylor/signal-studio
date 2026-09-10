@@ -78,6 +78,19 @@ export interface EventData {
   [key: string]: EventDataValue;
 }
 
+export interface IdentifyAccount {
+  id: string;
+  name?: string;
+  traits?: EventData;
+}
+
+export interface VersionedIdentity {
+  identityVersion: 1;
+  id: string;
+  data?: EventData;
+  account?: IdentifyAccount;
+}
+
 export type EventProperties = {
   /**
    * NOTE: event names will be truncated past 50 characters
@@ -164,6 +177,11 @@ export type UmamiTracker = {
      * ```
      */
     (id: string, data?: EventData): Promise<void>;
+
+    /**
+     * Identify a tracked user and optional account through the versioned Signal Studio contract.
+     */
+    (identity: VersionedIdentity): Promise<void>;
 
     /**
      * Associate data with the current visitor. An `id` string sets the Distinct ID.
@@ -439,10 +457,11 @@ type MetricEntry = PerformanceEntry & {
   };
 
   const identify = (
-    id: string | (EventData & { id?: string }),
+    id: string | VersionedIdentity | (EventData & { id?: string }),
     data?: EventData,
   ): Promise<void> => {
     const nextIdentity = typeof id === 'string' ? id : id.id;
+    const versioned = typeof id === 'object' && id.identityVersion === 1 ? id : null;
 
     if (nextIdentity !== undefined) {
       identity = nextIdentity;
@@ -452,7 +471,9 @@ type MetricEntry = PerformanceEntry & {
     return send(
       {
         ...getPayload(),
-        data: typeof id === 'object' ? id : data,
+        ...(versioned
+          ? { identityVersion: 1, id: versioned.id, data: versioned.data, account: versioned.account }
+          : { data: typeof id === 'object' ? id : data }),
       },
       'identify',
     );

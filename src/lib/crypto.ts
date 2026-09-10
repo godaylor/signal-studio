@@ -54,7 +54,14 @@ export function md5(...args: string[]) {
 }
 
 export function secret() {
-  return hash(process.env.APP_SECRET || process.env.DATABASE_URL);
+  const appSecret = process.env.APP_SECRET;
+  const explicitDevelopmentMode = ['development', 'test'].includes(process.env.NODE_ENV || '');
+
+  if (!appSecret && !explicitDevelopmentMode) {
+    throw new Error('APP_SECRET is required outside explicit development and test modes.');
+  }
+
+  return hash(appSecret || 'signal-studio-explicit-development-secret');
 }
 
 export function uuid(...args: any) {

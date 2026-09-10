@@ -2,6 +2,7 @@ import { parseRequest } from '@/lib/request';
 import { ok, unauthorized } from '@/lib/response';
 import { canUpdateWebsite } from '@/permissions';
 import { resetWebsite } from '@/queries/prisma';
+import { LifecycleError } from '@/server/lifecycle/contracts';
 
 export async function POST(
   request: Request,
@@ -19,7 +20,10 @@ export async function POST(
     return unauthorized();
   }
 
-  await resetWebsite(websiteId);
+  try { await resetWebsite(websiteId); }
+  catch (error) {
+    return Response.json({ error: { code: error instanceof LifecycleError ? error.code : 'reset-unavailable' } }, { status: error instanceof LifecycleError ? error.status : 500 });
+  }
 
   return ok();
 }

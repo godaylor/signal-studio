@@ -7,6 +7,7 @@ const FUNCTION_NAME = 'getEventStats';
 
 export interface EventStatsParameters {
   limit?: number | string;
+  eventName?: string;
 }
 
 interface WebsiteEventMetric {
@@ -19,17 +20,17 @@ export async function getEventStats(
   ...args: [websiteId: string, parameters: EventStatsParameters, filters: QueryFilters]
 ): Promise<WebsiteEventMetric[]> {
   return runQuery({
-    [PRISMA]: () => relationalQuery(...args),
+    [PRISMA]: () => getEventStatsPostgresql(...args),
     [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
-async function relationalQuery(
+export async function getEventStatsPostgresql(
   websiteId: string,
   parameters: EventStatsParameters,
   filters: QueryFilters,
 ) {
-  const { limit } = parameters;
+  const { limit, eventName } = parameters;
   const { timezone = 'utc', unit = 'day' } = filters;
   const { rawQuery, getDateSQL, parseFilters } = prisma;
   const { filterQuery, cohortQuery, joinSessionQuery, queryParams } = parseFilters({
@@ -42,13 +43,15 @@ async function relationalQuery(
     select event_name
     from website_event
     where website_id = {{websiteId::uuid}}
-      and created_at between {{startDate}} and {{endDate}}
+      and created_at >= {{startDate}}
+      and created_at < {{endDate}}
       and event_type = 2
     group by event_name
     order by count(*) desc
     limit ${limit}
   )`
     : '';
+  const eventNameQuery = eventName ? 'and website_event.event_name = {{eventName}}' : '';
 
   return rawQuery(
     `
@@ -60,14 +63,16 @@ async function relationalQuery(
     ${cohortQuery}
     ${joinSessionQuery}
     where website_event.website_id = {{websiteId::uuid}}
-      and website_event.created_at between {{startDate}} and {{endDate}}
+      and website_event.created_at >= {{startDate}}
+      and website_event.created_at < {{endDate}}
       and website_event.event_type = 2
+      ${eventNameQuery}
       ${filterQuery}
       ${limitQuery}
     group by 1, 2
     order by 2
     `,
-    queryParams,
+    { ...queryParams, ...(eventName ? { eventName } : {}) },
     FUNCTION_NAME,
   );
 }

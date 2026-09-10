@@ -5,10 +5,34 @@ import redis from '@/lib/redis';
 import { sanitizeSortFilters } from '@/lib/sort';
 import type { QueryFilters } from '@/lib/types';
 import { z } from 'zod';
+import { removeArtifact } from '@/server/exports/storage';
+import { LifecycleError } from '@/server/lifecycle/contracts';
 
 const WEBSITE_SORT_FIELDS = ['name', 'domain', 'createdAt'] as const;
 
 async function deleteWebsiteDependentData(tx: any, websiteId: string) {
+  // The parent row lock also blocks new ExportJob FK inserts until deletion ends.
+  // Existing queued jobs are locked; running jobs must finish before a reset.
+  await tx.$queryRaw`SELECT website_id FROM website WHERE website_id=${websiteId}::uuid FOR UPDATE`;
+  const lifecycle = await tx.$queryRaw`SELECT id FROM data_lifecycle_job WHERE project_id=${websiteId}::uuid AND status IN ('queued','running') LIMIT 1`;
+  if (lifecycle.length) throw new LifecycleError('lifecycle-already-active', 409);
+  const jobs = await tx.$queryRaw`SELECT id, artifact_key, status FROM export_job WHERE project_id=${websiteId}::uuid ORDER BY id LIMIT 1001 FOR UPDATE`;
+  if (jobs.length > 1000 || jobs.some(job => job.status === 'running')) throw new LifecycleError('lifecycle-use-batched-cleanup', 409);
+  for (const job of jobs) if (job.artifact_key) await removeArtifact(job.artifact_key);
+  await tx.exportJob.deleteMany({ where: { projectId: websiteId } });
+
+  await tx.accountMembership.deleteMany({
+    where: { projectId: websiteId },
+  });
+
+  await tx.trackedUser.deleteMany({
+    where: { projectId: websiteId },
+  });
+
+  await tx.trackedAccount.deleteMany({
+    where: { projectId: websiteId },
+  });
+
   await tx.sessionReplaySaved.deleteMany({
     where: { websiteId },
   });
