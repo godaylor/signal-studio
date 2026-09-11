@@ -1,19 +1,21 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useConfig, useLoginQuery, useUserWebsitesQuery } from '@/components/hooks';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
+import { CreateProject } from '@/features/sources/CreateProject';
 import { getStudioPath } from './navigation';
 import styles from './StudioPage.module.css';
 import { StudioLoadingScreen, StudioState } from './StudioState';
 
-export function StudioEntry() {
+export function StudioEntry({ createNew = false }: { createNew?: boolean }) {
   const router = useRouter();
+  const [creating, setCreating] = useState(false);
   const config = useConfig();
   const { t } = useStudioLocale();
   const { user, isLoading: isLoginLoading, error: loginError } = useLoginQuery();
-  const { data, isLoading, error } = useUserWebsitesQuery(
+  const { data, isLoading, error, refetch } = useUserWebsitesQuery(
     { userId: user?.id },
     { pageSize: 100, includeTeams: true },
     { enabled: !!user },
@@ -29,12 +31,12 @@ export function StudioEntry() {
   }, [config, loginError]);
 
   useEffect(() => {
-    if (projects[0]) {
+    if (projects[0] && !createNew && !creating) {
       router.replace(getStudioPath(projects[0].id, 'home'));
     }
-  }, [projects, router]);
+  }, [projects, router, createNew, creating]);
 
-  if (!config || isLoginLoading || isLoading || projects[0]) {
+  if (!config || isLoginLoading || isLoading || (projects[0] && !createNew && !creating)) {
     return <StudioLoadingScreen />;
   }
 
@@ -42,9 +44,21 @@ export function StudioEntry() {
     return <StudioLoadingScreen />;
   }
 
+  if (!error)
+    return (
+      <main className={styles.fullPageState}>
+        <CreateProject onStart={() => setCreating(true)} />
+      </main>
+    );
+
   return (
     <main className={styles.fullPageState}>
       <StudioState
+        action={
+          <button type="button" onClick={() => refetch()}>
+            {t('Retry', 'Повторить')}
+          </button>
+        }
         variant={error ? 'error' : 'empty'}
         title={
           error

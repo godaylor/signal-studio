@@ -1,0 +1,126 @@
+.page,
+.create {
+  color: var(--studio-ink, #172033);
+  width: min(100%, 1100px);
+  margin-inline: auto;
+  padding: clamp(24px, 4vw, 56px);
+}
+.create {
+  max-width: 680px;
+}
+.page h1,
+.create h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  margin: 8px 0 16px;
+}
+.page p,
+.create p {
+  color: var(--studio-ink-muted, #5f6d82);
+  line-height: 1.6;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.form {
+  display: grid;
+  gap: 12px;
+  margin-top: 32px;
+}
+.form label {
+  font-weight: 600;
+}
+.form input {
+  padding: 12px;
+  border: 1px solid var(--studio-grid, #c6d1df);
+  border-radius: 6px;
+  background: var(--studio-surface, #fff);
+  color: inherit;
+  min-width: 0;
+  font: inherit;
+}
+.form p {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+.page button,
+.form button,
+.link {
+  padding: 11px 16px;
+  border: 1px solid var(--studio-grid, #c6d1df);
+  border-radius: 6px;
+  background: var(--studio-surface, #fff);
+  color: var(--studio-ink, #172033);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.form button {
+  background: #2451d0;
+  border-color: #2451d0;
+  color: white;
+}
+.page button:disabled,
+.form button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.page :focus-visible,
+.create :focus-visible {
+  outline: 3px solid var(--studio-focus, #1746d1);
+  outline-offset: 3px;
+}
+.steps {
+  list-style: none;
+  padding: 0;
+  margin-top: 32px;
+  border-left: 2px solid var(--studio-cobalt, #2f62f2);
+}
+.steps > li {
+  padding: 0 0 32px 24px;
+}
+.steps h2 {
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+.code {
+  width: 100%;
+  min-height: 94px;
+  resize: vertical;
+  padding: 16px;
+  border: 1px solid var(--studio-grid, #c6d1df);
+  border-radius: 6px;
+  color: var(--studio-ink, #172033);
+  background: var(--studio-surface, #fff);
+  font:
+    13px / 1.7 ui-monospace,
+    monospace;
+  overflow-wrap: anywhere;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.status {
+  padding: 16px 20px;
+  background: var(--studio-surface, #fff);
+  border: 1px solid var(--studio-grid, #dce4ed);
+  border-radius: 8px;
+}
+@media (max-width: 600px) {
+  .page,
+  .create {
+    padding: 24px 18px;
+  }
+  .steps > li {
+    padding-left: 16px;
+  }
+}

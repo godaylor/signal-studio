@@ -98,7 +98,8 @@ function metricCte(query: AnalysisQueryV1, params: Record<string, unknown>) {
       ? 'property.amount'
       : '1';
   if (!revenue && ['uniqueUsers', 'uniqueAccounts', 'sessions'].includes(query.measure.aggregation)) {
-    const sessionFilters = query.filters.some(filter => ['browser', 'os', 'device', 'country'].includes(filter.field));
+    const sessionFilters = query.filters.some(filter => ['browser', 'os', 'device', 'country'].includes(filter.field)) ||
+      (query.mode === 'breakdown' && ['browser', 'os', 'device', 'country'].includes(query.breakdown!.field));
     return `matching_sessions as materialized (
       select distinct ${label} as label, we.session_id
       from website_event we
@@ -117,12 +118,9 @@ function metricCte(query: AnalysisQueryV1, params: Record<string, unknown>) {
     )`;
   }
   return `facts as (
-    select ${label} as label, tu.tracked_user_id as user_id,
-      membership.tracked_account_id as account_id, we.session_id, ${amount} as amount
+    select ${label} as label, we.session_id, ${amount} as amount
     from ${revenue ? 'revenue r join website_event we on we.website_id = r.website_id and we.event_id = r.event_id and we.session_id = r.session_id' : 'website_event we'}
     join session s on s.session_id = we.session_id and s.website_id = we.website_id
-    left join tracked_user tu on tu.project_id = we.website_id and tu.external_id = nullif(s.distinct_id, '')
-    left join account_membership membership on membership.project_id = tu.project_id and membership.tracked_user_id = tu.tracked_user_id
     ${
       !revenue && ['sum', 'average'].includes(query.measure.aggregation)
         ? `left join lateral (

@@ -1,6 +1,6 @@
 'use client';
 
-import { Database, Scale } from 'lucide-react';
+import { Scale } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useWebsiteQuery } from '@/components/hooks';
@@ -13,6 +13,7 @@ import { ExploreWorkspace } from '@/features/explore/ExploreWorkspace';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { LiveWorkspace } from '@/features/live/LiveWorkspace';
 import { HomeWorkspace } from '@/features/home/HomeWorkspace';
+import { SourcesWorkspace } from '@/features/sources/SourcesWorkspace';
 import { getStudioPath } from './navigation';
 import styles from './StudioPage.module.css';
 import { StudioState } from './StudioState';
@@ -105,34 +106,7 @@ export function StudioPage({ section, projectId }: { section: string; projectId:
 
   if (section === 'sources') {
     if (!access.data?.capabilities.manageSources) return <PermissionState projectId={projectId} />;
-    return (
-      <div className={styles.page}>
-        <PageHeading
-          eyebrow={t('Data management', 'Управление данными')}
-          title={t('Sources', 'Источники')}
-          description={t(
-            'Website and tracker origins feed a Project; they are not the product navigation model.',
-            'Сайт и источники трекера наполняют проект данными, но не являются моделью продуктовой навигации.',
-          )}
-        />
-        <section className={styles.sourceRow}>
-          <span className={styles.sourceIcon}>
-            <Database aria-hidden="true" size={20} />
-          </span>
-          <div>
-            <p className={styles.eyebrow}>{t('Connected source', 'Подключённый источник')}</p>
-            <h2>{projectName}</h2>
-            <p>
-              {t(
-                'The existing Website record currently provides the one-to-one Project facade.',
-                'Существующая запись Website сейчас обеспечивает однозначное соответствие проекту.',
-              )}
-            </p>
-          </div>
-          <span className={styles.sourceStatus}>{t('Available', 'Доступен')}</span>
-        </section>
-      </div>
-    );
+    return <SourcesWorkspace projectId={projectId} projectName={projectName} domain={project?.domain} />;
   }
 
   if (section === 'legal') {

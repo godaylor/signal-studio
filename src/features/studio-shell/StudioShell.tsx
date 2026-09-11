@@ -1,7 +1,7 @@
 'use client';
 
 import { useTheme } from '@umami/react-zen';
-import { Command, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun } from 'lucide-react';
+import { Command, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -284,6 +284,9 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
               aria-label={t('Profile settings', 'Настройки профиля')}
             >
               {user.username.slice(0, 1).toLocaleUpperCase()}
+            </Link>
+            <Link className={styles.iconButton} href="/logout" aria-label={t('Log out', 'Выйти')}>
+              <LogOut aria-hidden="true" size={18} />
             </Link>
           </div>
         </header>

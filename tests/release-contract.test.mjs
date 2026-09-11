@@ -16,7 +16,7 @@ test('publication depends on reusable CI with all quality and image gates', () =
   assert.ok(ci.on.includes('workflow_call'));
   const commands = ci.jobs.verify.steps.map(step => step.run || '').join('\n');
   for (const gate of ['pnpm db:migrate', 'pnpm typecheck', 'pnpm lint', 'pnpm test', 'pnpm test:integration', 'pnpm build', 'run-release-e2e.js', 'verify-release-inventory.js']) assert.ok(commands.includes(gate), gate);
-  assert.deepEqual(ci.jobs.image.strategy.matrix.target, ['runner', 'worker', 'migration']);
+  assert.deepEqual(ci.jobs.image.strategy.matrix.target, ['runner', 'worker', 'migration', 'hosted']);
   assert.equal(ci.jobs.image.needs, 'verify');
   assert.match(read('next.config.ts'), /ignoreBuildErrors: false/);
   assert.equal(existsSync('app.json'), false);

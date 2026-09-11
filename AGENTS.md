@@ -6,13 +6,16 @@ This repository is an MIT-licensed fork/transformation of Umami. Read this file 
 
 - M0–M16 portfolio implementation exists in the working tree; historical local
   acceptance is recorded in docs/M16_FINAL_REPORT.md.
-- Publication hardening follows FINAL_AUDIT.md PUB-01–PUB-09 and the explicitly
-  authorized 2026-09-10 task. No commit, push or deployment is authorized.
+- The 2026-09-11 product-completion task explicitly authorizes implementation,
+  owned-repository commits/push and public deployment. Paid account creation and
+  credentials still require the user's actual account; do not invent a live URL.
+- M17 covers first-run/source setup, independent event analytics, small-host
+  app/worker packaging and portfolio publication. See docs/PRODUCT_RELEASE.md.
 - docs/REQUIREMENTS_TRACEABILITY.md defines portfolio-v1 scope and deferred work.
   Deferred requirements are not implemented or passed.
 - Running demo on 32109/32110 is a preserved older image; source fixes must not be
   described as deployed there until an explicitly authorized rollout happens.
-- Current release evidence is in docs/RELEASE_CLOSURE_REPORT.md. Historical GREEN
+- Current work supersedes historical publication restrictions in docs/RELEASE_CLOSURE_REPORT.md. Historical GREEN
   does not mean public deployment, remote CI or manual accessibility passed.
 
 ## Required reading order

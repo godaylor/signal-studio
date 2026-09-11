@@ -1486,3 +1486,23 @@ external gates: docs/RELEASE_CLOSURE_REPORT.md and FINAL_AUDIT.md.
 Definition of done: local changed-scope checks pass and candidate packaging is verified;
 reports separate source-ready, preserved installed demo, deferred functionality and
 external publication gates. Do not equate an unchanged running image with patched source.
+
+## M17 — Working product and public hosting (2026-09-11)
+
+Explicitly authorized by the user's product-completion request. Scope: first-run
+project creation and source setup; Studio entry/login/logout UX; independent event
+count SQL and six breakdown dimensions; economical app/worker deployment; owned
+GitHub publication and truthful portfolio handoff. Existing work and other projects'
+processes, networks, volumes and containers must remain untouched.
+
+Definition of done:
+- A signed-in user creates a project, installs tracking, receives real events,
+  analyzes them, saves/reopens an Insight, uses Dashboards/Audiences and exports.
+- Changed SQL passes golden PostgreSQL tests for scope, dates, filters and counts.
+- App/worker hosted image is non-root at runtime and uses durable shared artifacts.
+- Typecheck, lint, relevant regression, production build and critical E2E pass.
+- Owned main, README, provenance and handoff reflect actual source and deployment.
+- Public HTTPS workflow is verified only after a host/account is provisioned.
+
+Public hosting/account remains an external prerequisite, not a passed gate.
+Current evidence: docs/PRODUCT_RELEASE.md.

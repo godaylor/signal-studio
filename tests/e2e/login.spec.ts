@@ -3,7 +3,7 @@ import { logout, umamiUser } from './helpers';
 
 test.describe('Login tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/login?locale=en-US');
   });
 
   test('logs user in with correct credentials and logs user out', async ({ page }) => {
@@ -11,7 +11,7 @@ test.describe('Login tests', () => {
     await page.getByTestId('input-password').locator('input').fill(umamiUser.password);
     await page.getByTestId('button-submit').click();
 
-    await expect(page).toHaveURL(/\/websites$/);
+    await expect(page).toHaveURL(/\/studio(?:\/[^/]+\/home)?$/);
 
     await logout(page);
   });

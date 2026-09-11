@@ -1,0 +1,94 @@
+.screen {
+  min-height: 100dvh;
+  padding: clamp(24px, 5vw, 72px);
+  background: var(--base50, #f5f7fa);
+  color: var(--base900, #172033);
+  display: grid;
+  place-items: center;
+}
+.layout {
+  width: min(1080px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: clamp(40px, 8vw, 120px);
+  align-items: center;
+}
+.intro > p:first-child {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 700;
+  color: #2451d0;
+}
+.intro h2 {
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  font-weight: 650;
+  margin: 20px 0;
+}
+.intro p {
+  font-size: 16px;
+  line-height: 1.65;
+  max-width: 470px;
+}
+.spine {
+  margin: 36px 0;
+  border-left: 3px solid #2f62f2;
+  padding-left: 24px;
+  list-style: none;
+  display: grid;
+  gap: 20px;
+}
+.spine li {
+  display: grid;
+  gap: 3px;
+}
+.spine span {
+  font-size: 13px;
+}
+.form {
+  padding: 32px 24px;
+  background: var(--base0, white);
+  border: 1px solid var(--base200, #dce4ed);
+  border-radius: 12px;
+}
+.form > p {
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 24px 0 0;
+}
+.form button[type='submit'] {
+  background: #2451d0;
+  color: #ffffff;
+  min-height: 44px;
+}
+.form button[data-size='icon-xs'] {
+  min-width: 32px;
+  min-height: 32px;
+}
+.legal {
+  margin-top: 36px;
+  font-size: 12px;
+}
+.legal a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    gap: 24px;
+  }
+  .intro h2 {
+    font-size: 32px;
+  }
+  .spine {
+    display: none;
+  }
+  .form {
+    padding: 24px 12px;
+  }
+}

@@ -607,6 +607,10 @@ function QueryBlockEditor({
               >
                 <option value="eventName">{t('Event name', 'Имя события')}</option>
                 <option value="urlPath">{t('URL path', 'Путь URL')}</option>
+                <option value="browser">{t('Browser', 'Браузер')}</option>
+                <option value="os">{t('Operating system', 'Операционная система')}</option>
+                <option value="device">{t('Device', 'Устройство')}</option>
+                <option value="country">{t('Country', 'Страна')}</option>
               </select>
             </label>
             <label>

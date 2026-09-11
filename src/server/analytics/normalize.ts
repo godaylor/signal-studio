@@ -8,7 +8,7 @@ import {
 import { AnalysisValidationError } from './errors';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const supportedBreakdowns = new Set(['eventName', 'urlPath']);
+const supportedBreakdowns = new Set(['eventName', 'urlPath', 'browser', 'os', 'device', 'country']);
 const supportedFunnelBreakdowns = new Set(['browser', 'os', 'device', 'country']);
 const supportedFilterFields = new Set([
   'eventName',

@@ -35,10 +35,10 @@ export function LoginForm() {
   };
 
   return (
-    <Column justifyContent="center" alignItems="center" gap="6">
+    <Column justifyContent="center" alignItems="center" gap="6" style={{ width: '100%' }}>
       <LanguageButton />
       <Heading>Signal Studio</Heading>
-      <Form onSubmit={handleSubmit} error={getErrorMessage(error)} style={{ minWidth: 300 }}>
+      <Form onSubmit={handleSubmit} error={getErrorMessage(error)} style={{ width: '100%' }}>
         <FormField
           label={t(labels.username)}
           data-test="input-username"

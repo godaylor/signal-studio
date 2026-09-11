@@ -1,62 +1,67 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { normalizeAnalysisQuery } from '../normalize';
 import { validAnalysisQuery } from '../test-fixtures';
+import { buildEventStatement } from './event-postgresql';
 import { postgresqlAnalysisAdapter } from './postgresql';
 
-const { eventStatsMock, eventMetricsMock } = vi.hoisted(() => ({
-  eventStatsMock: vi.fn(),
-  eventMetricsMock: vi.fn(),
+const { read } = vi.hoisted(() => ({ read: vi.fn() }));
+vi.mock('@/lib/prisma', () => ({
+  default: {
+    client: {
+      $transaction: (fn: (tx: unknown) => unknown) =>
+        fn({ $executeRawUnsafe: vi.fn(), $queryRawUnsafe: read }),
+    },
+  },
 }));
 
-vi.mock('@/queries/sql/events/getEventStats', () => ({
-  getEventStatsPostgresql: eventStatsMock,
-}));
-vi.mock('@/queries/sql/events/getEventMetrics', () => ({
-  getEventMetricsPostgresql: eventMetricsMock,
-}));
-
-describe('PostgreSQL AnalysisQuery adapter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('independent PostgreSQL event analytics', () => {
+  test('binds event names, literal filters, timezone and half-open bounds', () => {
+    const query = normalizeAnalysisQuery(
+      validAnalysisQuery({
+        filters: [{ field: 'urlPath', operator: 'contains', value: "%' OR true --" }],
+      }),
+    );
+    const statement = buildEventStatement(query);
+    expect(statement.sql).not.toContain("%' OR true --");
+    expect(statement.values).toContain("%' OR true --");
+    expect(statement.sql).toContain('strpos(');
+    expect(statement.sql).toMatch(/created_at >= \$\d+/);
+    expect(statement.sql).toMatch(/created_at < \$\d+/);
+    expect(statement.values).toContainEqual(new Date(query.range.endAt));
+    expect(statement.sql).not.toContain('join session');
   });
-
-  test('wraps the legacy trend query and keeps the event measure separate from filters', async () => {
-    eventStatsMock.mockResolvedValue([
-      { x: 'signup', t: '2026-03-07 00:00:00', y: 2n },
-      { x: 'purchase', t: '2026-03-07 00:00:00', y: 9n },
-      { x: 'signup', t: '2026-03-08 00:00:00', y: 1n },
-    ]);
-    const query = normalizeAnalysisQuery(validAnalysisQuery());
-    const result = await postgresqlAnalysisAdapter.execute(query);
-
-    expect(result.rows).toEqual([
-      { bucket: '2026-03-07 00:00:00', value: 2 },
-      { bucket: '2026-03-08 00:00:00', value: 1 },
-    ]);
-    expect(eventStatsMock.mock.calls[0][1]).toEqual({ eventName: 'signup' });
-    const filters = eventStatsMock.mock.calls[0][2];
-    expect(filters.startDate.toISOString()).toBe(query.range.startAt);
-    expect(filters.endDate.toISOString()).toBe(query.range.endAt);
-    expect(filters.event).toBeUndefined();
-  });
-
-  test('uses whitelisted type and bounded limit for breakdown', async () => {
-    eventMetricsMock.mockResolvedValue([{ x: '/app/onboarding', y: 4n }]);
+  test('bounds breakdowns and joins session dimensions without identity fanout', async () => {
     const query = normalizeAnalysisQuery(
       validAnalysisQuery({
         mode: 'breakdown',
-        breakdown: { field: 'urlPath', limit: 20 },
-        comparison: 'none',
+        breakdown: { field: 'browser', limit: 20 },
         visualization: 'table',
       }),
     );
-    const result = await postgresqlAnalysisAdapter.execute(query);
-
-    expect(result.rows).toEqual([{ key: '/app/onboarding', value: 4 }]);
-    expect(eventMetricsMock).toHaveBeenCalledWith(
-      query.projectId,
-      { type: 'path', limit: '20', offset: '0' },
-      expect.objectContaining({ event: 'eq.signup' }),
+    const statement = buildEventStatement(query);
+    expect(statement.sql).toContain('s.website_id = e.website_id');
+    expect(statement.sql).not.toContain('account_membership');
+    expect(statement.values.at(-1)).toBe(20);
+    read.mockResolvedValue([{ label: 'Chrome', value: 4n }]);
+    expect((await postgresqlAnalysisAdapter.execute(query)).rows).toEqual([
+      { key: 'Chrome', value: 4 },
+    ]);
+  });
+  test('keeps a selected event outside OR filters and maps trend values', async () => {
+    const query = normalizeAnalysisQuery(
+      validAnalysisQuery({
+        match: 'any',
+        filters: [
+          { field: 'browser', operator: 'equals', value: 'Chrome' },
+          { field: 'country', operator: 'equals', value: 'US' },
+        ],
+      }),
     );
+    const statement = buildEventStatement(query);
+    expect(statement.sql).toMatch(/e.event_name = \$\d+ AND \(.+ OR .+\)/);
+    read.mockResolvedValue([{ label: '2026-03-07 00:00:00', value: 2n }]);
+    expect((await postgresqlAnalysisAdapter.execute(query)).rows).toEqual([
+      { bucket: '2026-03-07 00:00:00', value: 2 },
+    ]);
   });
 });

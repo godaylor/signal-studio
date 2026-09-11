@@ -51,8 +51,12 @@ export async function loginPage(page: Page, request: APIRequestContext): Promise
 }
 
 export async function logout(page: Page) {
-  await page.getByRole('button', { name: umamiUser.username }).first().click();
-  await page.getByRole('menuitem', { name: /logout/i }).click();
+  if (page.url().includes('/studio')) {
+    await page.getByRole('link', { name: 'Log out', exact: true }).click();
+  } else {
+    await page.getByRole('button', { name: umamiUser.username }).first().click();
+    await page.getByRole('menuitem', { name: /logout/i }).click();
+  }
   await expect(page).toHaveURL(/\/login$/);
 }
 

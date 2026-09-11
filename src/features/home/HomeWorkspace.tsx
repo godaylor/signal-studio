@@ -71,6 +71,7 @@ export function HomeWorkspace({
           <section className={styles.health} aria-labelledby="home-health">
             <div>
               <h2 id="home-health">{t('Data health', 'Состояние данных')}</h2>
+              {data.health.state === 'empty' ? <Link href={getStudioPath(projectId, 'sources')}>{t('Connect your website to get started', 'Подключите сайт, чтобы начать')}</Link> : null}
               <p>
                 {data.health.state === 'empty'
                   ? t('No observed events yet', 'События ещё не поступали')

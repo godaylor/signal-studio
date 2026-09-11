@@ -82,3 +82,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/THIRD_PARTY_NOTICES.md ./THIRD_PA
 USER nextjs
 EXPOSE 3000
 CMD ["sh", "scripts/start-docker.sh"]
+
+# Small-host deployment: one billed service runs app and queue worker together.
+# Migration dependencies are available for the provider's explicit pre-deploy step.
+FROM migration AS hosted
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV SIGNAL_STUDIO_BIND_HOST=0.0.0.0
+ENV EXPORT_STORAGE_PATH=/app/exports
+ENV PORT=3000
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./.next/standalone
+USER nextjs
+EXPOSE 3000
+CMD ["node", "scripts/start-hosted.js"]

@@ -58,7 +58,7 @@ describe('AnalysisQuery PostgreSQL golden reference', () => {
     );
   });
 
-  test('returns the exact bounded breakdown through the legacy PostgreSQL kernel', async () => {
+  test('returns the exact bounded breakdown through the independent event executor', async () => {
     const service = createAnalysisQueryService({ telemetry: vi.fn() });
     const result = await service.execute({
       query: query('breakdown'),

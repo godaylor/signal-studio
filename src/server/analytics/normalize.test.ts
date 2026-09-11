@@ -69,14 +69,6 @@ describe('normalizeAnalysisQuery', () => {
       code: 'analysis-aggregation-unsupported',
     },
     {
-      name: 'unsupported cardinality',
-      input: validAnalysisQuery({
-        mode: 'breakdown',
-        breakdown: { field: 'browser', limit: 10 },
-      }),
-      code: 'analysis-breakdown-unsupported',
-    },
-    {
       name: 'unsupported operator',
       input: validAnalysisQuery({
         filters: [{ field: 'country', operator: 'contains', value: 'U' }],

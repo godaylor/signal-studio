@@ -148,6 +148,14 @@ describe('M16 Home metric golden PostgreSQL', () => {
         .total.value,
     ).toBe(5);
   });
+  test('breaks distinct users down by session dimensions without a filter on that dimension', async () => {
+    const result = await executeMetricPostgresql(query(
+      { source: 'event', key: '*', aggregation: 'uniqueUsers' },
+      { mode: 'breakdown', breakdown: { field: 'country', limit: 10 } },
+    ));
+    expect(result.total.value).toBe(3);
+    expect(result.rows).toEqual([{ key: 'US', value: 2 }, { key: 'DE', value: 1 }]);
+  });
   test('ordered lifecycle has exact denominators and half-open retention boundaries', async () => {
     const activation = await executeMetricPostgresql(
       query({ source: 'lifecycle', key: 'activated', aggregation: 'count' }),
