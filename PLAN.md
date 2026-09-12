@@ -1506,3 +1506,11 @@ Definition of done:
 
 Public hosting/account remains an external prerequisite, not a passed gate.
 Current evidence: docs/PRODUCT_RELEASE.md.
+# M18 — Free serverless deployment (2026-09-12)
+
+Explicit user scope: Vercel Hobby + Supabase Free, no paid resources or upgrades.
+Preserve Studio/auth/analytics. Replace durable local export files with private
+Supabase Storage in this profile and persistent worker with bounded request/cron
+invocations. Configure pooled PostgreSQL, protect database tables from Data API,
+test storage/auth/queue recovery and document free-tier limits. Public completion
+requires actual provider access, migrations, storage and end-to-end acceptance.

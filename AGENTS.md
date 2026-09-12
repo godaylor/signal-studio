@@ -4,6 +4,10 @@ This repository is an MIT-licensed fork/transformation of Umami. Read this file 
 
 ## Current checkpoint
 
+- M18 (2026-09-12) replaces Railway with Vercel Hobby + Supabase Free. Budget $0;
+  no paid resources/upgrades. Preserve existing auth and product services. See
+  docs/FREE_DEPLOYMENT.md. Hosted provider acceptance remains required.
+
 - M0–M16 portfolio implementation exists in the working tree; historical local
   acceptance is recorded in docs/M16_FINAL_REPORT.md.
 - The 2026-09-11 product-completion task explicitly authorizes implementation,

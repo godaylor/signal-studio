@@ -4,6 +4,10 @@
 
 **Live:** pending hosting account setup; do not present a localhost URL as public.
 
+Current hosting target: **Vercel Hobby + Supabase Free**, $0 within provider quotas.
+No paid Railway deployment is authorized. See [free deployment](docs/FREE_DEPLOYMENT.md).
+The readiness scores below describe the M17 checkpoint, not a completed M18 rollout.
+
 ## Portfolio copy
 
 Signal Studio is a product intelligence workspace for PLG teams. It turns raw

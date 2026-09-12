@@ -1,9 +1,13 @@
-# Public deployment
+# Historical paid-host deployment — not authorized
+
+The user selected a $0 budget on 2026-09-12. Use [Vercel Hobby + Supabase Free](FREE_DEPLOYMENT.md).
+The Railway instructions below are retained only as historical/self-hosting
+reference. Do not create a Railway paid resource or upgrade a plan.
 
 The deployment target is the real Next.js application, PostgreSQL and the export/
 retention worker. No static substitute is used. A public URL is not yet provisioned.
 
-## Recommended small-host topology
+## Previously prepared small-host topology
 
 Use one **Railway Hobby project** with two services:
 

@@ -140,7 +140,7 @@ const metadata = {
   revision,
   sourceSha256,
   fingerprintVersion: 2,
-  buildProfile: existsSync('src/proxy.ts') ? 'docker-proxy' : 'native',
+  buildProfile: process.env.VERCEL ? 'vercel-serverless' : existsSync('src/proxy.ts') ? 'docker-proxy' : 'native',
   sourceState: 'Content fingerprint includes uncommitted source; revision alone is not the build identity.',
   lockfileSha256: sha(readFileSync('pnpm-lock.yaml')),
   licenseSha256: sha(readFileSync('LICENSE')),

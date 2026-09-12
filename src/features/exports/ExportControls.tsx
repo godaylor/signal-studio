@@ -143,6 +143,9 @@ export function ExportControls({
                     {t('Expires', 'Срок до')}: {new Date(job.expiresAt).toLocaleString(locale)}
                   </span>
                   {job.errorCode ? <code>{job.errorCode}</code> : null}
+                  {['export-size-limit', 'export-row-limit', 'export-time-limit'].includes(job.errorCode ?? '') ? (
+                    <p>{t('This export is too large. Narrow the date range or audience filters and export each part separately.', 'Экспорт слишком большой. Сократите период или уточните фильтры аудитории и выгрузите данные частями.')}</p>
+                  ) : null}
                   {job.status === 'completed' ? (
                     <button
                       type="button"

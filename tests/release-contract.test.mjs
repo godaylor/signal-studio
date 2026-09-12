@@ -18,6 +18,11 @@ test('publication depends on reusable CI with all quality and image gates', () =
   for (const gate of ['pnpm db:migrate', 'pnpm typecheck', 'pnpm lint', 'pnpm test', 'pnpm test:integration', 'pnpm build', 'run-release-e2e.js', 'verify-release-inventory.js']) assert.ok(commands.includes(gate), gate);
   assert.deepEqual(ci.jobs.image.strategy.matrix.target, ['runner', 'worker', 'migration', 'hosted']);
   assert.equal(ci.jobs.image.needs, 'verify');
+  assert.equal(ci.jobs.serverless.env.SIGNAL_STUDIO_SERVERLESS, '1');
+  const serverlessCommands = ci.jobs.serverless.steps.map(step => step.run || '').join('\n');
+  assert.ok(serverlessCommands.includes('pnpm build:vercel'));
+  assert.ok(serverlessCommands.includes('tests/fixtures/storage-provider.mjs'));
+  assert.ok(!serverlessCommands.includes('worker:exports'));
   assert.match(read('next.config.ts'), /ignoreBuildErrors: false/);
   assert.equal(existsSync('app.json'), false);
 });

@@ -8,11 +8,11 @@ import { encodeExport } from './format';
 import { auditExport, normalizeExport } from './service';
 import { removeArtifact, writeArtifact } from './storage';
 
-export async function cleanupExports(now = new Date()) {
+export async function cleanupExports(now = new Date(), limit = 100) {
   // Batches bound both DB reads and filesystem work for a busy installation.
   const expired = await exportDb.exportJob.findMany({
     where: { expiresAt: { lte: now }, status: { not: 'expired' } },
-    take: 100,
+    take: limit,
     orderBy: { expiresAt: 'asc' },
   });
   for (const job of expired) {
@@ -33,13 +33,14 @@ export async function cleanupExports(now = new Date()) {
   });
 }
 
-export async function runExportOnce(): Promise<boolean> {
+export async function runExportOnce(jobId?: string): Promise<boolean> {
   const leaseId = randomUUID();
   const now = new Date();
   const stale = new Date(now.getTime() - EXPORT_LIMITS.leaseMs);
   const claimed = await exportDb.$queryRaw<Array<{ id: string; previousKey: string | null }>>`
     WITH candidate AS (SELECT id, artifact_key FROM export_job
       WHERE expires_at > ${now} AND attempts < ${EXPORT_LIMITS.maxAttempts}
+        AND (${jobId ?? null}::uuid IS NULL OR id = ${jobId ?? null}::uuid)
         AND (status = 'queued' OR (status = 'running' AND started_at < ${stale}))
       ORDER BY created_at, id FOR UPDATE SKIP LOCKED LIMIT 1)
     UPDATE export_job AS job SET status = 'running', lease_id = ${leaseId}::uuid,
@@ -69,8 +70,10 @@ export async function runExportOnce(): Promise<boolean> {
         encodeExport(
           dataset,
           definition.format,
-          { rows: EXPORT_LIMITS.jobRows, bytes: EXPORT_LIMITS.jobBytes },
+          { rows: EXPORT_LIMITS.jobRows, bytes: process.env.SIGNAL_STUDIO_SERVERLESS === '1' ? 3 * 1024 * 1024 : EXPORT_LIMITS.jobBytes },
           (rows, bytes) => {
+            if (process.env.SIGNAL_STUDIO_SERVERLESS === '1' && Date.now() - started > 150_000)
+              throw new ExportError('export-time-limit', 413);
             rowCount = rows;
             byteCount = bytes;
           },
@@ -84,7 +87,7 @@ export async function runExportOnce(): Promise<boolean> {
           await tx.$executeRaw`SET LOCAL statement_timeout = '30s'`;
           await write(tx);
         },
-        { isolationLevel: 'RepeatableRead', timeout: 240_000, maxWait: 5_000 },
+        { isolationLevel: 'RepeatableRead', timeout: process.env.SIGNAL_STUDIO_SERVERLESS === '1' ? 120_000 : 240_000, maxWait: 5_000 },
       );
     const currentAuth = await getExportWorkerAuth(job.requesterId, job.sessionVersion);
     const current = await requireExportAccess(currentAuth, job.projectId, definition);

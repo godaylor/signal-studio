@@ -77,6 +77,62 @@ jobs:
           name: browser-failure-context
           path: test-results
           retention-days: 7
+  serverless:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      VERCEL: '1'
+      SIGNAL_STUDIO_SERVERLESS: '1'
+      EXPORT_STORAGE_BACKEND: supabase
+      SUPABASE_URL: https://signal-storage.invalid
+      SUPABASE_SERVICE_ROLE_KEY: fixture-key-not-a-provider-credential
+      DISABLE_TELEMETRY: '1'
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: signal_studio_test_ci
+          POSTGRES_USER: signal_studio
+          POSTGRES_PASSWORD: signal_studio
+        ports: ['32110:5432']
+        options: >-
+          --health-cmd "pg_isready -U signal_studio -d signal_studio_test_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm env:init
+      - name: Independent scheduler secret
+        run: node -e "require('fs').appendFileSync(process.env.GITHUB_ENV, 'JOBS_CRON_SECRET=' + require('crypto').randomBytes(32).toString('hex') + '\n')"
+      - run: pnpm build-db
+      - run: pnpm db:migrate && pnpm admin:bootstrap --local && pnpm db:seed && pnpm db:seed:portfolio
+      - run: pnpm build:vercel
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Start serverless profile without a worker daemon
+        run: |
+          node --import ./tests/fixtures/storage-provider.mjs node_modules/next/dist/bin/next start --port 32140 --hostname 127.0.0.1 > .local/serverless-app.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:32140/api/ready >/dev/null; then break; fi
+            sleep 2
+          done
+          curl --fail --silent http://127.0.0.1:32140/api/ready
+      - name: Browser queue, source, auth and lifecycle against storage protocol fixture
+        run: node scripts/run-release-e2e.js tests/e2e/m15-export.spec.ts tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: serverless-failure-context
+          path: |
+            test-results
+            .local/serverless-app.log
+          retention-days: 7
   image:
     needs: verify
     runs-on: ubuntu-24.04

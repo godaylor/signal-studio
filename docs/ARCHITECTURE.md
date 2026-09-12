@@ -881,3 +881,22 @@ The following decisions need focused ADRs in their milestones:
 10. final project/source relationship for multi-source tracking.
 
 No deferred ADR blocks the documentation-only phase.
+# M18 hosting amendment — 2026-09-12
+
+The free profile keeps Next.js/Node route handlers and the existing application
+authentication on Vercel Hobby. PostgreSQL moves to dedicated Supabase Free with
+Supavisor transaction pooling. Application tables have RLS and no Data API grants;
+authorization remains in existing services, using a server-only database connection.
+Supabase Auth is not substituted for Application User/session/2FA semantics.
+
+Encrypted exports use a private Supabase Storage bucket. Files are limited to
+3 MiB in this profile, authenticated before download, and expire after one hour.
+The local 64 MiB/streaming adapter remains available for self-hosting. No secrets
+or signed public download URLs are sent to the browser.
+
+Next `after()` processes an enqueued export after its HTTP response. Durable queue
+state and leases remain in PostgreSQL. Supabase pg_cron/pg_net calls an authenticated
+300-second Node function every five minutes only when there is pending work; it
+recovers interrupted leases, advances bounded lifecycle batches and removes expired
+objects. No always-running worker, paid queue or Edge runtime rewrite is needed.
+Free quota exhaustion/pausing can delay jobs; public availability is not guaranteed.

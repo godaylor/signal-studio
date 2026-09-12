@@ -5,6 +5,9 @@ import { ExportError } from '@/server/exports/contracts';
 import { boundedExportRequest } from '@/server/exports/http';
 import { LifecycleError, lifecycleRequestSchema } from '@/server/lifecycle/contracts';
 import { createLifecycle, listLifecycle } from '@/server/lifecycle/service';
+import { scheduleServerlessJobs } from '@/server/jobs/serverless';
+
+export const maxDuration = 300;
 
 async function handle(request: Request, params: Promise<{ projectId: string }>, write: boolean) {
   const requestId = randomUUID();
@@ -15,11 +18,11 @@ async function handle(request: Request, params: Promise<{ projectId: string }>, 
       : await parseRequest(request);
     if (error) return error();
     const projectId = z.uuid().parse((await params).projectId);
+    const data = write ? await createLifecycle(auth, projectId, body) : await listLifecycle(auth, projectId);
+    if (write) scheduleServerlessJobs('lifecycle');
     return Response.json(
       {
-        data: write
-          ? await createLifecycle(auth, projectId, body)
-          : await listLifecycle(auth, projectId),
+        data,
       },
       { status: write ? 202 : 200, headers },
     );

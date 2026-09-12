@@ -8,8 +8,10 @@ adoption. Connect a source, explore behavior, save an Insight, build a Dashboard
 inspect an Audience and export the results.
 
 This is a working full-stack application with PostgreSQL persistence, authenticated
-APIs and background jobs. Public hosting is prepared; **no live production URL is
-claimed yet**. See [deployment](docs/DEPLOYMENT.md) and [current release evidence](docs/PRODUCT_RELEASE.md).
+APIs and background jobs. The target is **Vercel Hobby + Supabase Free ($0 within
+quotas)**, with request-triggered jobs and Supabase Cron recovery. **No live production
+URL is claimed yet**. See [free deployment](docs/FREE_DEPLOYMENT.md) and
+[current release evidence](docs/PRODUCT_RELEASE.md).
 
 ![Signal Studio Explore](docs/screenshots/explore-desktop.png)
 

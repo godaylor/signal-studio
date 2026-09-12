@@ -11,6 +11,9 @@
   "scripts": {
     "dev": "dotenv next dev --turbo",
     "build": "npm-run-all check-env build-db build-export-worker build-tracker build-recorder build-geo build-app prepare-standalone",
+    "build:vercel": "npm-run-all check-env build-db build-tracker build-recorder build-geo build:legal build-app",
+    "build:legal": "node scripts/generate-release-inventory.js",
+    "supabase:setup": "node scripts/setup-supabase.js",
     "start": "node scripts/start.js",
     "start:hosted": "node scripts/start-hosted.js",
     "build-docker": "npm-run-all build-db build-export-worker build-tracker build-recorder build-geo build-app prepare-standalone",

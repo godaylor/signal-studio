@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import type { Auth } from '@/lib/types';
 import type { CreateExport } from '@/server/exports/contracts';
 import { exportDb as db } from '@/server/exports/database';
@@ -216,5 +216,31 @@ describe('M15 PostgreSQL exports', () => {
     await cleanupExports();
     expect((await db.exportJob.findUniqueOrThrow({ where: { id: job.id } })).errorCode).toBe('export-worker-attempts-exhausted');
     expect(await runExportOnce()).toBe(false);
+  });
+  test('serverless queue publishes, downloads and expires a private remote artifact', async () => {
+    const objects = new Map<string, Uint8Array>();
+    vi.stubEnv('SIGNAL_STUDIO_SERVERLESS', '1');
+    vi.stubEnv('EXPORT_STORAGE_BACKEND', 'supabase');
+    vi.stubEnv('SUPABASE_URL', 'https://test.supabase.co');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'server-only-test-key');
+    vi.stubGlobal('fetch', vi.fn(async (url: string, options: RequestInit) => {
+      const key = new URL(url).pathname.split('/').at(-1)!;
+      if (options.method === 'POST') { objects.set(key, new Uint8Array(options.body as Uint8Array)); return new Response('{}'); }
+      if (options.method === 'DELETE') { for (const name of JSON.parse(options.body as string).prefixes) objects.delete(name); return new Response('[]'); }
+      return objects.has(key) ? new Response(new Uint8Array(objects.get(key)!)) : new Response('{}', { status: 404 });
+    }));
+    try {
+      const job = await enqueue();
+      expect(await runExportOnce(job.id)).toBe(true);
+      expect(await runExportOnce(job.id)).toBe(false);
+      const result = await downloadExport(auth(ids.owner), ids.project, job.id);
+      expect((await new Response(result.data).json()).rows).toHaveLength(1);
+      expect(objects.size).toBe(1);
+      await expect(downloadExport(auth(ids.outsider), ids.project, job.id)).rejects.toBeDefined();
+      await db.exportJob.update({ where: { id: job.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      await cleanupExports(new Date(), 2);
+      expect(objects.size).toBe(0);
+      await expect(downloadExport(auth(ids.owner), ids.project, job.id)).rejects.toMatchObject({ code: 'export-expired' });
+    } finally { vi.unstubAllGlobals(); vi.unstubAllEnvs(); }
   });
 });

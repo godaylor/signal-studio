@@ -18,6 +18,7 @@ export function getPrismaPgConfig(
 
   return {
     connectionString,
+    ...(process.env.SIGNAL_STUDIO_SERVERLESS === '1' ? { max: 2, idleTimeoutMillis: 10_000, connectionTimeoutMillis: 10_000 } : {}),
     ...options,
     ...(ssl ? { ssl } : {}),
   };

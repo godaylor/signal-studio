@@ -1,5 +1,9 @@
 # M17 — Working product and hosting handoff
 
+**Current deployment direction (M18, 2026-09-12):** Railway paid hosting was
+rejected by the user. The replacement is [free serverless deployment](FREE_DEPLOYMENT.md).
+M17 verification below is historical and does not certify the new provider setup.
+
 Verified 2026-09-11. M17 remains open until public production acceptance passes.
 The product is a full Next.js/PostgreSQL application; there is no public URL yet.
 
