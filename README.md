@@ -60,7 +60,7 @@ Browser → Next.js UI → authenticated services → analytics / saved entities
 | Data | PostgreSQL 15+, Prisma 7 with the PostgreSQL adapter, parameterized analytical SQL |
 | Authentication | bcryptjs, signed typed JWTs, session versions, encrypted TOTP secrets |
 | Collection/experience | Compatible Umami tracker/ingestion, rrweb recording/player, Web Vitals |
-| Jobs/storage | PostgreSQL job records and leases, Node worker, streamed local durable artifacts |
+| Jobs/storage | PostgreSQL leases; request/cron Node jobs and private Supabase Storage, or local worker/files for self-hosting |
 | Delivery | Node 22.22.2, pnpm 10.15.1, Docker multi-stage images, GitHub Actions |
 | Verification | Vitest, Testing Library, Playwright Chromium, axe, PostgreSQL golden fixtures |
 
@@ -124,13 +124,13 @@ Additional variables are documented in [.env.example](.env.example).
 GeoLite2 is skipped unless the operator explicitly provides a licensed dataset.
 Never disable TLS verification to solve a production database connection problem.
 
-**Recommended small-host deployment:** Railway, one hosted app/worker service,
-private PostgreSQL and persistent volumes. `pnpm start:hosted` supervises both
-processes. The Docker `hosted` target includes explicit migration tooling. Migrations
-run as a separate pre-deploy command, not at build/start time. The existing separate
-`runner`, `worker` and `migration` targets remain available for VPS/Compose deployments.
+**Current portfolio deployment:** Vercel Hobby + Supabase Free, with no paid
+resources. `pnpm build:vercel` builds the Node application; request-triggered jobs
+and Supabase Cron replace the persistent worker, and encrypted artifacts live in
+private Supabase Storage. Migrations remain an explicit operator step. The Docker
+`hosted`, `runner`, `worker` and `migration` targets remain available for self-hosting.
 
-[Complete hosting configuration and first-administrator setup](docs/DEPLOYMENT.md).
+[Free hosting configuration, quotas and first-administrator setup](docs/FREE_DEPLOYMENT.md).
 A hosting account must be connected before the public release can be verified.
 
 ## Verification

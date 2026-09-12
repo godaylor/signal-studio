@@ -16,7 +16,8 @@ Its Query Spine keeps the definition of an analysis visible and shareable.
 
 Built with Next.js, React, TypeScript, TanStack Query, PostgreSQL and Prisma.
 Includes authenticated APIs, scoped permissions, two-factor policy, exact analytics,
-background exports and a containerized application/worker deployment.
+background exports and a free serverless deployment profile; container deployment
+remains available for self-hosting.
 
 My contribution is the Studio product model and interface, analysis contracts and
 executors, saved entities, identity/permission hardening, source onboarding and
@@ -64,4 +65,4 @@ Equal-weight arithmetic mean: (95+90+90+88+93+0+95+75)/8 = **78.25%**.
 
 Public deployment is a blocking gap; M17 is not complete. Full evidence and
 limitations: [release report](docs/PRODUCT_RELEASE.md). Exact operator actions:
-[deployment guide](docs/DEPLOYMENT.md).
+[deployment guide](docs/FREE_DEPLOYMENT.md).
