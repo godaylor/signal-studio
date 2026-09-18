@@ -11,6 +11,9 @@ test('requires HTTPS outside loopback', () => { expect(() => validateProductionE
 test('serverless profile fails closed without remote storage and independent cron secret', () => {
   const env = { ...valid(), SIGNAL_STUDIO_SERVERLESS: '1', EXPORT_STORAGE_BACKEND: 'supabase', SUPABASE_URL: 'https://project.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'test-service-key', JOBS_CRON_SECRET: randomBytes(32).toString('hex') };
   expect(() => validateProductionEnvironment(env)).not.toThrow();
-  expect(() => validateProductionEnvironment({ ...env, EXPORT_STORAGE_BACKEND: 'local' })).toThrow(/Storage/);
+  expect(() => validateProductionEnvironment({ ...env, EXPORT_STORAGE_BACKEND: 'local' })).toThrow(/storage/);
   expect(() => validateProductionEnvironment({ ...env, JOBS_CRON_SECRET: env.APP_SECRET })).toThrow(/independent/);
+});
+test('serverless PostgreSQL artifacts need no Supabase credentials', () => {
+  expect(() => validateProductionEnvironment({ ...valid(), SIGNAL_STUDIO_SERVERLESS: '1', EXPORT_STORAGE_BACKEND: 'postgres', JOBS_CRON_SECRET: randomBytes(32).toString('hex') })).not.toThrow();
 });

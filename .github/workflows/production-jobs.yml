@@ -1,0 +1,32 @@
+name: Signal Studio production jobs
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: signal-studio-production-jobs
+  cancel-in-progress: false
+jobs:
+  maintain:
+    if: github.repository == 'godaylor/signal-studio' && github.event.repository.private == false && vars.SIGNAL_STUDIO_PUBLIC_URL != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Recover jobs and expire artifacts
+        env:
+          ORIGIN: ${{ vars.SIGNAL_STUDIO_PUBLIC_URL }}
+          JOBS_SECRET: ${{ secrets.SIGNAL_STUDIO_JOBS_SECRET }}
+        run: |
+          node --input-type=module <<'NODE'
+          const origin = process.env.ORIGIN;
+          if (!origin || !process.env.JOBS_SECRET) throw new Error('Production job configuration missing');
+          const url = new URL(origin);
+          if (url.protocol !== 'https:' || !url.hostname.endsWith('.vercel.app') || url.pathname !== '/') throw new Error('Invalid production origin');
+          const response = await fetch(new URL('/api/internal/jobs', url), {
+            method: 'POST', redirect: 'error', signal: AbortSignal.timeout(290000),
+            headers: { authorization: `Bearer ${process.env.JOBS_SECRET}` },
+          });
+          if (!response.ok || (await response.json()).ok !== true) throw new Error(`Job invocation failed (${response.status})`);
+          console.log('Production maintenance completed');
+          NODE

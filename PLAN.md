@@ -1,5 +1,14 @@
 # Signal Studio transformation plan
 
+## Current authorized deployment continuation — 2026-09-18
+
+Use existing Neon Free `signal-studio` and Vercel Hobby, preserving all product
+services. Scope: migration 36 encrypted bounded export storage, runtime variables,
+request-triggered jobs and scheduled recovery, production provisioning and public
+source → analytics → Insight/Dashboard → export acceptance. Supabase capacity was
+unavailable; do not create Supabase or paid resources. Done only after the real
+HTTPS workflow passes. Earlier publication restrictions below are historical.
+
 Status (2026-09-10): **Publication closure supersedes the earlier blanket readiness wording. M0–M16 GREEN evidence in docs/M16_FINAL_REPORT.md is historical, not automatic certification of changed code. Eight requirements are explicitly deferred for portfolio-v1 in docs/REQUIREMENTS_TRACEABILITY.md. Current candidate checks, installed-demo status and remaining GitHub/hosting/manual gates are recorded in FINAL_AUDIT.md and docs/RELEASE_CLOSURE_REPORT.md. No commit/push/deploy is authorized in this closure task.**
 Source baseline: Umami 3.3.1, commit `ca661c7057984aa98ed4f7083d84dae2f65bfcb0`
 

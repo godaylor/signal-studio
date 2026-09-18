@@ -83,7 +83,7 @@ jobs:
     env:
       VERCEL: '1'
       SIGNAL_STUDIO_SERVERLESS: '1'
-      EXPORT_STORAGE_BACKEND: supabase
+      EXPORT_STORAGE_BACKEND: postgres
       SUPABASE_URL: https://signal-storage.invalid
       SUPABASE_SERVICE_ROLE_KEY: fixture-key-not-a-provider-credential
       DISABLE_TELEMETRY: '1'
@@ -117,13 +117,13 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Start serverless profile without a worker daemon
         run: |
-          node --import ./tests/fixtures/storage-provider.mjs node_modules/next/dist/bin/next start --port 32140 --hostname 127.0.0.1 > .local/serverless-app.log 2>&1 &
+          node node_modules/next/dist/bin/next start --port 32140 --hostname 127.0.0.1 > .local/serverless-app.log 2>&1 &
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:32140/api/ready >/dev/null; then break; fi
             sleep 2
           done
           curl --fail --silent http://127.0.0.1:32140/api/ready
-      - name: Browser queue, source, auth and lifecycle against storage protocol fixture
+      - name: Browser queue, source, auth and lifecycle against PostgreSQL artifacts
         run: node scripts/run-release-e2e.js tests/e2e/m15-export.spec.ts tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
       - if: failure()
         uses: actions/upload-artifact@v4

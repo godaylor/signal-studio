@@ -709,6 +709,16 @@ model ExportJob {
 }
 
 // No cascading relations: audited job status survives erasure of its source.
+model ExportArtifact {
+  key String @id @db.VarChar(100)
+  jobId String @map("job_id") @db.Uuid
+  payload Bytes
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  @@index([expiresAt])
+  @@index([jobId])
+  @@map("export_artifact")
+}
+
 model DataLifecycleJob {
   id String @id @db.Uuid
   projectId String @map("project_id") @db.Uuid

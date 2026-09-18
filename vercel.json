@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "regions": ["fra1"],
+  "ignoreCommand": "node -e \"process.exit(process.env.VERCEL_ENV === 'production' ? 1 : 0)\"",
   "buildCommand": "pnpm build:vercel",
   "installCommand": "pnpm install --frozen-lockfile"
 }

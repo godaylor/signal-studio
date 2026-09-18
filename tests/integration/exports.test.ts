@@ -11,7 +11,7 @@ import {
   downloadExport,
   listExportJobs,
 } from '@/server/exports/service';
-import { artifactPath, writeArtifact } from '@/server/exports/storage';
+import { artifactPath, readArtifact, writeArtifact } from '@/server/exports/storage';
 import { cleanupExports, runExportOnce } from '@/server/exports/worker';
 
 const run = randomUUID();
@@ -216,6 +216,30 @@ describe('M15 PostgreSQL exports', () => {
     await cleanupExports();
     expect((await db.exportJob.findUniqueOrThrow({ where: { id: job.id } })).errorCode).toBe('export-worker-attempts-exhausted');
     expect(await runExportOnce()).toBe(false);
+  });
+  test('PostgreSQL artifacts authenticate, isolate and expire without a filesystem', async () => {
+    vi.stubEnv('SIGNAL_STUDIO_SERVERLESS', '1');
+    vi.stubEnv('EXPORT_STORAGE_BACKEND', 'postgres');
+    try {
+      const job = await enqueue();
+      expect(await runExportOnce(job.id)).toBe(true);
+      const record = await db.exportJob.findUniqueOrThrow({ where: { id: job.id } });
+      expect(record.status).toBe('completed');
+      const result = await downloadExport(auth(ids.owner), ids.project, job.id);
+      expect((await new Response(result.data).json()).rows).toHaveLength(1);
+      await expect(downloadExport(auth(ids.outsider), ids.project, job.id)).rejects.toBeDefined();
+      const key = record.artifactKey!;
+      const artifact = await db.exportArtifact.findUniqueOrThrow({ where: { key } });
+      expect(Buffer.from(artifact.payload).includes(Buffer.from('interrupted test artifact'))).toBe(false);
+      const corrupt = Buffer.from(artifact.payload); corrupt[28] ^= 1;
+      await db.exportArtifact.update({ where: { key }, data: { payload: corrupt } });
+      await expect(readArtifact(key)).rejects.toMatchObject({ code: 'export-artifact-invalid' });
+      await expect(writeArtifact(`${randomUUID()}.${randomUUID()}.bin`, (async function* () { yield Buffer.alloc(3 * 1024 * 1024 + 1); })())).rejects.toMatchObject({ code: 'export-size-limit' });
+      await db.exportJob.update({ where: { id: job.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
+      await cleanupExports();
+      expect(await db.exportArtifact.count({ where: { key } })).toBe(0);
+      await expect(downloadExport(auth(ids.owner), ids.project, job.id)).rejects.toMatchObject({ code: 'export-expired' });
+    } finally { vi.unstubAllEnvs(); }
   });
   test('serverless queue publishes, downloads and expires a private remote artifact', async () => {
     const objects = new Map<string, Uint8Array>();

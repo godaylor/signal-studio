@@ -1,5 +1,14 @@
 # Target architecture: Signal Studio
 
+Deployment amendment (2026-09-18): Vercel Hobby + existing Neon Free Frankfurt.
+The modular application, auth, Prisma and analytics contracts remain unchanged.
+Small encrypted exports use a PostgreSQL adapter (3 MiB/file, 24 MiB total live
+payload, one-hour TTL). A separate single-connection storage pool prevents dataset
+snapshot transactions from starving artifact writes. A transaction advisory lock
+serializes capacity checks across instances. GitHub Actions invokes the protected
+maintenance endpoint every 30 minutes; request-triggered execution stays primary.
+See FREE_DEPLOYMENT.md for operational limits; the earlier Supabase profile is historical.
+
 Status: target architecture with implemented portfolio slices; requirements and deferred boundaries are tracked in REQUIREMENTS_TRACEABILITY.md. See RELEASE_CLOSURE_REPORT.md for current verification.  
 Baseline: Umami 3.3.1 at `ca661c7057984aa98ed4f7083d84dae2f65bfcb0`
 

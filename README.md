@@ -8,8 +8,8 @@ adoption. Connect a source, explore behavior, save an Insight, build a Dashboard
 inspect an Audience and export the results.
 
 This is a working full-stack application with PostgreSQL persistence, authenticated
-APIs and background jobs. The target is **Vercel Hobby + Supabase Free ($0 within
-quotas)**, with request-triggered jobs and Supabase Cron recovery. **No live production
+APIs and background jobs. The target is **Vercel Hobby + Neon Free ($0 within
+quotas)**, with encrypted PostgreSQL exports, request-triggered jobs and scheduled recovery. **No live production
 URL is claimed yet**. See [free deployment](docs/FREE_DEPLOYMENT.md) and
 [current release evidence](docs/PRODUCT_RELEASE.md).
 
@@ -60,7 +60,7 @@ Browser → Next.js UI → authenticated services → analytics / saved entities
 | Data | PostgreSQL 15+, Prisma 7 with the PostgreSQL adapter, parameterized analytical SQL |
 | Authentication | bcryptjs, signed typed JWTs, session versions, encrypted TOTP secrets |
 | Collection/experience | Compatible Umami tracker/ingestion, rrweb recording/player, Web Vitals |
-| Jobs/storage | PostgreSQL leases; request/cron Node jobs and private Supabase Storage, or local worker/files for self-hosting |
+| Jobs/storage | PostgreSQL leases and bounded encrypted artifacts; request-triggered Node jobs and GitHub Actions recovery, or local worker/files for self-hosting |
 | Delivery | Node 22.22.2, pnpm 10.15.1, Docker multi-stage images, GitHub Actions |
 | Verification | Vitest, Testing Library, Playwright Chromium, axe, PostgreSQL golden fixtures |
 

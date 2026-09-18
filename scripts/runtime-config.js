@@ -14,9 +14,9 @@ export function validateProductionEnvironment(env) {
     if (url.username || url.password || url.search || url.hash || (url.protocol !== 'https:' && !(url.protocol === 'http:' && ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)))) throw new Error('SIGNAL_STUDIO_PUBLIC_URL requires HTTPS, except for localhost development.');
   }
   if (env.SIGNAL_STUDIO_SERVERLESS === '1') {
-    if (env.EXPORT_STORAGE_BACKEND !== 'supabase') throw new Error('Serverless exports require Supabase Storage.');
+    if (!['supabase', 'postgres'].includes(env.EXPORT_STORAGE_BACKEND)) throw new Error('Serverless exports require durable Supabase or PostgreSQL storage.');
     const storage = new URL(env.SUPABASE_URL || 'https://invalid.local');
-    if (!env.SUPABASE_URL || storage.protocol !== 'https:' || storage.pathname !== '/' || storage.username || storage.password || storage.search || storage.hash || !env.SUPABASE_SERVICE_ROLE_KEY)
+    if (env.EXPORT_STORAGE_BACKEND === 'supabase' && (!env.SUPABASE_URL || storage.protocol !== 'https:' || storage.pathname !== '/' || storage.username || storage.password || storage.search || storage.hash || !env.SUPABASE_SERVICE_ROLE_KEY))
       throw new Error('Server-only Supabase Storage configuration is required.');
     if (!env.JOBS_CRON_SECRET || env.JOBS_CRON_SECRET.length < 32 || env.JOBS_CRON_SECRET === secret)
       throw new Error('JOBS_CRON_SECRET must be an independent random secret of at least 32 characters.');

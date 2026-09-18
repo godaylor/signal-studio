@@ -5,6 +5,7 @@ import path from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ExportError } from './contracts';
+import { readPostgresArtifact, removePostgresArtifact, writePostgresArtifact } from './postgres-storage';
 import { readSupabaseArtifact, removeSupabaseArtifact, writeSupabaseArtifact } from './supabase-storage';
 
 const artifactPattern = /^[a-f0-9-]{36}\.[a-f0-9-]{36}\.bin$/;
@@ -25,6 +26,7 @@ function encryptionKey() {
 
 // Format: 12-byte IV, 16-byte authentication tag, then AES-256-GCM ciphertext.
 export async function writeArtifact(key: string, chunks: AsyncIterable<Buffer>) {
+  if (process.env.EXPORT_STORAGE_BACKEND === 'postgres') return writePostgresArtifact(key, chunks);
   if (process.env.EXPORT_STORAGE_BACKEND === 'supabase') return writeSupabaseArtifact(key, chunks);
   await mkdir(exportDirectory(), { recursive: true, mode: 0o700 });
   const iv = randomBytes(12);
@@ -55,6 +57,7 @@ export async function writeArtifact(key: string, chunks: AsyncIterable<Buffer>) 
 }
 
 export async function readArtifact(key: string): Promise<ReadableStream<Uint8Array>> {
+  if (process.env.EXPORT_STORAGE_BACKEND === 'postgres') return readPostgresArtifact(key);
   if (process.env.EXPORT_STORAGE_BACKEND === 'supabase') return readSupabaseArtifact(key);
   const filePath = artifactPath(key);
   const file = await open(/* turbopackIgnore: true */ filePath, 'r').catch(() => {
@@ -76,6 +79,7 @@ export async function readArtifact(key: string): Promise<ReadableStream<Uint8Arr
 }
 
 export async function removeArtifact(key: string) {
+  if (process.env.EXPORT_STORAGE_BACKEND === 'postgres') return removePostgresArtifact(key);
   if (process.env.EXPORT_STORAGE_BACKEND === 'supabase') return removeSupabaseArtifact(key);
   await unlink(/* turbopackIgnore: true */ artifactPath(key)).catch(error => {
     if (error.code !== 'ENOENT') throw error;

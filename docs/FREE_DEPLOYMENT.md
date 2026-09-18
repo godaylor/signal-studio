@@ -1,4 +1,63 @@
-# Vercel Hobby + Supabase Free
+# Vercel Hobby + Neon Free
+
+## Active profile — 2026-09-18
+
+The user supplied Neon project `signal-studio` in Frankfurt. This supersedes the
+Supabase plan below; both Supabase Free slots belong to other applications.
+No product rewrite, new auth system, paid resources or foreign-project changes.
+
+| Component | Current service | Cost within free quotas |
+|---|---|---:|
+| UI, ingestion, authenticated APIs and request-triggered jobs | Vercel Hobby, Node, Frankfurt | $0 |
+| PostgreSQL and queue state | Existing Neon Free `signal-studio` | $0 |
+| Encrypted export artifacts | Migration 36 `export_artifact` in the same database | $0 |
+| Recovery and expiry | Standard Ubuntu GitHub Actions in this public repository | $0 |
+| Public HTTPS address | Vercel-provided hostname | $0 |
+
+Use pooled `DATABASE_URL` for runtime, direct `DIRECT_DATABASE_URL` for operator
+migrations; `sslmode=verify-full` keeps certificate verification enabled. Keep
+Neon Data API disabled/unprovisioned: existing server auth owns permissions.
+The new artifact table also enables RLS and revokes PUBLIC privileges.
+
+Run the existing `pnpm db:migrate` (36 migrations) explicitly, then bootstrap one
+non-demo administrator with `pnpm admin:bootstrap`. Do not run seeds on production.
+Production variables: `DATABASE_URL`, independent `APP_SECRET`,
+`TWO_FACTOR_ENCRYPTION_KEY`, `JOBS_CRON_SECRET`, `SIGNAL_STUDIO_SERVERLESS=1`,
+`EXPORT_STORAGE_BACKEND=postgres`, `DISABLE_TELEMETRY=1`, `SKIP_BUILD_GEO=1`, and
+the verified `SIGNAL_STUDIO_PUBLIC_URL`. No Supabase credentials are needed.
+Only set production-scoped secrets. Preview builds are skipped by ignoreCommand.
+Build/start never perform migrations. Vercel configuration selects Frankfurt.
+
+Exports remain real authenticated downloads. Limit: 3 MiB/file, 100,000 rows,
+24 MiB total encrypted live payload, one-hour TTL. Quota is checked under a
+cross-instance database lock. Existing unexpired files are never evicted to admit
+a new file; a capacity error asks the user to wait. Expired ciphertext is removed
+on the next write or maintenance run. These payload limits exclude PostgreSQL
+indexes, MVCC and retained-history overhead; inspect the provider's overall usage.
+No new package or license dependency is introduced.
+
+Jobs normally start immediately via Next `after()`. Recovery/cleanup workflow
+`production-jobs.yml` runs at minutes 17 and 47 using repository variable
+`SIGNAL_STUDIO_PUBLIC_URL` and secret `SIGNAL_STUDIO_JOBS_SECRET` (same value as
+runtime `JOBS_CRON_SECRET`). It sends only the job secret to this application's
+HTTPS endpoint, never database credentials. It refuses private repositories and
+uses no artifacts or cache. Standard public-repository runners are free:
+[GitHub billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+Scheduled Actions can be delayed and may be disabled after repository inactivity;
+monitor workflow failures and re-enable if needed. No exact recovery-time SLA.
+Each maintenance invocation is bounded; a large lifecycle job may require more
+than one invocation. No constant worker or artificial keep-alive is deployed.
+
+Neon Free quotas are shared by production and the verification branch. Keep compute
+at the free default and scale-to-zero enabled. Do not upgrade on quota exhaustion.
+The database is limited to 512 MiB by the current project configuration; selective
+replay and operator-managed retention remain necessary. Neon beta object storage
+is not required, so Frankfurt and the supplied project are preserved.
+
+Public acceptance still must verify readiness, ingestion, analytics, saved state,
+queued download, permissions, expiry and scheduled invocation on the actual URL.
+
+## Historical Supabase profile (not the current deployment)
 
 Target budget: **$0/month**. No paid plans, trials that auto-convert, paid compute,
 custom Supabase domains, PITR or paid worker. Railway is not the current target.

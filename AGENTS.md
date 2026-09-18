@@ -4,6 +4,11 @@ This repository is an MIT-licensed fork/transformation of Umami. Read this file 
 
 ## Current checkpoint
 
+- 2026-09-18 deployment continuation: use existing Neon Free `signal-studio`
+  (Frankfurt) and Vercel Hobby. No new Supabase or Railway resources. Migration 36
+  adds bounded encrypted PostgreSQL artifacts; GitHub Actions performs recovery.
+  This user-authorized provider adjustment supersedes M18's Supabase target.
+
 - M18 (2026-09-12) replaces Railway with Vercel Hobby + Supabase Free. Budget $0;
   no paid resources/upgrades. Preserve existing auth and product services. See
   docs/FREE_DEPLOYMENT.md. Hosted provider acceptance remains required.

@@ -3,6 +3,57 @@
 Status: implementation verified locally; provider setup/public acceptance pending.
 No paid resources or plan changes were made. Budget target remains $0.
 
+## Neon continuation — 2026-09-18
+
+The user supplied an existing Frankfurt project, replacing the blocked Supabase
+target. Neon API confirms organization Maxeem is Free and project `signal-studio`
+is `autumn-term-44417221`, PostgreSQL 18, 512 MiB database limit.
+
+- Production branch `main` (`br-cool-mountain-b1acvq3g`), database `signal_studio`,
+  was verified empty before migration. All 36 Prisma migrations now applied.
+- A separate `deployment-verification` branch (`br-damp-leaf-b11nvzpg`) contains
+  `signal_studio_test_deployment`. Migrations were applied there first.
+- Both use TLS verification; explicit `sslmode=verify-full` resolved the local
+  Prisma connection issue. Direct connection is used for migrations; pooled
+  connection was verified for application traffic. Cold start required retry.
+- Production administrator `signal-owner` initialized with a generated password
+  saved only in ignored local credentials. No production seed was run.
+- Neon Data API is unprovisioned. Migration 36 enables artifact-table RLS and
+  revokes PUBLIC access; application services retain their existing auth checks.
+- 14 export integration tests passed against the real Neon verification database,
+  including PostgreSQL artifact round-trip, corruption rejection, size limit,
+  cross-user denial, expiry and existing lease/session semantics.
+- 18 targeted runtime/storage unit tests, TypeScript and Vercel-mode production
+  build passed. Lint has zero errors, 39 warnings and 59 informational diagnostics.
+- No package was added; generated legal inventory still has 1029 components,
+  478 license texts and zero missing notices. Root LICENSE is unchanged.
+
+Vercel import is prepared for `godaylor/signal-studio` on Maxeem Hobby. Its account
+2FA recommendation interrupted the form; automatic approval rejected skipping
+that recommendation. A user response is pending for that specific action.
+Production env upload, actual Vercel deployment, scheduler configuration and public
+HTTPS source/analytics/export acceptance are not yet claimed complete.
+
+## Hosted access check — 2026-09-13
+
+Authenticated browser access recovered after the earlier approval-service 403.
+Supabase's automatic browser checkpoint completed and Vercel dashboard loaded.
+The current tool catalog exposes no dedicated Supabase/Vercel connector methods.
+
+- Supabase organization `godaylor`: Free, existing project `replaylab`.
+- Supabase organization `Solecraft`: Free, existing project `solecraft`.
+- Supabase's new-project form explicitly reports that `godaylor` has reached the
+  limit of two active free projects and disables Create new project.
+- Vercel scope `Maxeem` (`/maxeem`): Hobby; authenticated dashboard accessible.
+
+Neither existing Supabase project belongs to Signal Studio. No project was paused,
+deleted, reused or upgraded. No cloud migration, bucket, RLS change, cron job,
+production environment variables or deployment was submitted in this attempt.
+Public analytics/source/export acceptance therefore remains pending. The concrete
+prerequisite is an available dedicated Supabase Free project; changing another
+application to obtain capacity is outside the authorized scope. Architecture stays
+Vercel Hobby + Supabase Free.
+
 ## Changed behavior
 
 - `src/server/exports/supabase-storage.ts`: private bounded encrypted object adapter;
