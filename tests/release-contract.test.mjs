@@ -21,7 +21,8 @@ test('publication depends on reusable CI with all quality and image gates', () =
   assert.equal(ci.jobs.serverless.env.SIGNAL_STUDIO_SERVERLESS, '1');
   const serverlessCommands = ci.jobs.serverless.steps.map(step => step.run || '').join('\n');
   assert.ok(serverlessCommands.includes('pnpm build:vercel'));
-  assert.ok(serverlessCommands.includes('tests/fixtures/storage-provider.mjs'));
+  assert.equal(ci.jobs.serverless.env.EXPORT_STORAGE_BACKEND, 'postgres');
+  assert.ok(!serverlessCommands.includes('tests/fixtures/storage-provider.mjs'));
   assert.ok(!serverlessCommands.includes('worker:exports'));
   assert.match(read('next.config.ts'), /ignoreBuildErrors: false/);
   assert.equal(existsSync('app.json'), false);
