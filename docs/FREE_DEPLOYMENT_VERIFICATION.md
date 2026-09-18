@@ -34,6 +34,25 @@ that recommendation. A user response is pending for that specific action.
 Production env upload, actual Vercel deployment, scheduler configuration and public
 HTTPS source/analytics/export acceptance are not yet claimed complete.
 
+Published code: `da6118cdcb3f1c50c197f0511347b9064a3f9380` on owned `main`.
+[CI run 35390044298](https://github.com/godaylor/signal-studio/actions/runs/35390044298):
+`verify` and `serverless` passed, including browser workflows using real PostgreSQL
+artifacts without a daemon. Four legacy self-hosted image jobs were still building
+at this checkpoint. An initial run failed a release-contract assertion requiring
+the superseded Supabase fixture; the contract now requires PostgreSQL and all four
+release/supervisor checks pass. Export UI component tests: 5 passed.
+
+GitHub repository visibility was confirmed PUBLIC. The scoped jobs secret is now
+configured in this repository; no database credentials were sent to Actions.
+The recovery schedule remains gated until the production-origin variable is set.
+Production readback: 36 completed migrations, one active administrator, artifact
+RLS enabled, database size 10,207,232 bytes at this checkpoint. The verification
+compute was observed suspended automatically; no paid compute changes were made.
+Browser read attempts later also hit approval-review timeouts. No Vercel form was
+submitted or security setting bypassed. No new local application, Docker process,
+network or volume was started. Root LICENSE SHA256 remains
+`2a2a42dba0334d768c61edc8f5bb5d3732d94de23d99a7e539a719b1d5117ba0`.
+
 ## Hosted access check — 2026-09-13
 
 Authenticated browser access recovered after the earlier approval-service 403.
