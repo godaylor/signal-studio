@@ -28,6 +28,11 @@ the verified `SIGNAL_STUDIO_PUBLIC_URL`. No Supabase credentials are needed.
 Only set production-scoped secrets. Preview builds are skipped by ignoreCommand.
 Build/start never perform migrations. Vercel configuration selects Frankfurt.
 
+Vercel manages Node 22 minor/patch updates (22.23.2 observed on 2026-09-20).
+The package engine therefore permits Node >=22.22.2 <23; local, Docker and CI
+remain pinned to 22.22.2. Both Vercel commands use Corepack to honor the existing
+pnpm 10.15.1 packageManager pin, with engine-strict still enabled.
+
 Exports remain real authenticated downloads. Limit: 3 MiB/file, 100,000 rows,
 24 MiB total encrypted live payload, one-hour TTL. Quota is checked under a
 cross-instance database lock. Existing unexpired files are never evicted to admit

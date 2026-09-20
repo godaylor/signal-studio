@@ -168,7 +168,7 @@
   },
   "packageManager": "pnpm@10.15.1",
   "engines": {
-    "node": "22.22.x",
+    "node": ">=22.22.2 <23",
     "pnpm": "10.15.1"
   }
 }

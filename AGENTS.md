@@ -221,7 +221,8 @@ Test isolation requirements:
 
 M0 established one supported local and CI contract: Node `22.22.x` (pinned to
 `22.22.2`) and pnpm `10.15.1` through Corepack. `.npmrc` enforces the Node
-engine, while `.nvmrc`, `package.json`, CI and Docker use the same versions.
+engine. Local `.nvmrc`, CI and Docker remain pinned; package.json also permits
+newer Node 22 minor/patch versions managed by Vercel (>=22.22.2 <23).
 
 Install and initialize local configuration:
 
