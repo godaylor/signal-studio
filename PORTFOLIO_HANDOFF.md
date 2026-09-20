@@ -2,11 +2,15 @@
 
 **Repository:** https://github.com/godaylor/signal-studio
 
-**Live:** pending hosting account setup; do not present a localhost URL as public.
+**Live:** https://signal-studio-smoky.vercel.app
 
-Current hosting target: **Vercel Hobby + Supabase Free**, $0 within provider quotas.
+Current hosting: **Vercel Hobby + Neon Free (Frankfurt)**, $0 within provider quotas.
 No paid Railway deployment is authorized. See [free deployment](docs/FREE_DEPLOYMENT.md).
-The readiness scores below describe the M17 checkpoint, not a completed M18 rollout.
+The public login page and authenticated production maintenance invocation were
+verified on 2026-09-20. Full source → analytics → export production acceptance is
+still pending; the task is not closed. All six CI jobs passed for the deployed
+configuration. See [deployment evidence](docs/FREE_DEPLOYMENT_VERIFICATION.md).
+The readiness scores below describe the historical M17 checkpoint.
 
 ## Portfolio copy
 

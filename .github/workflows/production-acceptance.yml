@@ -1,0 +1,26 @@
+name: Signal Studio production acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Controlled acceptance phase (requires temporary scoped credentials)
+        type: choice
+        options: [scenario, expiry]
+        default: scenario
+permissions:
+  contents: read
+concurrency:
+  group: signal-studio-production-acceptance
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'godaylor/signal-studio' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public production API
+        env:
+          PRODUCTION_ACCEPTANCE_CREDENTIALS: ${{ secrets.PRODUCTION_ACCEPTANCE_CREDENTIALS }}
+          ACCEPTANCE_PHASE: ${{ inputs.phase }}
+        run: node scripts/verify-production.mjs
