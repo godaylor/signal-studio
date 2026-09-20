@@ -1,7 +1,44 @@
 # M18 verification — 2026-09-12
 
-Status: implementation verified locally; provider setup/public acceptance pending.
+Status: deployed on Vercel Hobby + Neon Free; full public acceptance pending.
 No paid resources or plan changes were made. Budget target remains $0.
+
+## Vercel deployment continuation — 2026-09-20
+
+- Created only `maxeem/signal-studio` on the verified Hobby plan, project ID
+  `prj_rlSfdtTxh4vwGuZmwwny2rN3iGM9`, connected to the existing GitHub repository.
+- Saved nine prepared variables as Production-only secrets. No Preview secrets,
+  paid integrations, account security changes or other-project changes.
+- First deployment failed because Vercel supplied Node 22.23.2 / pnpm 10.28.0.
+  Commit `aac0f4afc2018de4920cbc97e07cd648647c4fc9` permits managed Node 22
+  updates and invokes pinned pnpm 10.15.1 through Corepack. Engine enforcement
+  remains enabled; local, CI and Docker Node versions remain pinned.
+- All six CI jobs passed for both the preceding implementation and this fix:
+  [CI 35480663721](https://github.com/godaylor/signal-studio/actions/runs/35480663721).
+  Four local release/supervisor checks also passed.
+- Public application: https://signal-studio-smoky.vercel.app. The browser passed
+  Vercel's automatic checkpoint and rendered the real Signal Studio login page,
+  Russian product copy and the Umami/MIT attribution link. This is not proof of
+  authenticated source/analytics/export acceptance.
+- Saved `SIGNAL_STUDIO_PUBLIC_URL` as Production config after the build began.
+  The next production deployment must incorporate that new variable.
+- Configured the same repository URL variable and dispatched the existing free
+  maintenance workflow. [Run 35481192197](https://github.com/godaylor/signal-studio/actions/runs/35481192197)
+  completed successfully: its step requires an HTTPS success response with
+  `ok: true` from the authenticated production jobs endpoint. The 30-minute
+  recovery schedule is enabled. Downloading the workflow log separately returned
+  a GitHub permission 403; the run/job success status was readable.
+- Local Node HTTPS readiness request received 403 `Vercel Security Checkpoint`.
+  Browser navigation to `/api/ready` returned `ERR_BLOCKED_BY_CLIENT`.
+  Reading the Vercel deployment page then hit two automatic approval timeouts;
+  no alternate route was used to bypass that browser restriction.
+- Remaining acceptance: confirm latest env deployment, authenticated source and
+  ingestion, exact analytics, saved Insight/Dashboard, queued download, permissions
+  and expiry on the public URL. These are not marked passed.
+
+No other PetProjects process/container/network/volume was changed. Root LICENSE
+and upstream attribution remain intact. Earlier checkpoint limitations below are
+historical; notably the earlier 2FA recommendation did not appear in this attempt.
 
 ## Neon continuation — 2026-09-18
 
