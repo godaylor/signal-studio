@@ -1,14 +1,22 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 import { DemoWalkthrough } from './DemoWalkthrough';
+import { renderToString } from 'react-dom/server';
 
 vi.mock('@/features/i18n/useStudioLocale', () => ({
   useStudioLocale: () => ({ t: (_en: string, ru: string) => ru }),
 }));
 
+test('server-rendered controls wait for hydration instead of losing the first click', () => {
+  const html = renderToString(<DemoWalkthrough />);
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  expect(container.querySelectorAll('button:disabled')).toHaveLength(8);
+});
+
 test('public demo explains isolation and links saved analysis to dashboard without a session', () => {
   render(<DemoWalkthrough />);
-  expect(screen.getByText(/Данные production не читаются/)).toBeVisible();
+  expect(screen.getByText(/Данные рабочих проектов не читаются/)).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Дашборд' }));
   expect(screen.getByText('Сначала сохраните анализ на шаге 4.')).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Сохранённый анализ' }));

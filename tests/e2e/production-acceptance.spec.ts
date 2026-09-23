@@ -31,7 +31,9 @@ test('production source, Explore, saved analysis, dashboard, audience and downlo
   await expect(page.getByRole('heading', { name: 'production_acceptance', exact: true })).toBeVisible();
   await page.goto(`/studio/${fixture.projectId}/dashboards?locale=en-US`);
   await expect(page.getByText('Production acceptance dashboard', { exact: true }).first()).toBeVisible();
-  await page.goto(`/studio/${fixture.projectId}/audiences?entity=user&locale=en-US`);
+  await page.goto(`/studio/${fixture.projectId}/audiences?locale=en-US`);
+  await page.getByRole('button', { name: 'Tracked users', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeEnabled({ timeout: 30_000 });
   await page.getByRole('button', { name: 'Export', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Export data', exact: true });
   await dialog.getByRole('combobox', { name: 'File format' }).selectOption('json');

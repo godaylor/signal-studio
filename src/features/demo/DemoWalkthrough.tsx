@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import styles from './DemoWalkthrough.module.css';
 
@@ -10,9 +10,11 @@ const events = [
   { event: 'onboarding_completed', ru: 'Настройка завершена', en: 'Setup completed', count: 84 },
   { event: 'report_created', ru: 'Первый отчёт создан', en: 'First report created', count: 48 },
 ];
+const subscribeToHydration = () => () => {};
 
 export function DemoWalkthrough() {
   const { t } = useStudioLocale();
+  const ready = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [step, setStep] = useState(0);
   const [saved, setSaved] = useState(false);
   const [placed, setPlaced] = useState(false);
@@ -87,7 +89,7 @@ export function DemoWalkthrough() {
         <p className={styles.notice}>
           {t(
             'Interactive walkthrough with fictional data, not a live workspace. Changes last until you reload this page. No production data is read or changed.',
-            'Интерактивный пример на вымышленных данных, не рабочее пространство. Изменения сохраняются только до перезагрузки страницы. Данные production не читаются и не изменяются.',
+            'Интерактивный пример на вымышленных данных, не рабочее пространство. Изменения сохраняются только до перезагрузки страницы. Данные рабочих проектов не читаются и не изменяются.',
           )}
         </p>
       </section>
@@ -98,6 +100,7 @@ export function DemoWalkthrough() {
               <li key={label}>
                 <button
                   type="button"
+                  disabled={!ready}
                   aria-current={step === index ? 'step' : undefined}
                   onClick={() => setStep(index)}
                 >
@@ -205,7 +208,7 @@ export function DemoWalkthrough() {
               <p>
                 {t(
                   'Each person is counted once per step. Fixed example, not a current production measurement.',
-                  'Каждый человек учитывается один раз на каждом шаге. Фиксированный пример, не текущие показатели production.',
+                  'Каждый человек учитывается один раз на каждом шаге. Фиксированный пример, не текущие показатели реального проекта.',
                 )}
               </p>
             </>
@@ -309,12 +312,12 @@ export function DemoWalkthrough() {
           )}
           <footer className={styles.actions}>
             {step > 0 && (
-              <button type="button" onClick={() => setStep(step - 1)}>
+              <button type="button" disabled={!ready} onClick={() => setStep(step - 1)}>
                 {t('Back', 'Назад')}
               </button>
             )}
             {step < 6 && (
-              <button type="button" onClick={() => setStep(step + 1)}>
+              <button type="button" disabled={!ready} onClick={() => setStep(step + 1)}>
                 {t('Next', 'Далее')}: {labels[step + 1]}
               </button>
             )}

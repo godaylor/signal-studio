@@ -9,7 +9,7 @@ test('public demo completes without authentication or project API access', async
   await page.goto('/login?locale=ru-RU');
   await page.getByRole('link', { name: 'Попробовать демо' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByText(/Данные production не читаются/)).toBeVisible();
+  await expect(page.getByText(/Данные рабочих проектов не читаются/)).toBeVisible();
   await page.getByRole('button', { name: 'События', exact: true }).click();
   await expect(page.getByRole('table')).toContainText('signup');
   await page.getByRole('button', { name: 'Анализ', exact: true }).click();
