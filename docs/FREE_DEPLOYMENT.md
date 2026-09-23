@@ -59,8 +59,9 @@ The database is limited to 512 MiB by the current project configuration; selecti
 replay and operator-managed retention remain necessary. Neon beta object storage
 is not required, so Frankfurt and the supplied project are preserved.
 
-Public acceptance still must verify readiness, ingestion, analytics, saved state,
-queued download, permissions, expiry and scheduled invocation on the actual URL.
+Production acceptance on 2026-09-23 verified readiness, ingestion, analytics,
+saved state, audiences, queued download, permissions and controlled artifact expiry.
+See [evidence, public demo and remaining limits](PRODUCTION_ACCEPTANCE_2026-09-23.md).
 
 ## Historical Supabase profile (not the current deployment)
 

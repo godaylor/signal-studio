@@ -1,11 +1,14 @@
 # M17 — Working product and hosting handoff
 
-**Current deployment direction (M18, 2026-09-12):** Railway paid hosting was
-rejected by the user. The replacement is [free serverless deployment](FREE_DEPLOYMENT.md).
-M17 verification below is historical and does not certify the new provider setup.
+**Current production (2026-09-23):** existing Vercel Hobby + Neon Free, Frankfurt.
+[Public demo](https://signal-studio-smoky.vercel.app/demo) requires no login and uses
+fictional data. Real workspace source → ingestion → analysis → saved Insight →
+dashboard → audience → export passed production API and browser acceptance.
+See [current evidence and limits](PRODUCTION_ACCEPTANCE_2026-09-23.md).
+The M17 local verification below is historical.
 
-Verified 2026-09-11. M17 remains open until public production acceptance passes.
-The product is a full Next.js/PostgreSQL application; there is no public URL yet.
+Historical local verification: 2026-09-11. The product is a full Next.js/PostgreSQL
+application, now hosted at https://signal-studio-smoky.vercel.app.
 
 ## Delivered
 
@@ -65,10 +68,10 @@ LICENSE is unchanged, SHA-256
 Upstream copyright and Umami attribution are retained. Initial working tree was
 clean; this release preserves upstream history and does not rewrite it.
 
-## Remaining release gate
+## Current release gate
 
-Authenticate a Railway account, create the dedicated project and PostgreSQL service,
-configure variables/volume and deploy the documented image. Then run the public
-acceptance checklist in DEPLOYMENT.md and add the verified URL to README, GitHub
-About and PORTFOLIO_HANDOFF.md. Hosting registration and billing are not available
-through current credentials. No paid service has been created.
+The old provider-account prerequisite is superseded by the deployed Vercel + Neon
+profile. Current production acceptance, demo rollout and CI results are recorded
+in [the dated report](PRODUCTION_ACCEPTANCE_2026-09-23.md). No paid service was
+created. Historical manual accessibility and large-dataset benchmarks are separate
+from this bounded portfolio acceptance; deferred functionality remains deferred.

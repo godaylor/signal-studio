@@ -6,10 +6,12 @@
 
 Current hosting: **Vercel Hobby + Neon Free (Frankfurt)**, $0 within provider quotas.
 No paid Railway deployment is authorized. See [free deployment](docs/FREE_DEPLOYMENT.md).
-The public login page and authenticated production maintenance invocation were
-verified on 2026-09-20. Full source → analytics → export production acceptance is
-still pending; the task is not closed. All six CI jobs passed for the deployed
-configuration. See [deployment evidence](docs/FREE_DEPLOYMENT_VERIFICATION.md).
+**[Public demo without login](https://signal-studio-smoky.vercel.app/demo):** an
+interactive walkthrough on fictional data, with temporary page-local saves and
+a downloadable JSON example. It never exposes a real workspace or credentials.
+The real source → ingestion → analytics → saved analysis → dashboard → audience →
+export path passed production API and browser checks on 2026-09-23. See
+[current acceptance evidence](docs/PRODUCTION_ACCEPTANCE_2026-09-23.md).
 The readiness scores below describe the historical M17 checkpoint.
 
 ## Portfolio copy
@@ -30,6 +32,10 @@ collection, authentication, legacy reports and dependencies are explicitly credi
 See [code origins](docs/CODE_ORIGINS.md).
 
 ## Demonstration sequence
+
+For a visitor: open the public demo and follow its seven steps; no account or
+operator assistance is needed. The steps explain the real workflow but do not
+send live events or persist objects in PostgreSQL. For a private workspace:
 
 1. Sign in, create a project, copy its tracker and receive a real event.
 2. Explore events with Query Spine; change filters or breakdown and share its URL.
@@ -67,6 +73,7 @@ Equal-weight arithmetic mean: (95+90+90+88+93+0+95+75)/8 = **78.25%**.
 | GitHub/docs/licensing | 95% | Own repo, CI, documentation, unchanged MIT, packaged notices | Verify latest published CI; add live URL |
 | Personal Portfolio №09 | 75% | Copy, contribution statement, screenshots and demo sequence | Live link and final public walkthrough |
 
-Public deployment is a blocking gap; M17 is not complete. Full evidence and
-limitations: [release report](docs/PRODUCT_RELEASE.md). Exact operator actions:
+The scores above are historical; the public deployment gap is resolved. Current
+evidence and limitations: [acceptance report](docs/PRODUCTION_ACCEPTANCE_2026-09-23.md).
+Operator documentation:
 [deployment guide](docs/FREE_DEPLOYMENT.md).

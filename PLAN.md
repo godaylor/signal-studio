@@ -1523,3 +1523,22 @@ Supabase Storage in this profile and persistent worker with bounded request/cron
 invocations. Configure pooled PostgreSQL, protect database tables from Data API,
 test storage/auth/queue recovery and document free-tier limits. Public completion
 requires actual provider access, migrations, storage and end-to-end acceptance.
+
+## Production portfolio acceptance — 2026-09-23
+
+The explicit user continuation keeps existing Vercel Hobby + Neon Free Frankfurt;
+it supersedes the historical M17 hosting prerequisite and M18 Supabase provider.
+Scope: verify the real source → ingestion → Explore → Insight → dashboard →
+audience → export path, provide safe public demo entry and clarify RU wording.
+
+**This scoped production release gate is closed.** Real HTTPS API and browser
+workflow passed; anonymous and unrelated-user exports are denied; controlled
+expiry and physical artifact cleanup passed. The public `/demo` walkthrough uses
+only fictional data and page-local state; real workspaces retain existing auth.
+Final public browser suite: 4 passed, including mobile/desktop axe and keyboard.
+Evidence, exact deployed revision, CI and accepted limitations:
+`docs/PRODUCTION_ACCEPTANCE_2026-09-23.md`.
+
+No migrations, paid resources, new provider, dependencies or shared admin login.
+This acceptance does not reopen deferred scope or certify historical M16 manual
+screen-reader, 1M-event benchmark or production backup/restore follow-ups.

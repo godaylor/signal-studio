@@ -1,6 +1,9 @@
 # M18 verification — 2026-09-12
 
-Status: deployed on Vercel Hobby + Neon Free; full public acceptance pending.
+Current status (2026-09-23): deployed on Vercel Hobby + Neon Free; the real
+production workflow passed API and browser checks. Public demonstration, CI and
+expiry evidence: [current report](PRODUCTION_ACCEPTANCE_2026-09-23.md).
+The dated checkpoints below are historical.
 No paid resources or plan changes were made. Budget target remains $0.
 
 ## Vercel deployment continuation — 2026-09-20

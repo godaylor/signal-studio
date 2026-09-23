@@ -8,10 +8,17 @@ adoption. Connect a source, explore behavior, save an Insight, build a Dashboard
 inspect an Audience and export the results.
 
 This is a working full-stack application with PostgreSQL persistence, authenticated
-APIs and background jobs. The target is **Vercel Hobby + Neon Free ($0 within
-quotas)**, with encrypted PostgreSQL exports, request-triggered jobs and scheduled recovery. **No live production
-URL is claimed yet**. See [free deployment](docs/FREE_DEPLOYMENT.md) and
-[current release evidence](docs/PRODUCT_RELEASE.md).
+APIs and background jobs. Production runs on **Vercel Hobby + Neon Free ($0 within
+quotas)**, with encrypted PostgreSQL exports, request-triggered jobs and scheduled recovery.
+
+**[Try the public demo — no login](https://signal-studio-smoky.vercel.app/demo)** ·
+[Sign in to a real workspace](https://signal-studio-smoky.vercel.app/login)
+
+The public demo is an interactive walkthrough on clearly labeled fictional data;
+its saved state resets on reload. Real sources, ingestion, analyses and exports
+use authenticated workspaces. No shared administrator credentials are provided.
+See [free deployment](docs/FREE_DEPLOYMENT.md) and
+[production acceptance evidence](docs/PRODUCTION_ACCEPTANCE_2026-09-23.md).
 
 ![Signal Studio Explore](docs/screenshots/explore-desktop.png)
 
