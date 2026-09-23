@@ -69,15 +69,27 @@ try {
     const restored = await request(`${base}/dashboards/${dashboard.id}`, { token });
     assert.equal(restored.widgets[0].insight.id, insight.id);
     pass('Save Insight and reload Dashboard with its reference');
+    const users = await request(`${base}/tracked-users`, { token });
+    assert.equal(users.data.length, 1);
+    const definition = { version: 1, entity: 'user', match: 'all', conditions: [
+      { kind: 'behavior', eventName: 'production_acceptance', withinDays: 1, minCount: 1 },
+    ] };
+    const audience = await request(`${base}/segments/preview`, { method: 'POST', token, body: { definition } });
+    assert.equal(audience.count, 1);
+    assert.equal(audience.exactness, 'exact');
+    const segment = await request(`${base}/segments`, { method: 'POST', token, body: { name: 'Production acceptance audience', definition } });
+    const restoredSegment = await request(`${base}/segments/${segment.id}`, { token });
+    assert.deepEqual(restoredSegment.definition, definition);
+    pass('Audience contains the ingested identity; behavioral segment saves and reloads');
     const exported = await request(`${base}/exports`, { method: 'POST', token, body: {
       version: 1, source: { kind: 'analysis', query }, format: 'json', allRows: false, idempotencyKey: randomUUID(),
     } });
     assert.equal(exported.metadata.exactness, 'exact');
     assert.deepEqual(exported.rows, result.data.rows.map(row => ({ series: 'primary', ...row })));
     pass('Synchronous JSON export matches exact analytics');
-    const definition = { version: 1, source: { kind: 'users', list: {} }, format: 'json', allRows: true, idempotencyKey: randomUUID() };
-    const queued = await request(`${base}/exports`, { method: 'POST', token, status: 202, body: definition });
-    const duplicate = await request(`${base}/exports`, { method: 'POST', token, status: 202, body: definition });
+    const exportDefinition = { version: 1, source: { kind: 'users', list: {} }, format: 'json', allRows: true, idempotencyKey: randomUUID() };
+    const queued = await request(`${base}/exports`, { method: 'POST', token, status: 202, body: exportDefinition });
+    const duplicate = await request(`${base}/exports`, { method: 'POST', token, status: 202, body: exportDefinition });
     assert.equal(duplicate.data.id, queued.data.id);
     pass('Background audience export queues idempotently');
     let job;

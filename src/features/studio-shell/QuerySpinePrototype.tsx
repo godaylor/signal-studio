@@ -20,7 +20,7 @@ export function QuerySpinePrototype() {
     <section className={styles.queryPrototype} aria-labelledby="query-spine-title">
       <div className={styles.querySpine}>
         <header>
-          <p>Query Spine</p>
+          <p>{t('Query Spine', 'Цепочка анализа')}</p>
           <h2 id="query-spine-title">{t('Question definition', 'Определение вопроса')}</h2>
         </header>
         <ol>
@@ -73,7 +73,7 @@ export function QuerySpinePrototype() {
         <p>
           {t(
             'The Query Spine keeps analytical lineage visible from the question to its result.',
-            'Query Spine сохраняет видимую связь аналитического вопроса с его результатом.',
+            'Цепочка анализа показывает связь вашего вопроса с результатом.',
           )}
         </p>
         <div

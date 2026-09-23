@@ -595,7 +595,7 @@ export function DashboardWidget({
                 .toLocaleString(locale)}
             </strong>
             <span>
-              {result.data.exactness} · {result.data.cache} ·{' '}
+              {result.data.exactness === 'exact' ? t('Exact count', 'Точный подсчёт') : t('Estimate', 'Оценка')} ·{' '}
               {new Date(result.data.freshnessAt).toLocaleTimeString(locale)}
             </span>
           </div>

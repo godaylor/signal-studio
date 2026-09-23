@@ -70,7 +70,7 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:32140/api/ready
       - name: Critical browser workflows, access restrictions, RU/EN and axe
-        run: node scripts/run-release-e2e.js tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-home.spec.ts tests/e2e/explore-workspace.spec.ts tests/e2e/insight-library.spec.ts tests/e2e/dashboard-workspace.spec.ts tests/e2e/audiences-experience.spec.ts tests/e2e/live-workspace.spec.ts tests/e2e/m15-export.spec.ts tests/e2e/m14-viewer-access.spec.ts tests/e2e/m14-public-share.spec.ts tests/e2e/m14-localization.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
+        run: node scripts/run-release-e2e.js tests/e2e/public-demo.spec.ts tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-home.spec.ts tests/e2e/explore-workspace.spec.ts tests/e2e/insight-library.spec.ts tests/e2e/dashboard-workspace.spec.ts tests/e2e/audiences-experience.spec.ts tests/e2e/live-workspace.spec.ts tests/e2e/m15-export.spec.ts tests/e2e/m14-viewer-access.spec.ts tests/e2e/m14-public-share.spec.ts tests/e2e/m14-localization.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -124,7 +124,7 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:32140/api/ready
       - name: Browser queue, source, auth and lifecycle against PostgreSQL artifacts
-        run: node scripts/run-release-e2e.js tests/e2e/m15-export.spec.ts tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
+        run: node scripts/run-release-e2e.js tests/e2e/public-demo.spec.ts tests/e2e/m15-export.spec.ts tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
       - if: failure()
         uses: actions/upload-artifact@v4
         with:

@@ -249,7 +249,7 @@ export function ExploreWorkspace({
         <div className={styles.instrument}>
           <aside className={styles.spine} aria-labelledby="query-spine-heading">
             <div className={styles.spineHeading}>
-              <p className={styles.eyebrow}>Query Spine</p>
+              <p className={styles.eyebrow}>{t('Query Spine', 'Цепочка анализа')}</p>
               <h2 id="query-spine-heading">{t('Question definition', 'Определение вопроса')}</h2>
             </div>
             <ol className={styles.blockList}>
@@ -262,7 +262,7 @@ export function ExploreWorkspace({
                     onClick={() => setActiveBlock(block.id)}
                   >
                     <strong>{block.label}</strong>
-                    <small>{blockValue(block.id, draft)}</small>
+                    <small>{blockValue(block.id, draft, t)}</small>
                   </button>
                 </li>
               ))}
@@ -301,7 +301,7 @@ export function ExploreWorkspace({
                 title={t('Ready for a valid question', 'Готово к корректному вопросу')}
                 message={t(
                   'Edit the Query Spine or start a valid analysis to run the PostgreSQL query.',
-                  'Измените Query Spine или начните корректный анализ, чтобы выполнить запрос PostgreSQL.',
+                  'Измените цепочку анализа или начните новый анализ, чтобы получить результат.',
                 )}
               />
             ) : (
@@ -340,30 +340,30 @@ export function ExploreWorkspace({
   );
 }
 
-function blockValue(block: BlockId, query: AnalysisQueryV1) {
+function blockValue(block: BlockId, query: AnalysisQueryV1, t: (en: string, ru: string) => string) {
   switch (block) {
     case 'signal':
-      if (query.mode === 'funnel') return `${query.funnel?.steps.length ?? 0} ordered steps`;
-      if (query.mode === 'retention') return 'Entry → return behavior';
-      return query.measure.key === '*' ? 'All custom events' : query.measure.key;
+      if (query.mode === 'funnel') return `${query.funnel?.steps.length ?? 0} ${t('ordered steps', 'последовательных шагов')}`;
+      if (query.mode === 'retention') return t('Entry → return behavior', 'Первое действие → возвращение');
+      return query.measure.key === '*' ? t('All custom events', 'Все пользовательские события') : query.measure.key;
     case 'measure':
       if (query.mode === 'funnel')
-        return `${query.funnel?.conversionWindowMinutes ?? 0} minute window`;
+        return `${query.funnel?.conversionWindowMinutes ?? 0} ${t('minute window', 'минут на прохождение')}`;
       if (query.mode === 'retention')
         return `${query.retention?.periods ?? 0} ${query.retention?.granularity} periods`;
       return query.measure.source === 'event' && query.measure.aggregation === 'count'
-        ? 'Exact event count'
+        ? t('Exact event count', 'Точное число событий')
         : `${query.measure.source} · ${query.measure.aggregation}${query.measure.property ? ' · ' + query.measure.property : ''}`;
     case 'breakdown':
       return query.mode === 'trend'
-        ? 'Trend over time'
+        ? t('Trend over time', 'Динамика по времени')
         : query.mode === 'funnel'
-          ? (query.breakdown?.field ?? 'Funnel')
+          ? (query.breakdown?.field ?? t('Funnel', 'Воронка'))
           : query.mode === 'retention'
-            ? 'Retention matrix'
-            : (query.breakdown?.field ?? 'Choose dimension');
+            ? t('Retention matrix', 'Таблица удержания')
+            : (query.breakdown?.field ?? t('Choose dimension', 'Выберите группировку'));
     case 'filters':
-      return query.filters.length ? `${query.filters.length} · match ${query.match}` : 'No filters';
+      return query.filters.length ? `${query.filters.length} · ${query.match === 'all' ? t('match all', 'все условия') : t('match any', 'любое условие')}` : t('No filters', 'Без фильтров');
     case 'context':
       return `${query.range.timezone} · ${comparisonLabel(query)}`;
   }
@@ -1041,14 +1041,14 @@ function ResultCanvas({
                   : query.measure.key}
           </h2>
           <p>
-            {comparisonLabel(query)} · {data.exactness} · {t('generated', 'сформировано')}{' '}
+            {comparisonLabel(query)} · {data.exactness === 'exact' ? t('Exact count', 'Точный подсчёт') : t('Estimate', 'Оценка')} · {t('generated', 'сформировано')}{' '}
             {new Date(data.generatedAt).toLocaleString(locale)}
           </p>
         </div>
         <span className={styles.freshness} data-stale={stale || undefined}>
           {stale
             ? t('Stale result', 'Устаревший результат')
-            : `${t('Fresh', 'Свежий')} · ${data.cache}`}
+            : t('Up to date', 'Актуальный результат')}
         </span>
       </header>
 

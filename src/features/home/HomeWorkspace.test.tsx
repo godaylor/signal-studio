@@ -37,7 +37,7 @@ describe('Home product states and defined KPI links', () => {
     render(<HomeWorkspace projectId={projectId} projectName="Demo" />);
     expect(screen.getByRole('heading', { level: 1, name: 'Главная' })).toBeVisible();
     expect(screen.getByText('События ещё не поступали')).toBeVisible();
-    expect(screen.getByText(/Сохраните Insight в анализе/)).toBeVisible();
+    expect(screen.getByText(/Сохраните результат анализа/)).toBeVisible();
   });
   test('has a recoverable loading state', () => {
     vi.mocked(useHome).mockReturnValue({ isPending: true } as any);

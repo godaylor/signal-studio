@@ -284,13 +284,13 @@ export function HomeWorkspace({
           </div>
           <section className={styles.section} aria-labelledby="home-recent">
             <h2 id="home-recent">
-              {t('Recent Insights and notes', 'Недавние Insights и заметки')}
+              {t('Recent Insights and notes', 'Недавние анализы и заметки')}
             </h2>
             {!data.recent.length ? (
               <p>
                 {t(
                   'Save an Insight in Explore to keep your finding here.',
-                  'Сохраните Insight в анализе, чтобы видеть вывод здесь.',
+                  'Сохраните результат анализа, чтобы видеть вывод здесь.',
                 )}
               </p>
             ) : (
