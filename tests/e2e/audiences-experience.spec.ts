@@ -104,5 +104,7 @@ test('funnel member opens matching evidence and Back restores the complete aggre
   await expect(page.getByRole('heading', { name: 'Session evidence', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Back to analysis' }).click();
   await expect(page).toHaveURL(/mode=funnel/);
-  await expect(page.getByRole('heading', { name: 'Ordered funnel' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'From the first step to the last' }),
+  ).toBeVisible();
 });

@@ -44,6 +44,28 @@ async function startGuest(context: BrowserContext): Promise<Guest> {
   return (await response.json()).guest;
 }
 
+async function enterGuestThroughUi(page: Page) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const entry = page.waitForResponse(
+      response => response.url().endsWith('/api/guest') && response.request().method() === 'POST',
+    );
+    await page.getByRole('button', { name: /Try without|Попробовать без регистрации/ }).click();
+    const response = await entry;
+    if (response.status() === 429 && attempt < 2) {
+      const seconds = Number(response.headers()['retry-after']);
+      // A browser retry owns a fresh guest. Respect the same shared minute
+      // budget as the API helper; longer capacity/client limits still fail.
+      if (Number.isFinite(seconds) && seconds >= 1 && seconds <= 60) {
+        await page.waitForTimeout(seconds * 1000 + 100);
+        continue;
+      }
+    }
+    expect(response.status(), await response.text()).toBe(200);
+    await expect(page).toHaveURL(/\/studio\/[a-f0-9-]+\/explore\?/, { timeout: 30_000 });
+    return;
+  }
+}
+
 async function query(
   request: APIRequestContext,
   definition: AnalysisQueryV1,
@@ -85,8 +107,7 @@ test('guest enters the working app, changes a real calculation, persists an Insi
   test.setTimeout(180_000);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/login?locale=en-US');
-  await page.getByRole('button', { name: /Try without|Попробовать без регистрации/ }).click();
-  await expect(page).toHaveURL(/\/studio\/[a-f0-9-]+\/explore\?/);
+  await enterGuestThroughUi(page);
   const guest = await currentGuest(page.request);
   const cookie = (await page.context().cookies()).find(item => item.name === 'signal-studio-guest');
   expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax' });
@@ -110,7 +131,9 @@ test('guest enters the working app, changes a real calculation, persists an Insi
   expect(recalculation.status()).toBe(200);
   expect(converted(await recalculation.json())).toEqual([336, 252, 84]);
   const appliedUrl = page.url();
-  await expect(table).toContainText('subscription_started');
+  await expect(
+    table.getByRole('rowheader', { name: '3. Subscription', exact: true }),
+  ).toBeVisible();
   await expect(table).toContainText('84');
 
   const title = `Guest paid conversion ${randomUUID().slice(0, 8)}`;
@@ -344,9 +367,10 @@ test('guest mobile has accessible navigation and forms, explains synthetic data,
   ).toContainText('84');
   expect((await currentGuest(page.request)).id).toBe(guest.id);
   await page.getByRole('button', { name: 'Включить тёмную тему', exact: true }).click();
-  await expect(
-    page.getByRole('table', { name: 'Эквивалентная таблица данных воронки' }),
-  ).toHaveCSS('color', 'rgb(233, 247, 253)');
+  await expect(page.getByRole('table', { name: 'Эквивалентная таблица данных воронки' })).toHaveCSS(
+    'color',
+    'rgb(233, 247, 253)',
+  );
   await noOverflowOrBlockingAxe(page);
   await page.setViewportSize({ width: 834, height: 1112 });
   const navigationTrigger = page

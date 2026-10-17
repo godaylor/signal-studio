@@ -42,7 +42,9 @@ for (const mobile of [false, true]) {
       .getByRole('group', { name: 'Цель примера' })
       .getByRole('button', { name: 'Подписка', exact: true })
       .click();
-    await expect(page.getByRole('button', { name: 'Подписка: 84', exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Оформили подписку: 84', exact: true }),
+    ).toBeVisible();
     await expect(shape).not.toHaveAttribute('d', beforeShape);
     await page
       .getByRole('group', { name: 'Цель примера' })

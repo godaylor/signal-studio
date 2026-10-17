@@ -83,11 +83,19 @@ test('funnel analysis survives URL and Insight round-trip with exact drill-down'
   page,
 }) => {
   await page.goto(advancedUrl('funnel'));
-  await expect(page.getByRole('heading', { name: 'Ordered funnel' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'From the first step to the last' }),
+  ).toBeVisible();
   await expect(page.getByRole('table', { name: 'Equivalent funnel data table' })).toBeVisible();
-  await page.locator('summary').filter({ hasText: /^Conversion trend$/ }).click();
+  await page
+    .locator('summary')
+    .filter({ hasText: /^Conversion trend$/ })
+    .click();
   await expect(page.getByRole('table', { name: 'Conversion trend' })).toBeVisible();
-  await page.locator('summary').filter({ hasText: /^Time-to-convert distribution$/ }).click();
+  await page
+    .locator('summary')
+    .filter({ hasText: /^Time-to-convert distribution$/ })
+    .click();
   await expect(page.getByRole('table', { name: 'Time-to-convert distribution' })).toBeVisible();
   await page.getByRole('button', { name: 'Dropped actors' }).last().click();
   await expect(page.getByRole('dialog', { name: 'Exact members' })).toBeVisible();
@@ -102,7 +110,9 @@ test('funnel analysis survives URL and Insight round-trip with exact drill-down'
   const item = library.getByRole('listitem').filter({ hasText: title });
   await item.getByRole('button', { name: 'Reopen' }).click();
   await expect(page).toHaveURL(/mode=funnel/);
-  await expect(page.getByRole('heading', { name: 'Ordered funnel' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'From the first step to the last' }),
+  ).toBeVisible();
 });
 
 test('retention matrix saves and reuses a behavioral Cohort accessibly', async ({ page }) => {
