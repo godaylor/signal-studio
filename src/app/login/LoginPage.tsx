@@ -245,8 +245,8 @@ export function LoginPage({
         </div>
         <p className={styles.sampleDefinition}>
           {t(
-            'The entry scene is a fixed synthetic example, not a live event feed. Inside your guest space, queries run against the sample events through the application’s PostgreSQL analytics.',
-            'Сцена входа — фиксированный синтетический пример, а не поток новых событий. В гостевом пространстве запросы рассчитываются по событиям через рабочую PostgreSQL-аналитику приложения.',
+            'The entry scene is a fixed synthetic example, not a live event feed. Inside your guest space, change the query and explore results calculated from the sample events.',
+            'Сцена входа — фиксированный синтетический пример, а не поток новых событий. Внутри меняйте запросы и исследуйте результаты, рассчитанные по событиям набора.',
           )}
         </p>
       </section>

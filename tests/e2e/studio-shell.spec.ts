@@ -66,7 +66,7 @@ test('tablet navigation keeps all primary destinations and closes after navigati
   await page.goto(studioHome);
 
   await page.getByRole('button', { name: 'Open navigation' }).first().click();
-  const drawer = page.getByRole('dialog', { name: 'Яснослед' });
+  const drawer = page.getByRole('dialog', { name: 'Кинорит' });
   const drawerNav = drawer.getByRole('navigation', { name: 'Primary' });
   await expect(drawerNav.getByRole('link')).toHaveText(primaryLabels);
 
@@ -90,7 +90,7 @@ test('mobile shell honors reduced motion and preserves the same IA', async ({ pa
     .poll(() => page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches))
     .toBe(true);
   await page.getByRole('button', { name: 'Open navigation' }).first().click();
-  const drawer = page.getByRole('dialog', { name: 'Яснослед' });
+  const drawer = page.getByRole('dialog', { name: 'Кинорит' });
   await expect(drawer.getByRole('navigation', { name: 'Primary' }).getByRole('link')).toHaveText(
     primaryLabels,
   );

@@ -346,14 +346,14 @@ test('guest mobile has accessible navigation and forms, explains synthetic data,
   await page.getByRole('button', { name: 'Включить тёмную тему', exact: true }).click();
   await expect(
     page.getByRole('table', { name: 'Эквивалентная таблица данных воронки' }),
-  ).toHaveCSS('color', 'rgb(240, 242, 255)');
+  ).toHaveCSS('color', 'rgb(233, 247, 253)');
   await noOverflowOrBlockingAxe(page);
   await page.setViewportSize({ width: 834, height: 1112 });
   const navigationTrigger = page
     .getByRole('button', { name: 'Открыть навигацию', exact: true })
     .first();
   await navigationTrigger.click();
-  const navigation = page.getByRole('dialog', { name: 'Яснослед', exact: true });
+  const navigation = page.getByRole('dialog', { name: 'Кинорит', exact: true });
   for (const name of ['Главная', 'Анализ', 'Дашборды', 'Аудитории', 'Опыт', 'Сейчас']) {
     await expect(navigation.getByRole('link', { name, exact: true })).toBeVisible();
   }

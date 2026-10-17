@@ -105,14 +105,14 @@ test('public Insight is aggregate-only, bilingual, and revoked from the live rec
   await page.goto(`/share/${ids.slug}`);
 
   await expect(page.getByRole('heading', { name: 'M14 safe public Insight' })).toBeVisible();
-  await expect(page.getByText('Яснослед · Публичный просмотр')).toBeVisible();
+  await expect(page.getByText('Кинорит · Публичный просмотр')).toBeVisible();
   await expect(page.getByLabel('Язык').getByRole('button')).toHaveCount(2);
   await expect(page.getByText('externalId')).toHaveCount(0);
   await expect(page.getByText('sensitiveTraits')).toHaveCount(0);
   await expect(page.getByText(/replay/i)).toHaveCount(0);
 
   await page.getByLabel('Язык').getByRole('button', { name: 'EN' }).click();
-  await expect(page.getByText('Яснослед · Public view')).toBeVisible();
+  await expect(page.getByText('Кинорит · Public view')).toBeVisible();
 
   await prisma.client.share.update({
     where: { id: ids.share },
