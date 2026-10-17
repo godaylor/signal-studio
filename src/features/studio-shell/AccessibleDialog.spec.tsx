@@ -37,8 +37,9 @@ describe('AccessibleDialog', () => {
     const dialog = screen.getByRole('dialog');
     expect(container.querySelector('[data-studio-shell]')).toContainElement(dialog);
     expect(container.querySelector('[data-animated-route]')).not.toContainElement(dialog);
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Search pages' })).toHaveFocus());
     await user.keyboard('{Escape}');
-    expect(screen.getByRole('button', { name: 'Open palette' })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Open palette' })).toHaveFocus());
   });
   test('moves focus in, closes with Escape and restores trigger focus', async () => {
     const user = userEvent.setup();
