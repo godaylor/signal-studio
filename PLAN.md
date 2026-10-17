@@ -2,7 +2,12 @@
 
 ## M21 — Кинорит: behavior in motion
 
-Status: In progress. Explicit user scope supersedes M20's name, optical artwork
+Status: **Complete**. Application revision
+`ed41c9555f8ba581a0f9641cd2b02d21d58a8b75` passed all six CI jobs in run
+`39071289051` and public HTTPS guest, save/reload/export and visual acceptance.
+See `docs/M21_FINAL_REPORT.md` and `docs/design/m21-kinorit/REVIEW.html`.
+
+Explicit user scope supersedes M20's name, optical artwork
 and restrained visual direction. Build one immersive, responsive data instrument:
 expressive entry screen, live result-driven visualization, cohesive surfaces and
 orchestrated transitions. Remove spiral/ribbon imagery, rename the UI, preserve

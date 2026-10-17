@@ -72,3 +72,5 @@ Full prompts: [PROMPTS.md](PROMPTS.md). Original generation folder: C:/Users/lap
 ```
 
 Initial reference captures used as imagegen inputs are retained as reference-initial-home-desktop.png and reference-initial-explore-mobile.png. They are development-stage records, not final release evidence. Final native screenshots use final-* names; public exact-revision screenshots use hosted-* names.
+
+Final native capture revision: ed41c9555f8ba581a0f9641cd2b02d21d58a8b75. All 28 light/dark desktop/mobile captures and 16 additional responsive checks passed. motion-demo.webm is a silent recording of the actual application in Chrome 155, 1440 × 1000, 15.76 seconds, 1,856,845 bytes. It is not generated video. The transition midpoint was separately checked to reveal its full width and disappear under reduced motion. See QA.json and ../../M21_FINAL_REPORT.md for final CI and public workflow evidence.
