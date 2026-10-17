@@ -5,7 +5,6 @@ import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { getStudioPath } from '@/features/studio-shell/navigation';
 import { StudioState } from '@/features/studio-shell/StudioState';
-import { OpticalScene } from '@/features/visual/OpticalScene';
 import type { AnalysisBreakdownRow } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import type { HomeMetric, HomeSnapshot } from '@/server/home/contracts';
@@ -44,7 +43,6 @@ export function HomeWorkspace({
   const activationTotal = activation?.result?.data.total;
   return (
     <section className={styles.page}>
-      <OpticalScene className={styles.opticalArtwork} />
       <header className={styles.heading}>
         <div>
           <p className={styles.eyebrow}>

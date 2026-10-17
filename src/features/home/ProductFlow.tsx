@@ -3,9 +3,9 @@
 import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useId } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { useVisualMotion } from '@/features/visual/MotionPreferences';
+import { FlowField } from '@/features/visual/FlowField';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import type { HomeMetric } from '@/server/home/contracts';
 import styles from './HomeWorkspace.module.css';
@@ -15,7 +15,6 @@ const stages = ['signups', 'activation', 'retention'] as const;
 export function ProductFlow({ metrics }: { metrics: HomeMetric[] }) {
   const { t, locale } = useStudioLocale();
   const { animate } = useVisualMotion();
-  const gradientId = useId();
   const labels = {
     signups: t('Signed up', 'Регистрация'),
     activation: t('Activated', 'Активация'),
@@ -24,28 +23,12 @@ export function ProductFlow({ metrics }: { metrics: HomeMetric[] }) {
 
   return (
     <div className={styles.productFlow}>
-      <div className={styles.flowTrace} aria-hidden="true">
-        <svg viewBox="0 0 1000 100" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
-              <stop stopColor="var(--studio-cobalt)" />
-              <stop offset="1" stopColor="var(--studio-cyan, #8de1e7)" />
-            </linearGradient>
-          </defs>
-          <path
-            className={styles.flowTraceBase}
-            d="M 0 66 C 190 66 320 40 500 66 S 810 92 1000 66"
-          />
-          <motion.path
-            className={styles.flowTraceActive}
-            stroke={`url(#${gradientId})`}
-            d="M 0 66 C 190 66 320 40 500 66 S 810 92 1000 66"
-            initial={animate ? { pathLength: 0, opacity: 0 } : false}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ type: 'tween', duration: animate ? 0.8 : 0, ease: 'easeInOut' }}
-          />
-        </svg>
-      </div>
+      <FlowField
+        className={styles.journeyField}
+        values={stages.map(
+          id => metrics.find(item => item.id === id)?.result?.data.total.value ?? 0,
+        )}
+      />
       <ol className={styles.flowStages}>
         {stages.map((id, index) => {
           const metric = metrics.find(item => item.id === id);
@@ -89,7 +72,6 @@ export function ProductFlow({ metrics }: { metrics: HomeMetric[] }) {
                   </span>
                 </div>
               ) : null}
-              <span className={styles.flowNode} aria-hidden="true" />
               {metric ? (
                 <Link
                   href={`/studio/${metric.query.projectId}/explore?${serializeAnalysisQuery(metric.query)}`}

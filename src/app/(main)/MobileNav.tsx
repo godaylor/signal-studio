@@ -72,7 +72,7 @@ export function MobileNav() {
       </MobileMenuButton>
       <Row alignItems="center" justifyContent="center" flexGrow={1}>
         <IconLabel icon={<Logo />} style={{ width: 'auto' }}>
-          <Text weight="bold">Яснослед</Text>
+          <Text weight="bold">Кинорит</Text>
         </IconLabel>
       </Row>
     </Grid>

@@ -24,6 +24,7 @@ import { useInsights } from '@/features/insights/useInsights';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
 import { StudioState } from '@/features/studio-shell/StudioState';
 import { useVisualMotion } from '@/features/visual/MotionPreferences';
+import { FlowField } from '@/features/visual/FlowField';
 import type { AnalysisFunnelStepRow } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import { applyDashboardContext, type DashboardGlobalContext } from '@/server/dashboards/context';
@@ -559,7 +560,6 @@ export function DashboardWidget({
 }) {
   const { locale, t } = useStudioLocale();
   const guest = useGuestWorkspace();
-  const { animate } = useVisualMotion();
   const applied = useMemo(
     () => (widget.insight?.query ? applyDashboardContext(widget.insight.query, context) : null),
     [context, widget.insight?.query],
@@ -709,41 +709,29 @@ export function DashboardWidget({
             </p>
           ) : null}
           {funnelSteps.length && !hasFunnelSegments ? (
-            <ol
-              className={styles.funnelBars}
-              aria-label={t('Funnel conversion by step', 'Конверсия воронки по шагам')}
-            >
-              {funnelSteps.map(row => (
-                <li key={row.step}>
-                  <span title={row.label}>{eventLabel(row.label)}</span>
-                  <div aria-hidden="true">
-                    <motion.i
-                      style={{
-                        width: `${row.overallConversionRate * 100}%`,
-                        transformOrigin: 'left',
-                      }}
-                      initial={animate ? { scaleX: 0 } : false}
-                      animate={{ scaleX: 1 }}
-                      transition={{
-                        type: 'tween',
-                        duration: animate ? 0.6 : 0,
-                        delay: animate ? row.step * 0.08 : 0,
-                        ease: 'easeOut',
-                      }}
-                    />
-                  </div>
-                  <strong>
-                    {row.converted.toLocaleString(locale)}{' '}
-                    <small>
-                      {row.overallConversionRate.toLocaleString(locale, {
-                        style: 'percent',
-                        maximumFractionDigits: 1,
-                      })}
-                    </small>
-                  </strong>
-                </li>
-              ))}
-            </ol>
+            <div className={styles.funnelStage}>
+              <ol
+                style={{ gridTemplateColumns: `repeat(${funnelSteps.length}, minmax(0,1fr))` }}
+                className={styles.funnelBars}
+                aria-label={t('Funnel conversion by step', 'Конверсия воронки по шагам')}
+              >
+                {funnelSteps.map(row => (
+                  <li key={row.step}>
+                    <span title={row.label}>{eventLabel(row.label)}</span>
+                    <strong>
+                      {row.converted.toLocaleString(locale)}{' '}
+                      <small>
+                        {row.overallConversionRate.toLocaleString(locale, {
+                          style: 'percent',
+                          maximumFractionDigits: 1,
+                        })}
+                      </small>
+                    </strong>
+                  </li>
+                ))}
+              </ol>
+              <FlowField values={funnelSteps.map(row => row.converted)} />
+            </div>
           ) : null}
           <table>
             <caption>

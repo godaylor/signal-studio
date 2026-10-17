@@ -48,7 +48,7 @@ export function ExperienceWorkspace({
   projectName: string;
 }) {
   const { locale, t } = useStudioLocale();
-  const { animate, ambient } = useVisualMotion();
+  const { animate } = useVisualMotion();
   const params = useSearchParams();
   const sessionId = params.get('sessionId') ?? undefined;
   const startAt = params.get('startAt') ?? undefined;
@@ -90,18 +90,7 @@ export function ExperienceWorkspace({
       </header>
       {!sessionId ? (
         <section className={styles.state}>
-          <motion.img
-            className={styles.emptyArtwork}
-            src="/brand/yasnosled/optical-flow.webp"
-            alt=""
-            aria-hidden="true"
-            width="1983"
-            height="793"
-            animate={ambient ? { y: [0, -7, 0] } : { y: 0 }}
-            transition={
-              ambient ? { duration: 8, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }
-            }
-          />
+          <div className={styles.sessionPreview} aria-hidden="true"><span /><span /><span /><span /><span /></div>
           <h2>{t('Choose a session from evidence', 'Выберите сессию из данных')}</h2>
           <p>
             {t(

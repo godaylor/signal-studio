@@ -1,0 +1,56 @@
+Kinorit / Кинорит — M21 original project assets (2026-10-17)
+
+Signal Studio transformation, based on Umami 3.3.1. Root MIT and Copyright (c) 2022 Umami Software, Inc. remain intact.
+
+Mark: original code drawn project SVG, root MIT. Current favicon/mobile/tile icons derive from that mark. No upstream Umami mark or name rights implied.
+Horizon: original built-in imagegen generation without external image references. Generation does not establish trademark rights or exclusive copyright. Decorative background only, never an analytics result. Format conversion only: existing sharp 0.35.3 (Apache-2.0), quality83, no new dependency. Full exact prompts: docs/design/m21-kinorit/PROMPTS.md
+Prompt-file SHA256: 0cdedd4ae33cbd6a702e1c360d76be2e49d5c77ac9931f596913f45d60d91833
+Full sources, generation filenames and derivation: docs/design/m21-kinorit/ASSETS.md
+
+public/brand/kinorit/horizon-original.png
+SHA256: ed0ccd03b94ef24b163b773632e374ffc90702685d95df84f7746db579a8108f
+Bytes: 1746659
+
+public/brand/kinorit/horizon.webp
+SHA256: 3792625d4c91117c2abef7934e0d90b705dfc02792920fed138792f6219e57c0
+Bytes: 73280
+
+public/brand/kinorit/mark.svg
+SHA256: e40aa5af38cdb6365479559e4519378804f00701fa50d554dcb4850c6a5ecaac
+Bytes: 372
+
+public/favicon.ico
+SHA256: 8af51e68c5213ca57bf298f8e3d3638c5fb5014e7945b9c6f75886e3b57fc04b
+Bytes: 1721
+
+public/favicon-16x16.png
+SHA256: f2ab8ac5148a78bd4fc998193b3abe241060ac9431a3ba45ad4674ab5ae5b890
+Bytes: 597
+
+public/favicon-32x32.png
+SHA256: 51cfec5fde0ff428733322968528313c38202cd5432f07cdb388dfe270e2aca7
+Bytes: 1103
+
+public/apple-touch-icon.png
+SHA256: affbf8d47150275db8f65f32e4a2f788cccc18e2e50553f6961bffe8def45387
+Bytes: 5869
+
+public/android-chrome-192x192.png
+SHA256: e9111732e9d731996327b39eb6820629422dde1deb81bdde2af1e51cd3d99210
+Bytes: 6253
+
+public/android-chrome-512x512.png
+SHA256: e4794b2f77e91c8c5eaac093a1abbd68ef00b8d9c242163b65512cd0fad940b0
+Bytes: 24028
+
+public/mstile-150x150.png
+SHA256: 413f001a77852792aad712fc79fef9f2173c1537fd9c29c8e0d74eb33ca94962
+Bytes: 4768
+
+public/site.webmanifest
+SHA256: d265e6e2c926763ff5951ac64f6ccef95813ad416a66d69e570eafaf64a630c0
+Bytes: 407
+
+public/browserconfig.xml
+SHA256: 10d7b1a7dc0324202bfd9b045b48cd7d185cff8707d12412090384199856b505
+Bytes: 255

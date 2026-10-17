@@ -292,9 +292,10 @@
   min-width: 0;
   min-height: 260px;
   padding: 24px;
-  background: var(--studio-surface);
-  border: 1px solid var(--studio-grid);
-  border-radius: 18px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--studio-grid);
+  border-radius: 0;
 }
 .grid > article[data-height="2"] {
   min-height: 440px;
@@ -671,4 +672,41 @@
   .createForm button:hover {
     transform: none;
   }
+}
+
+.funnelStage {
+  background: #061b2c;
+  color: #e9f8ff;
+  padding: 20px 10px 0;
+  margin-inline: -10px;
+  overflow: hidden;
+}
+.funnelStage .funnelBars {
+  gap: 12px;
+  margin: 0 0 -8px;
+  padding: 0 4%;
+}
+.funnelStage .funnelBars li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+}
+.funnelStage .funnelBars li:not(:first-child):not(:last-child) {
+  align-items: center;
+  text-align: center;
+}
+.funnelStage .funnelBars li:last-child {
+  align-items: flex-end;
+  text-align: right;
+}
+.funnelStage .funnelBars strong {
+  text-align: inherit;
+  font-size: 28px;
+  font-weight: 550;
+}
+.funnelStage .funnelBars small {
+  color: #94e8df;
+  font-size: 11px;
 }

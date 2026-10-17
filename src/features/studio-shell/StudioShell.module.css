@@ -855,40 +855,42 @@
   }
 }
 
-/* M20 optical workspace: one continuous canvas and shared navigation track. */
+/* M21 behavior instrument: continuous navigation and a result-driven data stage. */
 .studioFrame {
-  --studio-canvas: #f6f7fb;
+  --brand-mark: #128d9a;
+  --studio-canvas: #f0f6f8;
   --studio-surface: #fff;
-  --studio-surface-muted: #f0f2f9;
-  --studio-ink: #111326;
-  --studio-ink-muted: #626881;
-  --studio-grid: #e0e4f0;
-  --studio-grid-strong: #cbd1e5;
-  --studio-cobalt: #6857f3;
+  --studio-surface-muted: #e6eff3;
+  --studio-ink: #0e293d;
+  --studio-ink-muted: #536e7e;
+  --studio-grid: #cfdee6;
+  --studio-grid-strong: #b5cbd6;
+  --studio-cobalt: #136e95;
   --studio-on-accent: #fff;
-  --studio-cobalt-text: #5140d3;
-  --studio-cobalt-soft: #edebff;
+  --studio-cobalt-text: #0d637f;
+  --studio-cobalt-soft: #dceff1;
   --studio-coral: #b8493e;
   --studio-mint: #126c61;
-  --studio-focus: #6857f3;
+  --studio-focus: #136e95;
   display: block;
   font-family: var(--font-ui), var(--font-inter), sans-serif;
 }
 :global([data-theme="dark"]) .studioFrame {
-  --studio-canvas: #0d1020;
-  --studio-surface: #15192d;
-  --studio-surface-muted: #1c223b;
-  --studio-ink: #f0f2ff;
-  --studio-ink-muted: #a3abc6;
-  --studio-grid: #2a304b;
-  --studio-grid-strong: #424b6b;
-  --studio-cobalt: #a99aff;
-  --studio-on-accent: #111326;
-  --studio-cobalt-text: #bbadff;
-  --studio-cobalt-soft: #272340;
+  --brand-mark: #72e4d7;
+  --studio-canvas: #071e2d;
+  --studio-surface: #102c3d;
+  --studio-surface-muted: #183a4b;
+  --studio-ink: #e9f7fd;
+  --studio-ink-muted: #aac7d7;
+  --studio-grid: #2a4b5c;
+  --studio-grid-strong: #456b80;
+  --studio-cobalt: #72e4d7;
+  --studio-on-accent: #0e293d;
+  --studio-cobalt-text: #94eee2;
+  --studio-cobalt-soft: #153f49;
   --studio-coral: #ff9e8f;
   --studio-mint: #7ee0ce;
-  --studio-focus: #b3a4ff;
+  --studio-focus: #78ebdd;
 }
 .desktopSidebar {
   position: sticky;
@@ -971,7 +973,7 @@
   height: 2px;
   background: var(--studio-cobalt);
   border-radius: 2px;
-  box-shadow: 0 0 16px #6857f34d;
+  box-shadow: 0 0 16px #136e954d;
 }
 .sidebarUtility {
   display: flex;
@@ -1048,7 +1050,7 @@
   min-height: calc(100dvh - 180px);
 }
 .mainContent h1 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-ui), sans-serif;
   letter-spacing: -0.055em;
   font-weight: 550;
 }
@@ -1087,7 +1089,7 @@
 .mobileBottomNav {
   background: color-mix(in srgb, var(--studio-surface) 92%, transparent);
   backdrop-filter: blur(20px);
-  box-shadow: 0 -8px 30px #11132605;
+  box-shadow: 0 -8px 30px #0e293d05;
 }
 .mobileBottomNav a,
 .mobileBottomNav button {
@@ -1264,5 +1266,43 @@
   }
   .dialogHeader {
     padding: 14px 18px;
+  }
+}
+
+.routeFrame {
+  position: relative;
+  isolation: isolate;
+}
+.routeFrame::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    #35e0cf09 48%,
+    #35e0cf20 50%,
+    transparent 55%
+  );
+  animation: sceneSweep 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes sceneSweep {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 100%);
+  }
+}
+:global([data-visual-motion="off"]) .routeFrame::before {
+  animation: none;
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .routeFrame::before {
+    animation: none;
+    display: none;
   }
 }

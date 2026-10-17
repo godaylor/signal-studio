@@ -8,13 +8,13 @@
   display: block;
   width: 44px;
   height: 44px;
-  object-fit: contain;
-  filter: drop-shadow(0 3px 7px #6857f326);
+  color: var(--brand-mark, #128d9a);
+  filter: drop-shadow(0 0 10px #35e0cf22);
 }
 .wordmark {
-  font-family: var(--font-display), sans-serif;
-  font-size: 19px;
-  font-weight: 650;
-  letter-spacing: -0.07em;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.055em;
   line-height: 1.2;
 }

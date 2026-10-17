@@ -1,5 +1,23 @@
 # Signal Studio transformation plan
 
+## M21 — Кинорит: behavior in motion
+
+Status: In progress. Explicit user scope supersedes M20's name, optical artwork
+and restrained visual direction. Build one immersive, responsive data instrument:
+expressive entry screen, live result-driven visualization, cohesive surfaces and
+orchestrated transitions. Remove spiral/ribbon imagery, rename the UI, preserve
+all analytical definitions, authentication, permissions, saved data and free hosting.
+
+Subsystems: brand/metadata, login, shared data visualization and motion, Studio
+shell and six product surfaces, focused regression tests and visual evidence.
+No analytics SQL, schema, provider or account migration. Existing tree clean.
+
+Definition of done: actual result-driven paths and truthful sample labels; clear
+query lineage; keyboard/touch/reduced-motion/hidden-tab support; desktop/mobile
+light/dark screenshot and motion review; real guest save/reload/export regression;
+typecheck/lint/build/tests and public exact-source verification; provenance and
+remaining limitations documented. Preserve other projects and root MIT LICENSE.
+
 ## M20 — Яснослед: cohesive identity, expressive motion and reliable browser entry
 
 Status: **Complete**. Application revision

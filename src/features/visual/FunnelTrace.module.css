@@ -1,167 +1,182 @@
 .figure {
-  margin: 0;
-  min-width: 0;
-  padding: 18px 0 4px;
+  --brand-mark: #35e0cf;
+  margin: 0 -26px;
+  padding: 22px 26px 14px;
+  color: #e9f8ff;
+  background: #061b2c;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.figure::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 30%, #11728b30, transparent 65%);
 }
 .figure figcaption {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: baseline;
   gap: 16px;
   font-size: 13px;
-  font-weight: 600;
   margin-bottom: 26px;
 }
-.figure figcaption > span {
+.figure figcaption small {
+  color: #a1c2d3;
   font-size: 10px;
-  font-weight: 400;
-  color: var(--studio-ink-muted);
-}
-.group {
-  min-width: 0;
 }
 .group h3 {
-  font-size: 12px;
-  color: var(--studio-ink-muted);
+  margin: 18px 0;
+  font-size: 13px;
+  color: #b1d3e1;
 }
 .labels {
   display: grid;
-  gap: 0;
+  padding-inline: 4%;
 }
 .labels button {
   display: grid;
-  align-content: start;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
-  min-height: 68px;
+  align-content: start;
+  min-height: 72px;
   text-align: left;
-  padding: 4px 14px 4px 8px;
-  background: transparent;
-  color: var(--studio-ink);
+  padding: 0 10px;
   border: 0;
-  border-right: 1px dashed var(--studio-grid);
-  cursor: pointer;
   border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.labels button:focus-visible {
+  outline: 2px solid #35e0cf;
+  outline-offset: 3px;
+}
+.labels button:not(:first-child):not(:last-child) {
+  text-align: center;
+  justify-items: center;
 }
 .labels button:last-child {
-  border: 0;
+  text-align: right;
+  justify-items: end;
 }
-.labels button:hover,
-.labels button:focus-visible {
-  background: var(--studio-cobalt-soft);
-  border-radius: 10px;
+.labels button:hover .label,
+.labels button[data-highlight] .label {
+  color: #8bfff0;
 }
 .label {
-  display: flex;
-  gap: 8px;
-  align-items: center;
   font-size: 12px;
-  font-weight: 500;
+  color: #b7d5e3;
+  transition: color 0.2s;
   overflow-wrap: anywhere;
 }
-.label i {
-  width: 6px;
-  height: 6px;
+.labels strong {
+  font-size: clamp(24px, 3vw, 42px);
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.labels small {
+  color: #84e7df;
+  font-size: 12px;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.losses {
+  display: grid;
+  gap: 18px;
+  padding: 0 5% 0 20%;
+  margin-top: -18px;
+  position: relative;
+}
+.losses button {
+  color: #c9dfeb;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+.losses strong {
+  color: #ffbd90;
+  font-size: 20px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+.lossDot {
+  width: 5px;
+  height: 5px;
+  background: #ffb381;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.labels strong {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  font-size: 24px;
-  font-weight: 550;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.labels small {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--studio-ink-muted);
-  letter-spacing: 0;
-}
-.flow {
-  display: block;
-  width: 100%;
-  height: 130px;
-  overflow: visible;
-}
-.flow g {
-  transition: opacity 0.2s;
-}
-.bar {
-  transform-origin: left;
-  transform-box: fill-box;
-  filter: drop-shadow(0 5px 10px #6857f312);
-}
-.figure[data-animate="true"] .bar {
-  animation: grow 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.mobileTrack {
-  display: none;
-}
-@keyframes grow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+.caption {
+  font-size: 10px !important;
+  color: #a1c2d3 !important;
+  line-height: 1.6;
+  margin: 18px 0 0;
 }
 @media (max-width: 700px) {
   .figure {
-    padding: 8px 0;
+    margin-inline: -14px;
+    padding: 18px 14px 12px;
   }
   .figure figcaption {
     font-size: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 20px;
   }
-  .figure figcaption > span {
+  .figure figcaption small {
     display: none;
   }
   .labels {
-    grid-template-columns: 1fr !important;
-    gap: 16px;
+    padding: 0;
   }
   .labels button {
-    position: relative;
-    min-height: 56px;
-    grid-template-columns: 1fr auto;
-    padding: 0;
-    border: 0;
-    gap: 8px;
+    padding: 0 4px;
+    gap: 7px;
+    min-height: 75px;
   }
   .label {
-    font-size: 11px;
+    font-size: 10px;
+    line-height: 1.5;
   }
   .labels strong {
-    font-size: 14px;
-    gap: 8px;
-    letter-spacing: 0;
+    font-size: 25px;
+    gap: 5px;
   }
   .labels small {
     font-size: 10px;
   }
-  .mobileTrack {
-    display: block;
-    grid-column: 1 / -1;
-    width: 100%;
-    height: 17px;
-    border-radius: 6px;
-    background: var(--studio-surface-muted);
-    overflow: hidden;
+  .losses {
+    padding-left: 8%;
+    gap: 14px;
+    margin-top: -16px;
   }
-  .mobileTrack i {
-    display: block;
-    height: 100%;
-    border-radius: 6px;
-    min-width: 0;
-    transform-origin: left;
+  .losses button {
+    font-size: 10px;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-content: start;
   }
-  .figure[data-animate="true"] .mobileTrack i {
-    animation: grow 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  .losses strong {
+    font-size: 18px;
   }
-  .flow {
-    display: none;
+  .losses button > span:last-child {
+    flex-basis: 100%;
+  }
+  .caption {
+    font-size: 9px !important;
   }
 }

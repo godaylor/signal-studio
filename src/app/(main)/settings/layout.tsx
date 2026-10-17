@@ -11,7 +11,7 @@ export default function ({ children }) {
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Настройки | Яснослед',
-    default: 'Настройки | Яснослед',
+    template: '%s | Настройки | Кинорит',
+    default: 'Настройки | Кинорит',
   },
 };

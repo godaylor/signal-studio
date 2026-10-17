@@ -22,7 +22,6 @@ import { InsightLibrary, SaveInsightDialog } from '@/features/insights/InsightLi
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
 import { StudioState } from '@/features/studio-shell/StudioState';
 import { eventLabel } from '@/features/visual/eventLabel';
-import { OpticalScene } from '@/features/visual/OpticalScene';
 import type {
   AnalysisFilter,
   AnalysisOperator,
@@ -249,7 +248,6 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
       aria-label={t('Explore analysis workspace', 'Рабочая область анализа')}
     >
       <header className={styles.heading}>
-        <OpticalScene className={styles.exploreArt} />
         <div>
           <p className={styles.eyebrow}>{t('Behavior research', 'Исследование поведения')}</p>
           <h1>

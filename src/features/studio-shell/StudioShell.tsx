@@ -180,7 +180,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
       <a className={styles.skipLink} href="#studio-main">
         {t('Skip to content', 'Перейти к содержимому')}
       </a>
-      <aside className={styles.desktopSidebar} aria-label="Яснослед">
+      <aside className={styles.desktopSidebar} aria-label="Кинорит">
         <div className={styles.brandRow}>
           <Link className={styles.brand} href={getStudioPath(projectId, 'home')}>
             <BrandMark wordmark />
@@ -388,17 +388,18 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
         <GuestWorkspaceContext.Provider value={user.isGuest ? (guest.data ?? null) : null}>
           <main id="studio-main" className={styles.mainContent} tabIndex={-1}>
             <motion.div
+              className={styles.routeFrame}
               key={pathSection}
-              initial={animate ? { y: 12 } : false}
+              initial={animate ? { y: 18 } : false}
               animate={{ y: 0 }}
-              transition={{ type: 'tween', duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ type: 'tween', duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
             >
               {children}
             </motion.div>
           </main>
         </GuestWorkspaceContext.Provider>
         <footer className={styles.footer}>
-          <span>Яснослед</span>
+          <span>Кинорит</span>
           <Link href={getStudioPath(projectId, 'legal')}>
             {t('Based on Umami · MIT', 'На основе Umami · MIT')}
           </Link>
@@ -431,7 +432,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
 
       <AccessibleDialog
         open={mobileOpen}
-        title="Яснослед"
+        title="Кинорит"
         description={`${project.name} · ${roleLabel}`}
         side="left"
         onClose={() => setMobileOpen(false)}

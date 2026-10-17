@@ -130,15 +130,18 @@ const yasnosledIcons = new Set([
   'public/mstile-150x150.png',
 ]);
 const assets = [...walk('public'), ...walk('src/assets')].sort().map(file => {
-  const yasnosledArtwork = file.startsWith('public/brand/yasnosled/') || yasnosledIcons.has(file);
+  const kinoritArtwork = file.startsWith('public/brand/kinorit/') || yasnosledIcons.has(file);
+  const yasnosledArtwork = file.startsWith('public/brand/yasnosled/');
   const yasnosledMetadata = ['public/site.webmanifest', 'public/browserconfig.xml'].includes(file);
   return {
     path: file,
     sha256: sha(readFileSync(file)),
-    provenance: yasnosledArtwork
+    provenance: kinoritArtwork
+      ? 'Original Kinorit M21 code-drawn mark/icons and imagegen horizon; no external image references; see exact provenance'
+      : yasnosledArtwork
       ? 'Original Яснослед M20 imagegen artwork and format/resize derivatives; no external image references'
       : yasnosledMetadata
-        ? 'Original Яснослед application metadata'
+        ? 'Original Kinorit M21 application metadata'
         : file.includes('/fonts/')
           ? 'docs/licenses/pinned-assets.json'
           : file.startsWith('public/intl/country/')
@@ -149,8 +152,10 @@ const assets = [...walk('public'), ...walk('src/assets')].sort().map(file => {
                 ? 'Umami snapshot; Datamaps (MIT), Natural Earth (public domain)'
                 : `Umami MIT source snapshot ${upstream}; Signal Studio modifications under root MIT`,
     source:
-      yasnosledArtwork || yasnosledMetadata
-        ? 'docs/licenses/Yasnosled-assets.txt'
+      kinoritArtwork || yasnosledMetadata
+        ? 'docs/licenses/Kinorit-assets.txt'
+        : yasnosledArtwork
+          ? 'docs/licenses/Yasnosled-assets.txt'
         : `https://github.com/umami-software/umami/tree/${upstream}/${file}`,
   };
 });

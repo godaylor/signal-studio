@@ -20,17 +20,30 @@ async function settleTheme(page: import('@playwright/test').Page) {
 }
 
 for (const mobile of [false, true]) {
-  test(`Russian optical workspace: ${mobile ? 'mobile with reduced motion' : 'desktop with visible motion'}`, async ({
+  test(`Russian data workspace: ${mobile ? 'mobile with reduced motion' : 'desktop with visible motion'}`, async ({
     page,
   }) => {
     test.setTimeout(240_000);
     await page.setViewportSize({ width: mobile ? 390 : 1440, height: mobile ? 844 : 1000 });
     await page.emulateMedia({ reducedMotion: mobile ? 'reduce' : 'no-preference' });
     await page.goto('/login?locale=ru-RU');
-    await expect(page).toHaveTitle(/Яснослед/);
+    await expect(page).toHaveTitle(/Кинорит/);
     await expect(page.locator('html')).toHaveAttribute('data-visual-motion', mobile ? 'off' : 'on');
+    const shape = page.locator('[data-flow-body]').last();
+    const beforeShape = await shape.getAttribute('d');
+    if (!beforeShape) throw new Error('The example must render an aggregate flow');
+    await page
+      .getByRole('group', { name: 'Цель примера' })
+      .getByRole('button', { name: 'Подписка', exact: true })
+      .click();
+    await expect(page.getByRole('button', { name: 'Подписка: 84', exact: true })).toBeVisible();
+    await expect(shape).not.toHaveAttribute('d', beforeShape);
+    await page
+      .getByRole('group', { name: 'Цель примера' })
+      .getByRole('button', { name: 'Активация', exact: true })
+      .click();
     if (!mobile) {
-      const trace = page.locator('[data-ambient] path').last();
+      const trace = page.locator('[data-flow-pulse]').first();
       const before = await trace.evaluate(el => getComputedStyle(el).strokeDashoffset);
       await expect
         .poll(() => trace.evaluate(el => getComputedStyle(el).strokeDashoffset))
@@ -39,6 +52,10 @@ for (const mobile of [false, true]) {
       await expect(page.locator('html')).toHaveAttribute('data-visual-motion', 'off');
       await expect(page.locator('[data-ambient]')).toHaveAttribute('data-active', 'false');
       await page.getByRole('button', { name: 'Включить анимацию', exact: true }).click();
+      await page.getByRole('link', { name: 'Войти', exact: true }).click();
+      await expect(page.locator('[data-ambient]')).toHaveAttribute('data-active', 'false');
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect(page.locator('[data-ambient]')).toHaveAttribute('data-active', 'true');
     }
     // Entry itself is covered by the guest/auth suites; respect the real global entry budget.
     let entry = await page.request.post('/api/guest');
@@ -110,7 +127,7 @@ for (const mobile of [false, true]) {
       const dialog = page.getByRole('dialog', { name: 'Изменить запрос', exact: true });
       await expect(dialog).toBeFocused();
       if (mobile) {
-        const trace = page.locator('[data-ambient] path').last();
+        const trace = page.locator('[data-flow-pulse]').first();
         const before = await trace.evaluate(el => getComputedStyle(el).strokeDashoffset);
         await page.waitForTimeout(180);
         expect(await trace.evaluate(el => getComputedStyle(el).strokeDashoffset)).toBe(before);

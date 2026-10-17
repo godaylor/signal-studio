@@ -3,7 +3,7 @@
 Signal Studio is based on Umami 3.3.1, Copyright (c) 2022 Umami Software, Inc.,
 and is distributed under the MIT License included in the root `LICENSE` file.
 
-Яснослед is the current product name of this Signal Studio transformation.
+Кинорит (Kinorit) is the current product name of this Signal Studio transformation.
 The new name and artwork do not change its Umami foundation or MIT notice.
 
 Runtime and build dependencies retain their respective licenses. The build

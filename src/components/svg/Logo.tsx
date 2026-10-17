@@ -10,7 +10,7 @@ const SvgLogo = (props: SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <image
-      href={`${process.env.basePath || ''}/brand/yasnosled/mark.webp`}
+      href={`${process.env.basePath || ''}/brand/kinorit/mark.svg`}
       width="24"
       height="24"
     />

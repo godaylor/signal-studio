@@ -118,8 +118,8 @@ export function StudioPage({ section, projectId }: { section: string; projectId:
           eyebrow={t('Open source provenance', 'Происхождение открытого кода')}
           title={t('Legal & notices', 'Лицензии и уведомления')}
           description={t(
-            'Яснослед preserves the license and attribution of its Umami foundation.',
-            'Яснослед сохраняет лицензию и атрибуцию основы Umami.',
+            'Кинорит preserves the license and attribution of its Umami foundation.',
+            'Кинорит сохраняет лицензию и атрибуцию основы Umami.',
           )}
         />
         <article className={styles.legalNotice}>
@@ -128,14 +128,14 @@ export function StudioPage({ section, projectId }: { section: string; projectId:
             <h2>{t('Based on Umami', 'На основе Umami')}</h2>
             <p>
               {t(
-                'Яснослед is based on Umami 3.3.1, Copyright © 2022 Umami Software, Inc., and is distributed under the MIT License.',
-                'Яснослед основан на Umami 3.3.1, Copyright © 2022 Umami Software, Inc., и распространяется по лицензии MIT.',
+                'Кинорит is based on Umami 3.3.1, Copyright © 2022 Umami Software, Inc., and is distributed under the MIT License.',
+                'Кинорит основан на Umami 3.3.1, Copyright © 2022 Umami Software, Inc., и распространяется по лицензии MIT.',
               )}
             </p>
             <p>
               {t(
-                'The original MIT notice is preserved. Unbounded, Golos Text and Inter use OFL-1.1. The Яснослед mark and optical illustration were generated for this project. Sources, dependency notices and the exact build inventory are available below.',
-                'Исходное уведомление MIT сохранено. Unbounded, Golos Text и Inter — OFL-1.1. Знак и оптическая иллюстрация Ясноследа созданы для этого проекта. Источники, уведомления компонентов и точный состав сборки доступны ниже.',
+                'The original MIT notice is preserved. Unbounded, Golos Text and Inter use OFL-1.1. The Kinorit mark and flow visualization are original code; the entry horizon was generated for this project. Sources, dependency notices and the exact build inventory are available below.',
+                'Исходное уведомление MIT сохранено. Unbounded, Golos Text и Inter — OFL-1.1. Знак Кинорита и визуализация потока созданы кодом; пейзаж входа сгенерирован для этого проекта. Источники, уведомления компонентов и точный состав сборки доступны ниже.',
               )}
             </p>
             <ul>

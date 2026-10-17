@@ -41,7 +41,7 @@ export function CreateProject({ onStart }: { onStart?: () => void }) {
 
   return (
     <section className={styles.create} aria-labelledby="create-project-title">
-      <p className={styles.eyebrow}>Яснослед</p>
+      <p className={styles.eyebrow}>Кинорит</p>
       <h1 id="create-project-title">
         {t('Understand how people use your product', 'Узнайте, как люди используют ваш продукт')}
       </h1>

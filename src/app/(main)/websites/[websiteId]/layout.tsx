@@ -28,7 +28,7 @@ export default async function ({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Яснослед',
-    default: 'Источники | Яснослед',
+    template: '%s | Кинорит',
+    default: 'Источники | Кинорит',
   },
 };

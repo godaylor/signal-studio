@@ -912,7 +912,7 @@
   left: 8px;
   right: 12%;
   height: 2px;
-  background: linear-gradient(90deg, #8b72ef, #659bff, #69cadb);
+  background: linear-gradient(90deg, #4478f5, #22b9d4, #35cdbd);
   box-shadow: 0 0 14px #6857f322;
   z-index: -1;
 }
@@ -935,11 +935,11 @@
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: linear-gradient(140deg, #baaaff, #6857f3);
+  background: linear-gradient(140deg, #83c4f2, #1e84af);
   border: 2px solid var(--studio-surface);
   box-shadow:
-    0 0 0 1px #9585fb66,
-    0 0 12px #6857f344;
+    0 0 0 1px #30aec866,
+    0 0 12px #35e0cf33;
   margin-bottom: 8px;
   transition:
     transform 0.25s,
@@ -974,10 +974,10 @@
 }
 .canvas {
   padding: 24px 26px;
-  border: 1px solid var(--studio-grid);
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--studio-surface) 74%, var(--studio-canvas));
-  box-shadow: 0 6px 32px #11132603;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .analysisToolbar {
   margin: 0;
@@ -1056,9 +1056,10 @@
   gap: 6px;
 }
 .tableWrap {
-  border-radius: 12px;
-  border: 1px solid var(--studio-grid);
-  background: var(--studio-surface);
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid var(--studio-grid);
+  background: transparent;
 }
 .tableWrap caption {
   padding: 14px 16px;
@@ -1252,7 +1253,7 @@
   }
   .canvas {
     padding: 16px 14px;
-    border-radius: 16px;
+    border-radius: 0;
   }
   .result {
     gap: 13px;
@@ -1351,5 +1352,38 @@
     height: 160px;
     opacity: 0.36;
     mask-image: linear-gradient(90deg, transparent, #000 50%);
+  }
+}
+
+@media (max-width: 700px) {
+  .queryTrack {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 6px 0;
+    margin: 4px 0 10px;
+    border-block: 1px solid var(--studio-grid);
+    scrollbar-width: thin;
+  }
+  .queryTrack::before,
+  .queryTrack i {
+    display: none;
+  }
+  .queryTrack button {
+    display: flex;
+    align-items: baseline;
+    flex-shrink: 0;
+    gap: 6px;
+    white-space: nowrap;
+    padding: 0;
+    min-height: 30px;
+  }
+  .queryTrack span,
+  .queryTrack strong {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .queryTrack strong {
+    max-width: 130px;
   }
 }
