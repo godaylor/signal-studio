@@ -73,8 +73,9 @@ eight dashboards, 40 widgets, 15 segment/cohort creates, 12 exports and 150 othe
 The counters update atomically in PostgreSQL; race and direct-API bypass tests are included.
 Authorized attempts consume budgets even if a later service validation fails.
 
-Guest bodies are capped at 64 KiB. Normal bearer sessions with a leftover guest cookie
-retain normal body behavior. Cross-origin writes, fabricated cookies, public shares,
+Guest management bodies are capped at 64 KiB. Normal bearer sessions and public
+ingestion with a leftover guest cookie retain their existing body behavior.
+Cross-origin writes, fabricated cookies, public shares,
 membership/security changes, source administration and background/identity exports are
 denied. Logout remains possible after quota exhaustion. Expiry/revocation is checked live;
 replaying a formerly valid cookie fails. The guest endpoint uses private/no-store headers.

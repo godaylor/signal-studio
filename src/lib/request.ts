@@ -32,7 +32,7 @@ export async function parseRequest(
   let query = Object.fromEntries(url.searchParams);
   let body: any;
   try {
-    body = await getJsonBody(request);
+    body = await getJsonBody(request, !options?.skipAuth);
   } catch (bodyError) {
     return { url, query, body: undefined, auth: null,
       error: () => guestErrorResponse(bodyError, crypto.randomUUID()) };
@@ -94,9 +94,9 @@ function isAssuranceRoute(pathname: string) {
   ].some(path => pathname.endsWith(path));
 }
 
-export async function getJsonBody(request: Request) {
+export async function getJsonBody(request: Request, limitGuestBody = true) {
   try {
-    if (!getBearerToken(request) && guestCookieToken(request)) {
+    if (limitGuestBody && !getBearerToken(request) && guestCookieToken(request)) {
       const reader = request.clone().body?.getReader();
       if (!reader) return undefined;
       const chunks: Uint8Array[] = [];

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { getJsonBody } from '@/lib/request';
+import { getJsonBody, parseRequest } from '@/lib/request';
 import { sameOriginGuestRequest } from './contracts';
 import { GUEST_DATASET, guestDatasetRange, guestExampleQuery } from './dataset';
 import { guestRouteOperation } from './guard';
@@ -65,6 +65,30 @@ describe('temporary guest boundary', () => {
       body: JSON.stringify(payload),
     });
     expect(await getJsonBody(normalRequest)).toEqual(payload);
+  });
+
+  it('keeps public ingestion body behavior with a guest cookie while bounding management bodies', async () => {
+    const payload = {
+      type: 'event',
+      payload: { website: projectId, data: { detail: 'x'.repeat(70_000) } },
+    };
+    const post = (path: string) =>
+      new Request(`https://studio.test${path}`, {
+        method: 'POST',
+        headers: {
+          cookie: `signal-studio-guest=${'a'.repeat(64)}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+    for (const path of ['/api/send', '/api/batch', '/api/record']) {
+      const parsed = await parseRequest(post(path), undefined, { skipAuth: true });
+      expect(parsed.error).toBeUndefined();
+      expect(parsed.body).toEqual(payload);
+    }
+    const management = await parseRequest(post(`/api/projects/${projectId}/insights`));
+    expect(management.error().status).toBe(413);
+    expect((await management.error().json()).error.code).toBe('guest-request-too-large');
   });
 
   it('rejects cross-origin writes and malformed opaque cookie values', () => {
