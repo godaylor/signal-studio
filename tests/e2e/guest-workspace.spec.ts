@@ -60,7 +60,12 @@ async function enterGuestThroughUi(page: Page) {
         continue;
       }
     }
-    expect(response.status(), await response.text()).toBe(200);
+    // Successful entry navigates away and Chromium may discard the old page's
+    // response body. Read diagnostics only while a failed entry stays here.
+    if (response.status() !== 200) {
+      expect(response.status(), await response.text()).toBe(200);
+    }
+    expect(response.status()).toBe(200);
     await expect(page).toHaveURL(/\/studio\/[a-f0-9-]+\/explore\?/, { timeout: 30_000 });
     return;
   }

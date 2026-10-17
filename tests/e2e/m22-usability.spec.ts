@@ -176,12 +176,16 @@ test('mobile editing covers the shell, preserves valid dates and recovers from c
     await edit.click();
     const dialog = page.getByRole('dialog', { name: 'Edit query', exact: true });
     await expect(dialog).toBeFocused();
-    const box = await dialog.boundingBox();
-    if (!box) throw new Error('The mobile query editor must occupy the viewport.');
-    expect(box.x).toBeCloseTo(0, 0);
-    expect(box.y).toBeCloseTo(0, 0);
-    expect(box.width).toBeCloseTo(viewport.width, 0);
-    expect(box.height).toBeCloseTo(viewport.height, 0);
+    // Focus can arrive before the entrance transition finishes. Require the
+    // actual final viewport bounds rather than measuring an intermediate frame.
+    await expect(async () => {
+      const box = await dialog.boundingBox();
+      if (!box) throw new Error('The mobile query editor must occupy the viewport.');
+      expect(box.x).toBeCloseTo(0, 0);
+      expect(box.y).toBeCloseTo(0, 0);
+      expect(box.width).toBeCloseTo(viewport.width, 0);
+      expect(box.height).toBeCloseTo(viewport.height, 0);
+    }).toPass({ timeout: 5000, intervals: [50, 100, 200] });
     const title = dialog.getByRole('heading', { name: 'Edit query', exact: true });
     await expect(title).toBeVisible();
     expect(
