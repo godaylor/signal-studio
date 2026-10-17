@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { AnalysisResult } from '@/server/analytics/contracts';
@@ -145,6 +145,52 @@ describe('ExploreWorkspace', () => {
     } as unknown as ReturnType<typeof useSaveCohort>);
   });
 
+  test('does not interpret the previous funnel response as a new trend question', () => {
+    vi.mocked(useAnalysisResult).mockReturnValue({
+      data: {
+        ...result,
+        data: {
+          mode: 'funnel',
+          rows: [{ kind: 'funnel-step', step: 1, label: 'signup', converted: 336 }],
+        },
+      },
+      isPending: false,
+      isFetching: true,
+      isPlaceholderData: true,
+      error: null,
+    } as unknown as ReturnType<typeof useAnalysisResult>);
+    render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
+    expect(screen.getByRole('heading', { name: 'Calculating your answer' })).toBeVisible();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByText('336')).not.toBeInTheDocument();
+  });
+
+  test('running the unchanged question explicitly refreshes its data', async () => {
+    const user = userEvent.setup();
+    const refetch = vi.fn();
+    vi.mocked(useAnalysisResult).mockReturnValue({
+      ...vi.mocked(useAnalysisResult)(),
+      refetch,
+    } as unknown as ReturnType<typeof useAnalysisResult>);
+    render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
+    await user.click(screen.getByRole('button', { name: 'Edit query' }));
+    await user.click(screen.getByRole('button', { name: 'Run analysis' }));
+    expect(refetch).toHaveBeenCalledOnce();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  test('clipboard denial gives a recoverable action without an unhandled rejection', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValueOnce(
+      new DOMException('Denied', 'NotAllowedError'),
+    );
+    render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
+    await user.click(screen.getByRole('button', { name: 'Copy URL' }));
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Select and copy the address in your browser',
+    );
+  });
+
   test('restores URL state into a keyboard-operable Query Spine and equivalent table', async () => {
     const user = userEvent.setup();
     render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
@@ -177,6 +223,28 @@ describe('ExploreWorkspace', () => {
     expect(screen.getByRole('heading', { name: 'No events matched this question' })).toBeVisible();
     await user.click(screen.getByRole('button', { name: 'Edit query' }));
     expect(screen.getByRole('button', { name: 'Run analysis' })).toBeVisible();
+  });
+
+  test('clearing a required date keeps the valid applied question and explains how to change it', async () => {
+    const user = userEvent.setup();
+    render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
+    await user.click(
+      within(screen.getByRole('group', { name: 'Query Spine' })).getByRole('button', {
+        name: /Context/,
+      }),
+    );
+    const start = screen.getByLabelText('Start date');
+    fireEvent.change(start, { target: { value: '' } });
+    expect(start).toHaveValue('2026-03-01');
+    expect(screen.getByRole('alert')).toHaveTextContent('previous date has been kept');
+    expect(push).not.toHaveBeenCalled();
+    fireEvent.change(start, { target: { value: '2026-03-02' } });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Run analysis' }));
+    expect(push).toHaveBeenCalledWith(
+      expect.stringContaining('start=2026-03-02T00%3A00%3A00.000Z'),
+      { scroll: false },
+    );
   });
 
   test('renders permission denial without hiding the Query Spine', () => {

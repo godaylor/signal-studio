@@ -176,7 +176,11 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
   const SettingsIcon = studioUtilityNavigation[1].icon;
 
   return (
-    <div className={styles.studioFrame} data-sidebar-collapsed={sidebarCollapsed || undefined}>
+    <div
+      className={styles.studioFrame}
+      data-studio-shell
+      data-sidebar-collapsed={sidebarCollapsed || undefined}
+    >
       <a className={styles.skipLink} href="#studio-main">
         {t('Skip to content', 'Перейти к содержимому')}
       </a>

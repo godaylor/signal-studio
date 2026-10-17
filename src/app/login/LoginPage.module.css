@@ -165,6 +165,45 @@
   color: #a0bfce;
   margin: 16px 0 0;
 }
+.exampleContext {
+  max-width: 330px;
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #b3ccda;
+}
+.exampleReading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 30px;
+  max-width: 1900px;
+  margin: auto;
+  padding: 0 clamp(22px, 5vw, 90px) 25px;
+  color: #b9d6e3;
+  font-size: 12px;
+}
+.exampleReading p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  line-height: 1.6;
+}
+.exampleReading p:last-child {
+  font-size: 11px;
+  max-width: 360px;
+}
+.waterKey,
+.lossKey {
+  display: inline-block;
+  width: 22px;
+  height: 3px;
+  flex-shrink: 0;
+  background: #61e9e1;
+}
+.lossKey {
+  background: #ffb381;
+}
 .expired {
   font-size: 13px;
   color: #ffc09a;
@@ -276,6 +315,74 @@
   font-size: 11px;
   color: #b1cedd;
   text-decoration: none;
+  min-height: 40px;
+}
+@media (min-width: 1900px) {
+  .header {
+    padding-inline: max(48px, calc((100vw - 1800px) / 2));
+  }
+}
+@media (max-width: 280px) {
+  .header {
+    height: auto;
+    min-height: 100px;
+    flex-wrap: wrap;
+    padding-block: 12px;
+  }
+  .header nav {
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
+  }
+  .header button {
+    width: 40px;
+    height: 40px;
+  }
+  .intro h1 {
+    font-size: clamp(27px, 12vw, 34px);
+    overflow-wrap: anywhere;
+  }
+  .guestAction {
+    width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .sceneLabels {
+    gap: 4px;
+  }
+  .sceneLabels button {
+    padding-inline: 1px;
+  }
+  .sceneLabels strong {
+    font-size: 23px;
+  }
+  .sceneLabels span {
+    font-size: 9px;
+    overflow-wrap: anywhere;
+  }
+  .sceneAnswer {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .answerNote {
+    max-width: none;
+    flex-basis: 100%;
+  }
+  .scenario {
+    gap: 10px;
+  }
+  .sampleTop {
+    padding-inline: 0;
+    font-size: 9px;
+  }
+  .journey h2,
+  .account h2 {
+    font-size: 26px;
+    overflow-wrap: anywhere;
+  }
+  .account {
+    padding-inline: 16px;
+  }
 }
 .proofline {
   max-width: 1900px;

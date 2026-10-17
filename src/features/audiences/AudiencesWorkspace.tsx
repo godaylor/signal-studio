@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { ExportControls } from '@/features/exports/ExportControls';
+import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
 import { useVisualMotion } from '@/features/visual/MotionPreferences';
@@ -81,6 +82,7 @@ export function AudiencesWorkspace({
   projectName: string;
 }) {
   const { t } = useStudioLocale();
+  const guest = useGuestWorkspace();
   const { animate } = useVisualMotion();
   const params = useSearchParams();
   const router = useRouter();
@@ -88,7 +90,8 @@ export function AudiencesWorkspace({
   const requestedView = params.get('view');
   const view =
     requestedView === 'users' || requestedView === 'segments' ? requestedView : 'accounts';
-  const [searchDraft, setSearchDraft] = useState(params.get('q') ?? '');
+  const appliedSearch = params.get('q') ?? '';
+  const [searchDraft, setSearchDraft] = useState(appliedSearch);
   const profileId = params.get('profileId');
   const profileEntity = params.get('profileEntity');
   const profile: ProfileSelection | undefined =
@@ -98,6 +101,9 @@ export function AudiencesWorkspace({
       ? { id: profileId, entity: profileEntity }
       : undefined;
   const deferredSearch = useDeferredValue(searchDraft);
+  useEffect(() => {
+    setSearchDraft(appliedSearch);
+  }, [appliedSearch]);
   const serializedParams = params.toString();
 
   const replaceParams = useCallback(
@@ -133,13 +139,21 @@ export function AudiencesWorkspace({
         <p>
           {t('Audiences', 'Аудитории')} · {projectName}
         </p>
-        <h1>{t('The people behind your metrics', 'Люди за метриками')}</h1>
+        <h1>{t('Who uses your product?', 'Кто пользуется продуктом?')}</h1>
         <span>
           {t(
-            'Find the people behind your metrics and see how they use your product.',
-            'Посмотрите, кто стоит за метриками и как эти люди используют продукт.',
+            'An account is a company, a user is a person, and a segment is a group defined by conditions. Open a profile to see their activity and sessions.',
+            'Аккаунт — компания, пользователь — человек, сегмент — группа по условиям. Откройте профиль, чтобы увидеть действия и сессии.',
           )}
         </span>
+        {guest ? (
+          <span>
+            {t(
+              'These companies and people are fictional. Their profiles lead to the stored synthetic events used in your analyses.',
+              'Эти компании и люди вымышлены. В их профилях доступны сохранённые синтетические события, по которым рассчитан анализ.',
+            )}
+          </span>
+        ) : null}
       </header>
       <LayoutGroup id={`audience-views-${projectId}`}>
         <nav className={styles.tabs} aria-label={t('Audience view', 'Представление аудитории')}>
@@ -314,18 +328,39 @@ function IdentityView({
       {list.error ? (
         <p role="alert" className={styles.state}>
           {t(
-            'Identities could not be loaded. Retry from this URL.',
-            'Не удалось загрузить идентичности. Повторите попытку с текущего URL.',
-          )}
+            'People and accounts could not be loaded. Your filters have been kept.',
+            'Не удалось загрузить пользователей и компании. Ваши фильтры сохранены.',
+          )}{' '}
+          <button type="button" className={styles.rowButton} onClick={() => list.refetch()}>
+            {t('Retry', 'Повторить')}
+          </button>
         </p>
       ) : null}
       {!list.isPending && !list.error && rows.length === 0 ? (
-        <p className={styles.state}>
-          {t(
-            'No people or accounts match these filters. Try a different search or stage.',
-            'По этим фильтрам никого нет. Измените поиск или этап.',
+        <div className={styles.state}>
+          <p>
+            {t(
+              'No people or accounts match these filters. This does not mean there are no events.',
+              'По этим фильтрам никого нет. Это не означает, что событий нет.',
+            )}
+          </p>
+          {search || lifecycle ? (
+            <button
+              type="button"
+              className={styles.rowButton}
+              onClick={() => {
+                onSearch('');
+                replaceParams({ q: undefined, lifecycle: undefined });
+              }}
+            >
+              {t('Clear search and stage', 'Сбросить поиск и этап')}
+            </button>
+          ) : (
+            <Link className={styles.rowButton} href={`/studio/${projectId}/explore`}>
+              {t('Explore recorded events', 'Посмотреть записанные события')}
+            </Link>
           )}
-        </p>
+        </div>
       ) : null}
       {rows.length ? (
         <div className={styles.tableWrap}>
@@ -575,6 +610,11 @@ function SegmentView({
   const preview = usePreviewSegment(projectId);
   const save = useSaveSegment(projectId);
   const remove = useDeleteSegment(projectId);
+  const definitionKey = JSON.stringify(definition);
+  const previewMatchesDraft = JSON.stringify(preview.variables) === definitionKey;
+  const savedMatchesDraft =
+    save.variables?.name === name.trim() &&
+    JSON.stringify(save.variables?.definition) === definitionKey;
   const updateCondition = (index: number, condition: OperationalSegmentCondition) =>
     setDefinition(current => ({
       ...current,
@@ -804,7 +844,15 @@ function SegmentView({
             )}
           </p>
         ) : null}
-        {preview.data ? (
+        {preview.data && !previewMatchesDraft ? (
+          <p role="status">
+            {t(
+              'Conditions changed. Preview the size again to see the current audience.',
+              'Условия изменились. Оцените размер снова, чтобы увидеть текущую аудиторию.',
+            )}
+          </p>
+        ) : null}
+        {preview.data && previewMatchesDraft ? (
           <div className={styles.preview} role="status">
             <strong>
               {preview.data.count.toLocaleString(locale)} {t('exact', 'точно')}{' '}
@@ -829,7 +877,7 @@ function SegmentView({
             </ul>
           </div>
         ) : null}
-        {save.isSuccess ? (
+        {save.isSuccess && savedMatchesDraft ? (
           <p role="status">
             {t(
               'Segment saved with its reusable definition.',
@@ -888,21 +936,39 @@ function SegmentView({
                       : t('No saved dependencies', 'Нет сохранённых зависимостей')}
                   </small>
                 </div>
-                <button
-                  type="button"
-                  disabled={dependencyCount > 0 || remove.isPending}
-                  title={
-                    dependencyCount
-                      ? t(
-                          'Remove dependencies before deleting this Segment.',
-                          'Удалите зависимости перед удалением сегмента.',
-                        )
-                      : undefined
-                  }
-                  onClick={() => remove.mutate(segment.id)}
-                >
-                  {t('Delete', 'Удалить')}
-                </button>
+                <div className={styles.segmentActions}>
+                  <button
+                    type="button"
+                    disabled={preview.isPending}
+                    aria-label={t(
+                      `Preview members of ${segment.name}`,
+                      `Показать состав: ${segment.name}`,
+                    )}
+                    onClick={() => {
+                      setDefinition(segment.definition);
+                      setName('');
+                      save.reset();
+                      preview.mutate(segment.definition);
+                    }}
+                  >
+                    {t('Show members', 'Показать состав')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={dependencyCount > 0 || remove.isPending}
+                    title={
+                      dependencyCount
+                        ? t(
+                            'Remove dependencies before deleting this Segment.',
+                            'Удалите зависимости перед удалением сегмента.',
+                          )
+                        : undefined
+                    }
+                    onClick={() => remove.mutate(segment.id)}
+                  >
+                    {t('Delete', 'Удалить')}
+                  </button>
+                </div>
               </li>
             );
           })}

@@ -35,7 +35,9 @@ import {
   serializeAnalysisQuery,
 } from '@/server/analytics/url-codec';
 import { AdvancedMeasureEditor, AdvancedResults, AdvancedSignalEditor } from './AdvancedAnalysis';
+import { createChartScale } from './chartScale';
 import styles from './ExploreWorkspace.module.css';
+import { GuestQuestions } from './GuestQuestions';
 import {
   analysisDimensions,
   analysisOperators,
@@ -131,7 +133,7 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
   );
   const [activeBlock, setActiveBlock] = useState<BlockId>('signal');
   const [selectedRow, setSelectedRow] = useState<DisplayRow>();
-  const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [saveOpen, setSaveOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [queryError, setQueryError] = useState('');
@@ -154,7 +156,11 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
       const serialized = serializeAnalysisQuery(draft);
       setQueryError('');
       setEditorOpen(false);
-      router.push(`${pathname}?${serialized}`, { scroll: false });
+      if (serialized === serializeAnalysisQuery(restored.query)) {
+        void result.refetch();
+      } else {
+        router.push(`${pathname}?${serialized}`, { scroll: false });
+      }
     } catch {
       setQueryError(
         t(
@@ -172,9 +178,13 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
   };
 
   const copyUrl = async () => {
-    await navigator.clipboard.writeText(window.location.href);
-    setCopyState('copied');
-    window.setTimeout(() => setCopyState('idle'), 1400);
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 1400);
+    } catch {
+      setCopyState('failed');
+    }
   };
 
   const composer = (
@@ -252,7 +262,7 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
           <p className={styles.eyebrow}>{t('Behavior research', 'Исследование поведения')}</p>
           <h1>
             {restored.query.mode === 'funnel'
-              ? t('Where does activation break?', 'Где теряется активация?')
+              ? t('How far do people get?', 'До какого шага доходят люди?')
               : restored.query.mode === 'retention'
                 ? t('What brings people back?', 'Что возвращает людей?')
                 : t('How is product use changing?', 'Как используют продукт?')}
@@ -274,11 +284,11 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
             type="button"
             className={styles.secondaryButton}
             onClick={() => setLibraryOpen(true)}
-            aria-label={t('Insight library', 'Библиотека инсайтов')}
-            title={t('Insight library', 'Библиотека инсайтов')}
+            aria-label={t('Insight library', 'Сохранённые анализы')}
+            title={t('Insight library', 'Сохранённые анализы')}
           >
             <BookOpen aria-hidden="true" />{' '}
-            <span>{t('Insight library', 'Библиотека инсайтов')}</span>
+            <span>{t('Insight library', 'Сохранённые анализы')}</span>
           </button>
           <button
             type="button"
@@ -286,7 +296,7 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
             disabled={!!restored.error}
             onClick={() => setSaveOpen(true)}
           >
-            <Save aria-hidden="true" /> {t('Save insight', 'Сохранить инсайт')}
+            <Save aria-hidden="true" /> {t('Save insight', 'Сохранить анализ')}
           </button>
           <button
             type="button"
@@ -312,6 +322,23 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
           </button>
         </div>
       </header>
+
+      {copyState === 'failed' ? (
+        <p role="alert" className={styles.notice}>
+          {t(
+            'Copying is unavailable. Select and copy the address in your browser.',
+            'Копирование недоступно. Выделите и скопируйте адрес в браузере.',
+          )}
+        </p>
+      ) : null}
+      {guest ? (
+        <GuestQuestions
+          baseQuery={guest.defaultQuery}
+          onChoose={query => {
+            router.push(`${pathname}?${serializeAnalysisQuery(query)}`, { scroll: false });
+          }}
+        />
+      ) : null}
 
       {restored.error ? (
         <StudioState
@@ -488,7 +515,11 @@ function blockValue(block: BlockId, query: AnalysisQueryV1, t: (en: string, ru: 
             }).format(minutes);
       }
       if (query.mode === 'retention')
-        return `${query.retention?.periods ?? 0} ${query.retention?.granularity} periods`;
+        return new Intl.NumberFormat(t('en-US', 'ru-RU'), {
+          style: 'unit',
+          unit: query.retention?.granularity ?? 'day',
+          unitDisplay: 'long',
+        }).format(query.retention?.periods ?? 0);
       return query.measure.source === 'event' && query.measure.aggregation === 'count'
         ? t('Exact event count', 'Точное число событий')
         : `${query.measure.source} · ${query.measure.aggregation}${query.measure.property ? ' · ' + query.measure.property : ''}`;
@@ -519,6 +550,15 @@ function QueryBlockEditor({
   onChange: (query: AnalysisQueryV1) => void;
 }) {
   const { t } = useStudioLocale();
+  const [dateError, setDateError] = useState(false);
+  const updateDate = (field: 'startAt' | 'endAt', value: string) => {
+    if (!value) {
+      setDateError(true);
+      return;
+    }
+    setDateError(false);
+    onChange({ ...query, range: { ...query.range, [field]: dateInputToUtc(value) } });
+  };
   if (block === 'signal' && (query.mode === 'funnel' || query.mode === 'retention')) {
     return <AdvancedSignalEditor query={query} onChange={onChange} />;
   }
@@ -841,12 +881,7 @@ function QueryBlockEditor({
             aria-label={t('Start date', 'Дата начала')}
             type="date"
             value={query.range.startAt.slice(0, 10)}
-            onChange={event =>
-              onChange({
-                ...query,
-                range: { ...query.range, startAt: dateInputToUtc(event.target.value) },
-              })
-            }
+            onChange={event => updateDate('startAt', event.target.value)}
           />
         </label>
         <label>
@@ -855,15 +890,18 @@ function QueryBlockEditor({
             aria-label={t('End date', 'Дата окончания')}
             type="date"
             value={query.range.endAt.slice(0, 10)}
-            onChange={event =>
-              onChange({
-                ...query,
-                range: { ...query.range, endAt: dateInputToUtc(event.target.value) },
-              })
-            }
+            onChange={event => updateDate('endAt', event.target.value)}
           />
         </label>
       </div>
+      {dateError ? (
+        <p role="alert" className={styles.help}>
+          {t(
+            'A date is required. The previous date has been kept; choose a new date to change it.',
+            'Дата обязательна. Предыдущая дата сохранена; выберите новую, чтобы её изменить.',
+          )}
+        </p>
+      ) : null}
       <label>
         {t('Timezone', 'Часовой пояс')}
         <select
@@ -1055,7 +1093,7 @@ function ResultCanvas({
   onSelectRow: (row: DisplayRow) => void;
 }) {
   const { locale, t } = useStudioLocale();
-  if (result.isPending) {
+  if (result.isPending || result.isPlaceholderData) {
     return (
       <div className={styles.resultState} role="status" aria-live="polite">
         <LoaderCircle className={styles.spin} aria-hidden="true" />
@@ -1080,7 +1118,17 @@ function ResultCanvas({
             ? t('Analysis permission required', 'Требуется право на анализ')
             : t('Analysis failed', 'Анализ завершился ошибкой')
         }
-        message={t('The analysis could not be loaded.', 'Не удалось загрузить результат анализа.')}
+        message={t(
+          'Check your connection, then try this question again.',
+          'Проверьте соединение и повторите расчёт этого вопроса.',
+        )}
+        action={
+          error.status !== 403 ? (
+            <button type="button" onClick={() => void result.refetch()}>
+              {t('Retry analysis', 'Повторить расчёт')}
+            </button>
+          ) : undefined
+        }
       />
     );
   }
@@ -1142,13 +1190,13 @@ function ResultCanvas({
         : undefined);
 
   return (
-    <div className={styles.result}>
+    <div className={styles.result} data-mode={query.mode}>
       <header className={styles.resultHeader}>
         <div>
           <p className={styles.eyebrow}>{t('Your answer', 'Результат')}</p>
           <h2>
             {query.mode === 'funnel'
-              ? t('Ordered funnel', 'Упорядоченная воронка')
+              ? t('From the first step to the last', 'От первого шага до последнего')
               : query.mode === 'retention'
                 ? t('Behavioral retention', 'Поведенческое удержание')
                 : query.measure.key === '*'
@@ -1160,7 +1208,6 @@ function ResultCanvas({
             {data.exactness === 'exact'
               ? t('Exact count', 'Точный подсчёт')
               : t('Estimate', 'Оценка')}{' '}
-            · {t('generated', 'сформировано')} {new Date(data.generatedAt).toLocaleString(locale)}
           </p>
         </div>
         <span className={styles.freshness} data-stale={stale || undefined}>
@@ -1264,6 +1311,10 @@ function ResultCanvas({
       <details className={styles.definitions}>
         <summary>{t('Definitions and freshness', 'Определения и свежесть')}</summary>
         <dl>
+          <div>
+            <dt>{t('Result generated', 'Результат сформирован')}</dt>
+            <dd>{new Date(data.generatedAt).toLocaleString(locale)}</dd>
+          </div>
           {data.definitions.map(definition => (
             <div key={definition.key}>
               <dt>{definition.label}</dt>
@@ -1278,7 +1329,7 @@ function ResultCanvas({
 
 function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow[] }) {
   const { locale, t } = useStudioLocale();
-  const max = Math.max(...rows.flatMap(row => [row.value, row.comparison ?? 0]), 1);
+  const scale = createChartScale(rows.flatMap(row => [row.value, row.comparison ?? 0]));
   const label = analysisSummary(query, rows);
 
   if (query.visualization === 'bar' || query.mode === 'breakdown') {
@@ -1290,12 +1341,26 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
             <div key={row.key}>
               <span>{row.key}</span>
               <div className={styles.barTracks}>
-                <i style={{ width: `${Math.max((row.value / max) * 100, 1)}%` }} />
-                {row.comparison !== undefined ? (
+                <span className={styles.signedTrack}>
+                  <span className={styles.zeroLine} style={{ left: `${scale.zero}%` }} />
                   <i
-                    className={styles.comparisonBar}
-                    style={{ width: `${Math.max((row.comparison / max) * 100, 1)}%` }}
+                    style={{
+                      left: `${scale.bar(row.value).left}%`,
+                      width: `${scale.bar(row.value).width}%`,
+                    }}
                   />
+                </span>
+                {row.comparison !== undefined ? (
+                  <span className={styles.signedTrack}>
+                    <span className={styles.zeroLine} style={{ left: `${scale.zero}%` }} />
+                    <i
+                      className={styles.comparisonBar}
+                      style={{
+                        left: `${scale.bar(row.comparison).left}%`,
+                        width: `${scale.bar(row.comparison).width}%`,
+                      }}
+                    />
+                  </span>
                 ) : null}
               </div>
               <b>
@@ -1312,7 +1377,7 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
   const points = rows
     .map((row, index) => {
       const x = rows.length === 1 ? 50 : (index / (rows.length - 1)) * 100;
-      const y = 92 - (row.value / max) * 78;
+      const y = scale.lineY(row.value);
       return `${x},${y}`;
     })
     .join(' ');
@@ -1320,7 +1385,7 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
     ? rows
         .map((row, index) => {
           const x = rows.length === 1 ? 50 : (index / (rows.length - 1)) * 100;
-          const y = 92 - ((row.comparison ?? 0) / max) * 78;
+          const y = scale.lineY(row.comparison ?? 0);
           return `${x},${y}`;
         })
         .join(' ')
@@ -1330,9 +1395,23 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
     <figure className={styles.chart} role="img" aria-label={label}>
       <figcaption>{label}</figcaption>
       <div className={styles.linePlot}>
-        <div className={styles.yAxis} aria-hidden="true">
-          {[max, max / 2, 0].map(value => (
-            <span key={value}>{value.toLocaleString(locale, { maximumFractionDigits: 1 })}</span>
+        <div
+          className={styles.yAxis}
+          style={{ position: 'relative', padding: 0 }}
+          aria-hidden="true"
+        >
+          {scale.ticks.map(value => (
+            <span
+              key={value}
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: `${scale.lineY(value)}%`,
+                transform: 'translateY(-50%)',
+              }}
+            >
+              {value.toLocaleString(locale, { maximumFractionDigits: 1 })}
+            </span>
           ))}
         </div>
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -1341,6 +1420,13 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
             <line x1="0" y1="50" x2="100" y2="50" />
             <line x1="0" y1="75" x2="100" y2="75" />
           </g>
+          <line
+            className={styles.zeroLine}
+            x1="0"
+            y1={scale.lineY(0)}
+            x2="100"
+            y2={scale.lineY(0)}
+          />
           <polyline points={points} />
           {comparisonPoints ? (
             <polyline className={styles.comparisonLine} points={comparisonPoints} />

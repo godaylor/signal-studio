@@ -52,7 +52,7 @@ export function SaveInsightDialog({
   return (
     <AccessibleDialog
       open={open}
-      title={t('Save insight', 'Сохранить инсайт')}
+      title={t('Save insight', 'Сохранить анализ')}
       description={t(
         'Name this analysis to return to it or add it to a dashboard.',
         'Дайте анализу название, чтобы вернуться к нему или добавить на дашборд.',
@@ -61,7 +61,7 @@ export function SaveInsightDialog({
     >
       <form className={styles.saveForm} onSubmit={submit}>
         <label>
-          {t('Insight title', 'Название инсайта')}
+          {t('Insight title', 'Название анализа')}
           <input
             value={title}
             onChange={event => setTitle(event.target.value)}
@@ -78,14 +78,14 @@ export function SaveInsightDialog({
           />
         </label>
         {create.error ? (
-          <p role="alert">{t('Insight could not be saved.', 'Не удалось сохранить инсайт.')}</p>
+          <p role="alert">{t('Insight could not be saved.', 'Не удалось сохранить анализ.')}</p>
         ) : null}
         <div className={styles.dialogActions}>
           <button type="button" onClick={onClose}>
             {t('Cancel', 'Отмена')}
           </button>
           <button type="submit" disabled={create.isPending}>
-            {create.isPending ? t('Saving…', 'Сохранение…') : t('Save insight', 'Сохранить инсайт')}
+            {create.isPending ? t('Saving…', 'Сохранение…') : t('Save insight', 'Сохранить анализ')}
           </button>
         </div>
       </form>
@@ -123,7 +123,7 @@ export function InsightLibrary({
   return (
     <AccessibleDialog
       open={open}
-      title={t('Insight library', 'Библиотека инсайтов')}
+      title={t('Insight library', 'Сохранённые анализы')}
       description={t(
         'Find and reopen your saved analyses.',
         'Найдите и откройте сохранённые анализы.',
@@ -134,9 +134,9 @@ export function InsightLibrary({
         <div className={styles.filters}>
           <label className={styles.search}>
             <Search aria-hidden="true" />
-            <span className="sr-only">{t('Search insights', 'Поиск инсайтов')}</span>
+            <span className="sr-only">{t('Search insights', 'Поиск сохранённых анализов')}</span>
             <input
-              aria-label={t('Search insights', 'Поиск инсайтов')}
+              aria-label={t('Search insights', 'Поиск сохранённых анализов')}
               type="search"
               value={search}
               onChange={event => setSearch(event.target.value)}

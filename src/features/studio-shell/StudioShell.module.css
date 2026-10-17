@@ -481,6 +481,12 @@
   min-width: 0;
   width: 100%;
 }
+.mainContent :is(a, button, input, select, textarea, summary, [tabindex]) {
+  scroll-margin-block: 150px 90px;
+}
+:global(html) {
+  scroll-padding-block: 130px 90px;
+}
 
 .footer {
   min-height: 56px;
@@ -514,6 +520,7 @@
   place-items: center;
   padding: 20px;
   background: rgb(7 12 22 / 62%);
+  overscroll-behavior: contain;
 }
 
 .dialogCenter,
@@ -1234,7 +1241,7 @@
   }
   .guestMeta button {
     padding: 0;
-    min-height: 18px;
+    min-height: 32px;
     font-size: 9px;
   }
   .guestMeta strong {
@@ -1266,6 +1273,38 @@
   }
   .dialogHeader {
     padding: 14px 18px;
+  }
+}
+@media (min-width: 1900px) {
+  .desktopSidebar,
+  .topbar,
+  .footer {
+    padding-inline: max(48px, calc((100vw - 1800px) / 2));
+  }
+}
+@media (max-height: 450px) and (max-width: 1099px) {
+  .topbar {
+    position: relative;
+    min-height: 48px;
+    padding-block: 4px;
+  }
+  .guestMeta {
+    margin-left: 0;
+  }
+  .guestMeta strong {
+    display: none;
+  }
+  .mobileBottomNav {
+    min-height: 44px;
+    padding-block: 2px;
+  }
+  .mobileBottomNav :is(a, button) {
+    min-height: 40px;
+    flex-direction: row;
+    gap: 5px;
+  }
+  .mainContent {
+    padding-bottom: 50px;
   }
 }
 

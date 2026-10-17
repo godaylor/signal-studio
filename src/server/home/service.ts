@@ -12,6 +12,7 @@ export async function getHomeSnapshot(
   now = new Date(),
 ): Promise<HomeSnapshot> {
   if (!access.capabilities.viewAggregate) throw new Error('home-access-denied');
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
   const projectId = access.projectId;
   const { activeRange, cohortRange } = homeRanges(now);
   const currencies = await prisma.client.revenue.findMany({
@@ -55,6 +56,7 @@ export async function getHomeSnapshot(
       metrics.push({ ...item, result: null, error: 'home-metric-unavailable' });
     }
   }
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
   const [health, accounts, insights] = await Promise.all([
     prisma.rawQuery(
       `select max(created_at) as latest,

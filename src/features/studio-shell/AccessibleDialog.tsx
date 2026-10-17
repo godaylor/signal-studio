@@ -2,7 +2,8 @@
 
 import { X } from 'lucide-react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import styles from './StudioShell.module.css';
 
@@ -37,6 +38,12 @@ export function AccessibleDialog({
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    // Escape route animation stacking/containing blocks while retaining theme tokens.
+    setPortalTarget(document.querySelector<HTMLElement>('[data-studio-shell]'));
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -102,7 +109,7 @@ export function AccessibleDialog({
     }
   };
 
-  return (
+  const content = (
     <div className={styles.dialogBackdrop} onMouseDown={handleBackdropClick}>
       <div
         ref={dialogRef}
@@ -139,4 +146,5 @@ export function AccessibleDialog({
       </div>
     </div>
   );
+  return portalTarget ? createPortal(content, portalTarget) : content;
 }

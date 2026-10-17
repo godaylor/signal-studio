@@ -1,8 +1,10 @@
 .workspace {
+  min-width: 0;
   width: min(100%, 1600px);
   margin-inline: auto;
   padding: 34px clamp(24px, 4vw, 64px) 76px;
   color: var(--studio-ink);
+  overflow-wrap: anywhere;
 }
 .heading {
   max-width: 1100px;
@@ -83,6 +85,9 @@
 }
 .toolbar h2 {
   margin-bottom: 0;
+}
+.toolbar > * {
+  min-width: 0;
 }
 .toolbar label,
 .builderControls label {
@@ -175,6 +180,8 @@
   font-size: 11px;
 }
 .rowButton {
+  min-width: 0;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -185,6 +192,8 @@
   border: 0;
   font-weight: 700;
   cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .primaryButton,
 .secondaryButton {
@@ -193,6 +202,8 @@
   border-radius: 10px;
   font-weight: 650;
   cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .primaryButton {
   color: var(--studio-on-accent, #fff);
@@ -292,6 +303,17 @@
   border: 0;
   font-weight: 700;
   cursor: pointer;
+}
+.segmentList .segmentActions {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.segmentActions button {
+  min-height: 44px;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
 .segmentGrid {
   display: grid;
@@ -440,5 +462,16 @@
   .workspace * {
     scroll-behavior: auto !important;
     transition-duration: 0s !important;
+  }
+}
+@media (max-width: 360px) {
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .profileBody {
+    padding: 14px;
+  }
+  .traits {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -1,5 +1,26 @@
 # Signal Studio transformation plan
 
+## M22 — Understandable product and responsive hardening
+
+Status: In progress. Explicit user request (2026-10-18): audit complete product
+journeys and popular viewport/aspect-ratio classes, fix discovered defects,
+make results understandable to a first-time non-analyst, strengthen useful
+visuals and reconcile concept promises with actual working screens.
+
+Subsystems: entry, shared visual/result explanations, Explore interaction and
+query state, secondary product surfaces, responsive shell/dialog/table behavior,
+focused tests and actual-browser evidence. Preserve all auth/permissions,
+SQL definitions, tenant data and existing free providers. Initial tree clean
+at d8eacd5fa. No unrelated refactor or schema change.
+
+Definition of done: prioritized findings with fixed/deferred status; no stale
+result relabeling or date-clearing crashes; understandable first question,
+result interpretation and next action; responsive checks from 200px diagnostic
+to 7680px desktop plus representative portrait/landscape and zoom; guest
+query/save/dashboard/export/reload and account/permission regressions; actual
+screens compared to design, appropriate tests/build/CI and exact public revision
+verified. State browser/device simulation limits honestly.
+
 ## M21 — Кинорит: behavior in motion
 
 Status: **Complete**. Application revision

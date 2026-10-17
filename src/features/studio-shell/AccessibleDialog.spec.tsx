@@ -24,6 +24,22 @@ function DialogHarness() {
 }
 
 describe('AccessibleDialog', () => {
+  test('escapes the animated route while inheriting the studio theme container', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <div data-studio-shell>
+        <div data-animated-route>
+          <DialogHarness />
+        </div>
+      </div>,
+    );
+    await user.click(screen.getByRole('button', { name: 'Open palette' }));
+    const dialog = screen.getByRole('dialog');
+    expect(container.querySelector('[data-studio-shell]')).toContainElement(dialog);
+    expect(container.querySelector('[data-animated-route]')).not.toContainElement(dialog);
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('button', { name: 'Open palette' })).toHaveFocus();
+  });
   test('moves focus in, closes with Escape and restores trigger focus', async () => {
     const user = userEvent.setup();
     render(<DialogHarness />);

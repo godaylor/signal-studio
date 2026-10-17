@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { List, type RowComponentProps } from 'react-window';
+import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import type { LiveSnapshot } from '@/server/live/contracts';
@@ -17,6 +18,7 @@ const MAX_STREAM_HEIGHT = 464;
 function formatTime(value: string | null | undefined, locale: string) {
   if (!value) return locale === 'en-US' ? 'No recent event' : 'Нет недавних событий';
   return new Date(value).toLocaleTimeString(locale, {
+    timeZone: 'UTC',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -25,7 +27,7 @@ function formatTime(value: string | null | undefined, locale: string) {
 
 function formatDateTime(value: string | null | undefined, locale: string) {
   if (!value) return locale === 'en-US' ? 'No recent event' : 'Нет недавних событий';
-  return new Date(value).toLocaleString(locale);
+  return new Date(value).toLocaleString(locale, { timeZone: 'UTC' });
 }
 
 function StreamRow({
@@ -67,6 +69,7 @@ export function LiveWorkspace({
   projectName: string;
 }) {
   const { locale, t } = useStudioLocale();
+  const guest = useGuestWorkspace();
   const { animate, ambient } = useVisualMotion();
   const [paused, setPaused] = useState(false);
   const query = useLiveSnapshot(projectId, paused);
@@ -152,8 +155,8 @@ export function LiveWorkspace({
           <h1>{t('Current activity', 'Текущая активность')}</h1>
           <span>
             {t(
-              'See who is active and what is changing over the last 30 minutes.',
-              'Кто активен сейчас и что меняется за последние 30 минут.',
+              'New actions from the last 30 minutes. Open an observation to see what happened during that session.',
+              'Новые действия за последние 30 минут. Откройте наблюдение, чтобы посмотреть ход сессии.',
             )}
           </span>
         </div>
@@ -183,6 +186,21 @@ export function LiveWorkspace({
         </div>
       </header>
 
+      {guest &&
+      !snapshot.activity.length &&
+      snapshot.totals.events === 0 &&
+      snapshot.totals.views === 0 ? (
+        <p className={styles.guestNotice}>
+          {t(
+            'No new events in the last 30 minutes. The guest dataset contains fixed historical events, so an empty live window is expected. ',
+            'За последние 30 минут новых событий нет. Гостевой набор содержит фиксированные исторические события, поэтому пустое окно активности ожидаемо. ',
+          )}
+          <Link href={`/studio/${projectId}/explore`}>
+            {t('Explore the stored events', 'Исследовать сохранённые события')}
+          </Link>
+        </p>
+      ) : null}
+
       <section
         className={styles.signalRail}
         aria-label={t('Live transport state', 'Состояние обновления')}
@@ -205,11 +223,11 @@ export function LiveWorkspace({
         />
         <strong aria-live="polite">{state}</strong>
         <span>
-          {t('Snapshot', 'Снимок')}{' '}
+          {t('Snapshot (UTC)', 'Снимок (UTC)')}{' '}
           <time dateTime={snapshot.generatedAt}>{formatTime(snapshot.generatedAt, locale)}</time>
         </span>
         <span>
-          {t('Data through', 'Данные по')}{' '}
+          {t('Data through (UTC)', 'Данные по (UTC)')}{' '}
           <time dateTime={snapshot.freshnessAt ?? undefined}>
             {formatTime(snapshot.freshnessAt, locale)}
           </time>

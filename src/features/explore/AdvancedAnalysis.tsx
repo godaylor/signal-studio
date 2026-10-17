@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
+import { eventLabel } from '@/features/visual/eventLabel';
+import { FunnelNarrative } from '@/features/visual/FunnelNarrative';
 import { FunnelTrace } from '@/features/visual/FunnelTrace';
 import type {
   AnalysisBehavior,
@@ -17,6 +19,7 @@ import type {
 } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import styles from './ExploreWorkspace.module.css';
+import { isRetentionObserved } from './retentionObservation';
 import {
   type AdvancedMemberSelection,
   useAdvancedMembers,
@@ -469,6 +472,7 @@ export function AdvancedResults({
             setSelection({ kind: 'funnel-step', step: row.step, outcome: 'dropped' })
           }
         />
+        <FunnelNarrative steps={steps} />
         <div className={styles.tableWrap}>
           <table>
             <caption>
@@ -496,7 +500,7 @@ export function AdvancedResults({
                   <tr key={`${row.segment ?? 'all'}-${row.step}`}>
                     <th scope="row">
                       {row.segment ? `${row.segment} · ` : ''}
-                      {row.step}. {row.label}
+                      {row.step}. {eventLabel(row.label, locale)}
                     </th>
                     <td>{row.converted.toLocaleString(locale)}</td>
                     <td>{row.dropped.toLocaleString(locale)}</td>
@@ -588,8 +592,17 @@ export function AdvancedResults({
   const cohortStarts = [...new Set(rows.map(row => row.cohortStart))];
   const periods = Array.from({ length: (query.retention?.periods ?? 0) + 1 }, (_, index) => index);
   const compared = comparison as AnalysisRetentionRow[];
+  const hasIncomplete = rows.some(row => !isRetentionObserved(row, query, result.generatedAt));
   return (
     <>
+      {hasIncomplete ? (
+        <p className={styles.notice}>
+          {t(
+            'Some return periods are not fully observed yet. They show “Not observed”, not a final 0%. The weighted curve includes only complete periods. Exports retain the original partial counts.',
+            'Часть периодов ещё не наблюдалась полностью. Вместо итоговых 0% показано «Нет полного периода». Взвешенная кривая учитывает только завершённые периоды. Выгрузка сохраняет исходные частичные значения.',
+          )}
+        </p>
+      ) : null}
       <div className={styles.tableWrap}>
         <table>
           <caption>
@@ -621,25 +634,41 @@ export function AdvancedResults({
                     const comparisonCell = compared.find(
                       row => row.cohortStart === cohortStart && row.period === period,
                     );
+                    const observed = cell && isRetentionObserved(cell, query, result.generatedAt);
                     return (
-                      <td key={period}>
-                        <button
-                          type="button"
-                          className={styles.rowButton}
-                          aria-label={t(
-                            `${cohortStart}, period ${period}: ${cell?.retained ?? 0} retained, ${percent(cell?.retentionRate ?? 0, locale)}`,
-                            `${cohortStart}, период ${period}: удержано ${cell?.retained ?? 0}, ${percent(cell?.retentionRate ?? 0, locale)}`,
-                          )}
-                          onClick={() =>
-                            setSelection({ kind: 'retention-cell', cohortStart, period })
-                          }
-                        >
-                          {percent(cell?.retentionRate ?? 0, locale)}
-                          <small>
-                            {cell?.retained ?? 0}
-                            {comparisonCell ? ` / ${comparisonCell.retained}` : ''}
-                          </small>
-                        </button>
+                      <td
+                        key={period}
+                        className={styles.retentionCell}
+                        style={{
+                          backgroundColor:
+                            cell && observed
+                              ? `color-mix(in srgb, var(--studio-cobalt) ${Math.round(Math.max(0, Math.min(1, cell.retentionRate)) * 24)}%, var(--studio-surface))`
+                              : undefined,
+                        }}
+                      >
+                        {!observed ? (
+                          <span className={styles.unobserved}>
+                            {t('Not observed', 'Нет полного периода')}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.rowButton}
+                            aria-label={t(
+                              `${cohortStart}, period ${period}: ${cell?.retained ?? 0} retained, ${percent(cell?.retentionRate ?? 0, locale)}`,
+                              `${cohortStart}, период ${period}: удержано ${cell?.retained ?? 0}, ${percent(cell?.retentionRate ?? 0, locale)}`,
+                            )}
+                            onClick={() =>
+                              setSelection({ kind: 'retention-cell', cohortStart, period })
+                            }
+                          >
+                            {percent(cell?.retentionRate ?? 0, locale)}
+                            <small>
+                              {cell?.retained ?? 0}
+                              {comparisonCell ? ` / ${comparisonCell.retained}` : ''}
+                            </small>
+                          </button>
+                        )}
                       </td>
                     );
                   })}
@@ -662,7 +691,9 @@ export function AdvancedResults({
           </thead>
           <tbody>
             {periods.map(period => {
-              const cells = rows.filter(row => row.period === period);
+              const cells = rows.filter(
+                row => row.period === period && isRetentionObserved(row, query, result.generatedAt),
+              );
               const retained = cells.reduce((sum, row) => sum + row.retained, 0);
               const eligible = cells.reduce((sum, row) => sum + row.cohortSize, 0);
               return (
@@ -670,7 +701,7 @@ export function AdvancedResults({
                   <th scope="row">P{period}</th>
                   <td>{retained.toLocaleString(locale)}</td>
                   <td>{eligible.toLocaleString(locale)}</td>
-                  <td>{percent(eligible ? retained / eligible : 0, locale)}</td>
+                  <td>{eligible ? percent(retained / eligible, locale) : '—'}</td>
                 </tr>
               );
             })}

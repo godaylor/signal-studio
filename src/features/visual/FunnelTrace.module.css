@@ -8,6 +8,31 @@
   isolation: isolate;
   overflow: hidden;
 }
+.narrative {
+  padding: 18px 0 22px;
+  border-top: 1px solid var(--studio-grid);
+  max-width: 980px;
+}
+.narrative h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 650;
+}
+.narrative p {
+  margin: 6px 0;
+  font-size: 15px;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+.narrative .narrativeDetail {
+  font-size: 12px;
+  color: var(--studio-ink-muted);
+}
+.narrativeDetail summary {
+  cursor: pointer;
+  min-height: 32px;
+  padding-block: 7px;
+}
 .figure::before {
   content: "";
   position: absolute;
@@ -32,6 +57,37 @@
   margin: 18px 0;
   font-size: 13px;
   color: #b1d3e1;
+}
+.narrative .segmentContrast {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding-block: 8px;
+  color: var(--studio-cobalt-text);
+}
+.segmentContrast > strong {
+  font-size: clamp(17px, 2vw, 25px);
+  font-weight: 550;
+}
+.segmentContrast > span {
+  font-size: 12px;
+  color: var(--studio-ink-muted);
+}
+.segmentContrast > small {
+  flex-basis: 100%;
+  color: var(--studio-ink-muted);
+  font-size: 12px;
+}
+.traceViewport {
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: thin;
+  overscroll-behavior-inline: contain;
+}
+.traceViewport:focus-visible {
+  outline: 2px solid #35e0cf;
+  outline-offset: 3px;
 }
 .labels {
   display: grid;
@@ -129,6 +185,22 @@
   margin: 18px 0 0;
 }
 @media (max-width: 700px) {
+  .narrative {
+    padding: 8px 0 10px;
+    border: 0;
+  }
+  .narrative h3 {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .narrative p {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-block: 3px;
+  }
+  .narrative .narrativeDetail {
+    font-size: 11px;
+  }
   .figure {
     margin-inline: -14px;
     padding: 18px 14px 12px;
@@ -178,5 +250,17 @@
   }
   .caption {
     font-size: 9px !important;
+  }
+}
+@media (max-width: 700px) {
+  .figure {
+    padding-top: 14px;
+  }
+  .figure figcaption {
+    margin-bottom: 8px;
+    font-size: 10px;
+  }
+  .labels button {
+    min-height: 58px;
   }
 }

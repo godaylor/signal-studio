@@ -15,6 +15,7 @@ import {
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useProjectAccess } from '@/features/access/useProjectAccess';
 import { dateInputToUtc } from '@/features/explore/model';
 import { useAnalysisResult } from '@/features/explore/useAnalysisQuery';
 import { ExportControls } from '@/features/exports/ExportControls';
@@ -23,8 +24,9 @@ import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { useInsights } from '@/features/insights/useInsights';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
 import { StudioState } from '@/features/studio-shell/StudioState';
-import { useVisualMotion } from '@/features/visual/MotionPreferences';
+import { eventLabel } from '@/features/visual/eventLabel';
 import { FlowField } from '@/features/visual/FlowField';
+import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import type { AnalysisFunnelStepRow } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import { applyDashboardContext, type DashboardGlobalContext } from '@/server/dashboards/context';
@@ -52,6 +54,8 @@ export function DashboardWorkspace({
 }) {
   const { locale, t } = useStudioLocale();
   const { animate } = useVisualMotion();
+  const access = useProjectAccess(projectId);
+  const canCreate = !!access.data?.capabilities.editDashboards;
   const dashboards = useDashboards(projectId);
   const create = useCreateDashboard(projectId);
   const update = useUpdateDashboard(projectId);
@@ -71,6 +75,7 @@ export function DashboardWorkspace({
   const [noteTitle, setNoteTitle] = useState('');
   const [noteBody, setNoteBody] = useState('');
   const [contextDraft, setContextDraft] = useState<DashboardGlobalContext>({});
+  const [contextDateError, setContextDateError] = useState(false);
   const list = dashboards.data?.data ?? [];
   const selected = list.find(item => item.id === selectedId) ?? list[0];
 
@@ -78,8 +83,29 @@ export function DashboardWorkspace({
     if (!selectedId && list[0]) setSelectedId(list[0].id);
   }, [list, selectedId]);
   useEffect(() => {
-    if (selected) setContextDraft(selected.globalContext ?? {});
+    if (selected) {
+      setContextDraft(selected.globalContext ?? {});
+      setContextDateError(false);
+    }
   }, [selected]);
+
+  const updateContextDate = (field: 'startAt' | 'endAt', value: string) => {
+    if (!value) {
+      setContextDateError(true);
+      return;
+    }
+    const date = dateInputToUtc(value);
+    setContextDateError(false);
+    setContextDraft(current => ({
+      ...current,
+      range: {
+        startAt: current.range?.startAt ?? date,
+        endAt: current.range?.endAt ?? date,
+        timezone: current.range?.timezone ?? 'UTC',
+        [field]: date,
+      },
+    }));
+  };
 
   if (dashboards.isPending)
     return (
@@ -99,6 +125,7 @@ export function DashboardWorkspace({
     );
 
   const createDashboard = async () => {
+    if (!canCreate || create.isPending) return;
     try {
       const dashboard = await create.mutateAsync({
         title: newTitle || `${projectName} ${t('dashboard', 'дашборд')}`,
@@ -109,6 +136,24 @@ export function DashboardWorkspace({
       setCreateOpen(false);
     } catch {
       // A localized mutation error is rendered below.
+    }
+  };
+
+  const addTextWidget = async (kind: 'note' | 'header') => {
+    if (!selected?.canEdit || addWidget.isPending || (kind === 'header' && !noteTitle.trim()))
+      return;
+    const title = noteTitle;
+    const body = noteBody;
+    try {
+      await addWidget.mutateAsync({
+        dashboardId: selected.id,
+        widget: { kind, title, body },
+      });
+      // Keep any newer text typed while the submitted draft was being saved.
+      setNoteTitle(current => (current === title ? '' : current));
+      setNoteBody(current => (current === body ? '' : current));
+    } catch {
+      // Retain the draft; the shared mutation error below offers another attempt.
     }
   };
 
@@ -123,14 +168,24 @@ export function DashboardWorkspace({
           <h1>{t('Dashboards', 'Дашборды')}</h1>
           <span>
             {t(
-              'Keep the answers that matter in one view.',
-              'Соберите важные ответы в одном представлении.',
+              'Saved analyses and notes, together on one screen.',
+              'Дашборд — сохранённые анализы и заметки на одном экране.',
             )}
           </span>
         </div>
         <button
           className={styles.newDashboard}
           type="button"
+          disabled={!canCreate}
+          aria-label={t('New dashboard', 'Новый дашборд')}
+          title={
+            !canCreate
+              ? t(
+                  'Dashboard editing permission required',
+                  'Нужно право на редактирование дашбордов',
+                )
+              : undefined
+          }
           onClick={() => {
             create.reset();
             setCreateOpen(true);
@@ -145,8 +200,12 @@ export function DashboardWorkspace({
           variant="empty"
           title={t('No dashboards yet', 'Дашбордов пока нет')}
           message={t(
-            'Create your first dashboard and add a saved Insight.',
-            'Создайте первый дашборд и добавьте сохранённый инсайт.',
+            canCreate
+              ? 'Create a dashboard, then add an analysis saved in Explore.'
+              : 'No dashboards have been created. A project editor can create one for you.',
+            canCreate
+              ? 'Создайте дашборд, затем добавьте анализ, сохранённый в разделе «Анализ».'
+              : 'Дашбордов пока нет. Участник с правом редактирования может создать их для вас.',
           )}
         />
       ) : selected ? (
@@ -183,7 +242,7 @@ export function DashboardWorkspace({
               <div>
                 <h2>{selected.title}</h2>
                 {selected.description ? <span>{selected.description}</span> : null}
-                <p>
+                <p className={styles.dashboardUpdated}>
                   <span className="sr-only">{selected.owner.username} · </span>
                   {t('updated', 'обновлено')} {new Date(selected.updatedAt).toLocaleString(locale)}
                 </p>
@@ -191,18 +250,11 @@ export function DashboardWorkspace({
               <div className={styles.modeSwitch} aria-label={t('Dashboard mode', 'Режим дашборда')}>
                 <button
                   type="button"
-                  aria-pressed={mode === 'view'}
-                  onClick={() => setMode('view')}
-                >
-                  {t('View', 'Просмотр')}
-                </button>
-                <button
-                  type="button"
                   aria-pressed={mode === 'edit'}
                   disabled={!selected.canEdit}
-                  onClick={() => setMode('edit')}
+                  onClick={() => setMode(current => (current === 'view' ? 'edit' : 'view'))}
                 >
-                  {t('Edit', 'Редактирование')}
+                  {mode === 'view' ? t('Edit', 'Редактировать') : t('View', 'Готово')}
                 </button>
               </div>
             </div>
@@ -222,16 +274,7 @@ export function DashboardWorkspace({
                       <input
                         type="date"
                         value={utcDate(contextDraft.range?.startAt)}
-                        onChange={event =>
-                          setContextDraft(current => ({
-                            ...current,
-                            range: {
-                              startAt: dateInputToUtc(event.target.value),
-                              endAt: current.range?.endAt ?? dateInputToUtc(event.target.value),
-                              timezone: current.range?.timezone ?? 'UTC',
-                            },
-                          }))
-                        }
+                        onChange={event => updateContextDate('startAt', event.target.value)}
                       />
                     </label>
                     <label>
@@ -239,16 +282,7 @@ export function DashboardWorkspace({
                       <input
                         type="date"
                         value={utcDate(contextDraft.range?.endAt)}
-                        onChange={event =>
-                          setContextDraft(current => ({
-                            ...current,
-                            range: {
-                              startAt: current.range?.startAt ?? dateInputToUtc(event.target.value),
-                              endAt: dateInputToUtc(event.target.value),
-                              timezone: current.range?.timezone ?? 'UTC',
-                            },
-                          }))
-                        }
+                        onChange={event => updateContextDate('endAt', event.target.value)}
                       />
                     </label>
                     <label>
@@ -295,6 +329,14 @@ export function DashboardWorkspace({
                       />
                     </label>
                     <div className={styles.contextActions}>
+                      {contextDateError ? (
+                        <p role="alert">
+                          {t(
+                            'A date is required. The previous period has been kept. Use Clear to remove the shared period.',
+                            'Дата обязательна. Предыдущий период сохранён. Нажмите «Очистить», чтобы убрать общий период.',
+                          )}
+                        </p>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() =>
@@ -307,6 +349,7 @@ export function DashboardWorkspace({
                         type="button"
                         onClick={() => {
                           setContextDraft({});
+                          setContextDateError(false);
                           update.mutate({ id: selected.id, patch: { globalContext: {} } });
                         }}
                       >
@@ -328,14 +371,14 @@ export function DashboardWorkspace({
                     }}
                   >
                     <label>
-                      {t('Add existing Insight', 'Добавить существующий инсайт')}
+                      {t('Add existing Insight', 'Добавить сохранённый анализ')}
                       <select
                         aria-label={t('Insight to add', 'Инсайт для добавления')}
                         value={selectedInsightId}
                         onChange={event => setSelectedInsightId(event.target.value)}
                         required
                       >
-                        <option value="">{t('Choose Insight', 'Выберите инсайт')}</option>
+                        <option value="">{t('Choose Insight', 'Выберите анализ')}</option>
                         {insights.map(insight => (
                           <option key={insight.id} value={insight.id}>
                             {insight.title}
@@ -343,19 +386,14 @@ export function DashboardWorkspace({
                         ))}
                       </select>
                     </label>
-                    <button type="submit">
+                    <button type="submit" disabled={!selectedInsightId || addWidget.isPending}>
                       <Plus aria-hidden="true" /> {t('Add Insight', 'Добавить инсайт')}
                     </button>
                   </form>
                   <form
                     onSubmit={event => {
                       event.preventDefault();
-                      addWidget.mutate({
-                        dashboardId: selected.id,
-                        widget: { kind: 'note', title: noteTitle, body: noteBody },
-                      });
-                      setNoteTitle('');
-                      setNoteBody('');
+                      void addTextWidget('note');
                     }}
                   >
                     <label>
@@ -373,18 +411,13 @@ export function DashboardWorkspace({
                         required
                       />
                     </label>
-                    <button type="submit">
+                    <button type="submit" disabled={addWidget.isPending}>
                       <FileText aria-hidden="true" /> {t('Add note', 'Добавить заметку')}
                     </button>
                     <button
                       type="button"
-                      onClick={() =>
-                        noteTitle &&
-                        addWidget.mutate({
-                          dashboardId: selected.id,
-                          widget: { kind: 'header', title: noteTitle, body: noteBody },
-                        })
-                      }
+                      disabled={!noteTitle.trim() || addWidget.isPending}
+                      onClick={() => void addTextWidget('header')}
                     >
                       {t('Add section header', 'Добавить заголовок раздела')}
                     </button>
@@ -396,8 +429,8 @@ export function DashboardWorkspace({
             {update.error || addWidget.error || updateWidget.error || removeWidget.error ? (
               <p role="alert" className={styles.error}>
                 {t(
-                  'A dashboard change failed. Existing widgets remain available.',
-                  'Не удалось изменить дашборд. Существующие виджеты остаются доступными.',
+                  'A dashboard change failed. Your note draft and existing widgets are kept. Try again.',
+                  'Не удалось изменить дашборд. Текст заметки и существующие виджеты сохранены. Повторите попытку.',
                 )}
               </p>
             ) : null}
@@ -422,6 +455,7 @@ export function DashboardWorkspace({
                     transition={{ type: 'tween', duration: animate ? 0.32 : 0, ease: 'easeOut' }}
                     style={{ gridColumn: `span ${widget.width}` }}
                     data-height={widget.height}
+                    data-kind={widget.kind}
                   >
                     {mode === 'edit' ? (
                       <div
@@ -507,7 +541,7 @@ export function DashboardWorkspace({
         </div>
       ) : null}
       <AccessibleDialog
-        open={createOpen}
+        open={createOpen && canCreate}
         onClose={() => setCreateOpen(false)}
         title={t('Create dashboard', 'Создать дашборд')}
         description={t(
@@ -541,7 +575,7 @@ export function DashboardWorkspace({
               )}
             </p>
           ) : null}
-          <button type="submit" disabled={create.isPending}>
+          <button type="submit" disabled={!canCreate || create.isPending}>
             <Plus size={16} aria-hidden="true" />
             {t('Create dashboard', 'Создать дашборд')}
           </button>
@@ -574,14 +608,7 @@ export function DashboardWidget({
         )
       : [];
   const hasFunnelSegments = funnelSteps.some(row => row.segment !== undefined);
-  const eventLabel = (label: string) =>
-    guest
-      ? ({
-          signup: t('Signup', 'Регистрация'),
-          onboarding_completed: t('Onboarding completed', 'Завершили онбординг'),
-          core_feature_used: t('Core feature used', 'Использовали функцию'),
-        }[label] ?? label)
-      : label;
+  const displayEvent = (label: string) => (guest ? eventLabel(label, locale) : label);
   const rows = result.data?.data.mode === 'funnel' ? funnelSteps : (result.data?.data.rows ?? []);
   const visibleRows = rows.slice(
     0,
@@ -589,7 +616,9 @@ export function DashboardWidget({
   );
   const rowLabel = (row: (typeof rows)[number]) => {
     if ('label' in row)
-      return 'segment' in row && row.segment ? `${row.segment} · ${row.label}` : row.label;
+      return 'segment' in row && row.segment
+        ? `${row.segment} · ${displayEvent(row.label)}`
+        : displayEvent(row.label);
     if ('key' in row) return row.key;
     if ('bucket' in row) {
       const date = new Date(row.bucket);
@@ -640,28 +669,35 @@ export function DashboardWidget({
     <div className={styles.widget}>
       <header>
         <div>
-          <p>{t('Insight', 'Инсайт')}</p>
+          <p>{t('Saved analysis', 'Сохранённый анализ')}</p>
           <h3>{widget.insight.title}</h3>
         </div>
-        <span data-context={applied.state}>
-          {applied.state === 'incompatible'
-            ? t('Override incompatible', 'Переопределение несовместимо')
-            : applied.state === 'applied'
-              ? t('Context applied', 'Контекст применён')
-              : t('Saved context', 'Сохранённый контекст')}
-        </span>
+        {applied.state !== 'unchanged' ? (
+          <span data-context={applied.state}>
+            {applied.state === 'incompatible'
+              ? t('Override incompatible', 'Переопределение несовместимо')
+              : applied.state === 'applied'
+                ? t('Context applied', 'Контекст применён')
+                : t('Saved context', 'Сохранённый контекст')}
+          </span>
+        ) : null}
       </header>
       {applied.state === 'incompatible' ? (
         <div className={styles.widgetError}>
           <AlertTriangle aria-hidden="true" />
           <p>{applied.reasons.join(' ')}</p>
         </div>
-      ) : result.isPending ? (
+      ) : result.isPending || result.isPlaceholderData ? (
         <p role="status">{t('Loading Insight…', 'Загрузка инсайта…')}</p>
       ) : result.error ? (
         <div className={styles.widgetError}>
           <AlertTriangle aria-hidden="true" />
-          <p>{t('This widget could not be loaded.', 'Не удалось загрузить этот виджет.')}</p>
+          <div>
+            <p>{t('This widget could not be loaded.', 'Не удалось загрузить этот виджет.')}</p>
+            <button type="button" onClick={() => result.refetch()} disabled={result.isFetching}>
+              {t('Retry widget', 'Повторить загрузку')}
+            </button>
+          </div>
         </div>
       ) : result.data ? (
         <>
@@ -681,12 +717,6 @@ export function DashboardWidget({
                   ) : null}
                 </>
               ) : null}
-              <small>
-                {result.data.exactness === 'exact'
-                  ? t('Exact count', 'Точный подсчёт')
-                  : t('Estimate', 'Оценка')}{' '}
-                · {new Date(result.data.freshnessAt).toLocaleTimeString(locale)}
-              </small>
               <small>
                 {rangeDate(applied.query.range.startAt)} —{' '}
                 {rangeDate(new Date(applied.query.range.endAt).getTime() - 1)} ·{' '}
@@ -708,61 +738,84 @@ export function DashboardWidget({
               )}
             </p>
           ) : null}
-          {funnelSteps.length && !hasFunnelSegments ? (
-            <div className={styles.funnelStage}>
-              <ol
-                style={{ gridTemplateColumns: `repeat(${funnelSteps.length}, minmax(0,1fr))` }}
-                className={styles.funnelBars}
-                aria-label={t('Funnel conversion by step', 'Конверсия воронки по шагам')}
+          {funnelSteps.length > 0 && !hasFunnelSegments ? (
+            <div
+              className={styles.funnelStage}
+              role="region"
+              tabIndex={0}
+              aria-label={t('Funnel conversion by step', 'Конверсия воронки по шагам')}
+            >
+              <div
+                className={styles.funnelScene}
+                style={{ minWidth: `${funnelSteps.length * 80}px` }}
               >
-                {funnelSteps.map(row => (
-                  <li key={row.step}>
-                    <span title={row.label}>{eventLabel(row.label)}</span>
-                    <strong>
-                      {row.converted.toLocaleString(locale)}{' '}
-                      <small>
+                <ol
+                  style={{ gridTemplateColumns: `repeat(${funnelSteps.length}, minmax(0,1fr))` }}
+                  className={styles.funnelBars}
+                >
+                  {funnelSteps.map(row => (
+                    <li key={row.step}>
+                      <span title={row.label}>{displayEvent(row.label)}</span>
+                      <strong>
+                        {row.converted.toLocaleString(locale)}{' '}
+                        <small>
+                          {row.overallConversionRate.toLocaleString(locale, {
+                            style: 'percent',
+                            maximumFractionDigits: 1,
+                          })}
+                        </small>
+                      </strong>
+                    </li>
+                  ))}
+                </ol>
+                <FlowField values={funnelSteps.map(row => row.converted)} />
+              </div>
+            </div>
+          ) : null}
+          <div
+            className={styles.tableScroll}
+            role="region"
+            tabIndex={0}
+            aria-label={`${t('Data for', 'Данные для')} ${widget.insight.title}`}
+          >
+            <table>
+              <caption>
+                {t('Data for', 'Данные для')} {widget.insight.title}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t('Value', 'Значение')}</th>
+                  <th scope="col">{t('Count', 'Количество')}</th>
+                  {funnelSteps.length > 0 ? (
+                    <th scope="col">{t('Conversion', 'Конверсия')}</th>
+                  ) : null}
+                </tr>
+              </thead>
+              <tbody>
+                {visibleRows.map((row, index) => (
+                  <tr key={`${rowLabel(row)}-${index}`}>
+                    <th scope="row">{rowLabel(row)}</th>
+                    <td>{row.value.toLocaleString(locale)}</td>
+                    {'overallConversionRate' in row ? (
+                      <td>
                         {row.overallConversionRate.toLocaleString(locale, {
                           style: 'percent',
                           maximumFractionDigits: 1,
                         })}
-                      </small>
-                    </strong>
-                  </li>
+                      </td>
+                    ) : null}
+                  </tr>
                 ))}
-              </ol>
-              <FlowField values={funnelSteps.map(row => row.converted)} />
-            </div>
-          ) : null}
-          <table>
-            <caption>
-              {t('Data for', 'Данные для')} {widget.insight.title}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">{t('Value', 'Значение')}</th>
-                <th scope="col">{t('Count', 'Количество')}</th>
-                {funnelSteps.length ? <th scope="col">{t('Conversion', 'Конверсия')}</th> : null}
-              </tr>
-            </thead>
-            <tbody>
-              {visibleRows.map((row, index) => (
-                <tr key={`${rowLabel(row)}-${index}`}>
-                  <th scope="row">{rowLabel(row)}</th>
-                  <td>{row.value.toLocaleString(locale)}</td>
-                  {'overallConversionRate' in row ? (
-                    <td>
-                      {row.overallConversionRate.toLocaleString(locale, {
-                        style: 'percent',
-                        maximumFractionDigits: 1,
-                      })}
-                    </td>
-                  ) : null}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
           <details>
             <summary>{t('Definition and freshness', 'Определение и свежесть')}</summary>
+            <p>
+              {result.data.exactness === 'exact'
+                ? t('Exact count', 'Точный подсчёт')
+                : t('Estimate', 'Оценка')}
+            </p>
             <p>
               {t('Owner', 'Владелец')}: {widget.insight.owner.username}
             </p>

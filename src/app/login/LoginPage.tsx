@@ -45,7 +45,9 @@ export function LoginPage({
   const labels = [
     t('Signup', 'Регистрация'),
     t('Setup complete', 'Настройка'),
-    subscription ? t('Subscription', 'Подписка') : t('Core feature', 'Первая ценность'),
+    subscription
+      ? t('Subscribed', 'Оформили подписку')
+      : t('Used a feature', 'Использовали функцию'),
   ];
   const rate = values[0] ? values[2] / values[0] : 0;
   return (
@@ -102,8 +104,8 @@ export function LoginPage({
             </h1>
             <p className={styles.description}>
               {t(
-                'Where people find value. Where they leave. Follow the behavior — and decide what to change.',
-                'Где люди находят ценность. Где уходят. Проследите поведение и решите, что изменить.',
+                'See which step people do not reach in your app. Compare devices, inspect the participants and save the answer for your team.',
+                'Узнайте, до какого шага не доходят люди в вашем приложении. Сравните устройства, изучите участников и сохраните ответ для команды.',
               )}
             </p>
             {expired ? (
@@ -119,6 +121,12 @@ export function LoginPage({
               {t(
                 'Private workspace · no signup · saved for 24 hours',
                 'Личное пространство · без регистрации · сохранение на 24 часа',
+              )}
+            </p>
+            <p className={styles.exampleContext}>
+              {t(
+                'Try it on Orbit, a fictional online service. No data connection needed.',
+                'Попробуйте на Orbit — вымышленном онлайн-сервисе. Подключать свои данные не нужно.',
               )}
             </p>
           </motion.div>
@@ -173,8 +181,8 @@ export function LoginPage({
               </strong>
               <span className={styles.answerNote}>
                 {t(
-                  'Exact counts. A question you can explore.',
-                  'Точные числа. Вопрос, который можно исследовать.',
+                  `${values[2]} of ${values[0]} reached the final step.`,
+                  `${values[2]} из ${values[0]} дошли до последнего шага.`,
                 )}
               </span>
             </div>
@@ -184,6 +192,25 @@ export function LoginPage({
             {t('Look inside', 'Что внутри')}
           </a>
         </section>
+        <div className={styles.exampleReading}>
+          <p>
+            <span className={styles.waterKey} aria-hidden="true" />
+            {t('Blue flow — reached the next step', 'Голубой поток — прошли дальше')}
+          </p>
+          <p>
+            <span className={styles.lossKey} aria-hidden="true" />
+            {t(
+              'Warm branch — did not reach the next step',
+              'Тёплая ветвь — не дошли до следующего шага',
+            )}
+          </p>
+          <p>
+            {t(
+              'Change the goal above, then open the workspace to change the query.',
+              'Переключите цель выше. В рабочем пространстве можно менять сам запрос.',
+            )}
+          </p>
+        </div>
         <div className={styles.proofline}>
           <span>{t('From the event to the decision', 'От события до решения')}</span>
           <span>

@@ -13,10 +13,10 @@ export function eventLabel(value: string, locale: string) {
   return (
     (
       {
-        signup: 'Регистрация',
-        onboarding_completed: 'Настройка завершена',
-        core_feature_used: 'Ключевая функция',
-        subscription_started: 'Подписка оформлена',
+        signup: 'Зарегистрировались',
+        onboarding_completed: 'Завершили настройку',
+        core_feature_used: 'Использовали функцию',
+        subscription_started: 'Оформили подписку',
       } as Record<string, string>
     )[value] ?? value
   );

@@ -2,18 +2,23 @@
   width: min(100%, 1600px);
   min-height: calc(100vh - 116px);
   margin-inline: auto;
-  padding: 32px clamp(24px, 4vw, 64px) 60px;
+  padding: 24px clamp(20px, 3vw, 48px) 48px;
   color: var(--studio-ink);
 }
 .heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 26px;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.heading > div,
+.dashboardHeader > div,
+.widget > header > div {
+  min-width: 0;
 }
 .heading p {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
   color: var(--studio-ink-muted);
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -22,17 +27,18 @@
 .heading h1 {
   margin: 0;
   font-family: var(--font-display), sans-serif;
-  font-size: clamp(27px, 3vw, 36px);
+  font-size: clamp(25px, 2.6vw, 32px);
   font-weight: 650;
   letter-spacing: -0.055em;
   line-height: 1.2;
 }
 .heading span {
   display: block;
-  margin-top: 12px;
+  margin-top: 7px;
   color: var(--studio-ink-muted);
   line-height: 1.5;
-  font-size: 14px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
 }
 .workspace button,
 .workspace input,
@@ -41,6 +47,8 @@
 }
 .workspace button {
   cursor: pointer;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .workspace :is(button, input, select, summary, a):focus-visible {
   outline: 3px solid var(--studio-focus);
@@ -127,14 +135,14 @@
 }
 .canvas {
   min-width: 0;
-  padding-top: 24px;
+  padding-top: 12px;
 }
 .dashboardHeader {
   display: flex;
   justify-content: space-between;
   gap: 20px;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 .dashboardHeader h2 {
   margin: 0;
@@ -188,6 +196,7 @@
   align-items: center;
   gap: 8px;
   width: fit-content;
+  max-width: 100%;
   min-height: 44px;
   color: var(--studio-cobalt-text);
   font-size: 12px;
@@ -220,6 +229,7 @@
   color: var(--studio-ink-muted);
   font-size: 12px;
   font-weight: 500;
+  min-width: 0;
 }
 .editor input,
 .editor select,
@@ -235,7 +245,14 @@
 }
 .contextActions {
   display: flex;
+  flex-wrap: wrap;
   gap: 7px;
+  min-width: 0;
+}
+.contextActions p {
+  flex-basis: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 .contextActions button:last-child {
   color: var(--studio-ink);
@@ -244,17 +261,18 @@
 }
 .adders {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
   gap: 24px;
 }
 .adders form {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: end;
+  min-width: 0;
 }
 .adders form:last-child {
-  grid-template-columns: 1fr 1.5fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto;
 }
 .adders form:last-child button:last-child {
   grid-column: 1 / -1;
@@ -277,6 +295,7 @@
   display: grid;
   gap: 22px;
   padding-top: 24px;
+  min-width: 0;
 }
 .createForm button {
   justify-self: end;
@@ -291,7 +310,7 @@
   position: relative;
   min-width: 0;
   min-height: 260px;
-  padding: 24px;
+  padding: 18px 12px;
   background: transparent;
   border: 0;
   border-top: 1px solid var(--studio-grid);
@@ -300,10 +319,15 @@
 .grid > article[data-height="2"] {
   min-height: 440px;
 }
+.grid > article[data-kind="note"],
+.grid > article[data-kind="header"] {
+  min-height: 0;
+}
 .layoutControls {
   display: flex;
   justify-content: flex-end;
   gap: 4px;
+  flex-wrap: wrap;
   margin: -8px -8px 10px;
 }
 .layoutControls button {
@@ -311,6 +335,7 @@
   place-items: center;
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   color: var(--studio-ink-muted);
   background: transparent;
   border: 1px solid var(--studio-grid);
@@ -322,13 +347,15 @@
 }
 .widget {
   display: grid;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
 }
 .widget > header {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   align-items: start;
+  flex-wrap: wrap;
 }
 .widget header p {
   margin: 0 0 7px;
@@ -363,7 +390,8 @@
   justify-content: space-between;
   gap: 10px;
   align-items: center;
-  padding-bottom: 14px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--studio-grid);
 }
 .widgetMeta strong {
@@ -371,6 +399,7 @@
   font-weight: 600;
   letter-spacing: -0.055em;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 .widgetMeta span,
 .widgetMeta small {
@@ -444,8 +473,21 @@
   font-size: 11px;
   font-weight: 400;
 }
+.tableScroll {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  overscroll-behavior-inline: contain;
+}
+.tableScroll:focus-visible,
+.funnelStage:focus-visible {
+  outline: 3px solid var(--studio-focus);
+  outline-offset: 3px;
+}
 .widget table {
   width: 100%;
+  min-width: 280px;
   border-collapse: collapse;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
@@ -483,6 +525,7 @@
   font-size: 12px;
   font-weight: 550;
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 .widget a:hover {
   text-decoration: underline;
@@ -491,16 +534,19 @@
 .widget a svg {
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 }
 .widget details {
   color: var(--studio-ink-muted);
   font-size: 11px;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 .widget summary {
   display: flex;
   align-items: center;
   width: fit-content;
+  max-width: 100%;
   min-height: 44px;
   cursor: pointer;
 }
@@ -520,6 +566,15 @@
 .widgetError p {
   margin: 0;
 }
+.widgetError button {
+  min-height: 44px;
+  padding: 6px 0;
+  color: var(--studio-cobalt-text);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .note {
   padding: 12px;
   border-left: 3px solid var(--studio-cobalt);
@@ -528,6 +583,7 @@
 .sectionHeader p {
   color: var(--studio-ink-muted);
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 .sectionHeader {
   padding-bottom: 12px;
@@ -552,7 +608,7 @@
 }
 @media (max-width: 720px) {
   .workspace {
-    padding: 20px 18px 32px;
+    padding: 16px 14px 32px;
   }
   .heading {
     align-items: start;
@@ -567,7 +623,7 @@
     font-size: 26px;
   }
   .heading span {
-    margin-top: 10px;
+    margin-top: 7px;
     font-size: 12px;
   }
   .newDashboard {
@@ -575,6 +631,7 @@
     padding: 10px;
     font-size: 0 !important;
     border-radius: 12px;
+    flex-shrink: 0;
   }
   .newDashboard svg {
     width: 20px;
@@ -592,18 +649,19 @@
     display: none;
   }
   .dashboardList strong {
-    max-width: 270px;
+    max-width: min(270px, 65vw);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 12px;
   }
   .canvas {
-    padding-top: 18px;
+    padding-top: 12px;
   }
   .dashboardHeader {
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
   }
   .dashboardHeader h2 {
     font-size: 17px;
@@ -611,6 +669,9 @@
   .dashboardHeader p {
     font-size: 10px;
     line-height: 1.5;
+  }
+  .dashboardUpdated {
+    display: none;
   }
   .modeSwitch {
     padding: 2px;
@@ -635,8 +696,7 @@
   }
   .grid > article {
     grid-column: 1 !important;
-    padding: 20px;
-    border-radius: 16px;
+    padding: 16px 0;
   }
   .widget {
     gap: 13px;
@@ -679,7 +739,12 @@
   color: #e9f8ff;
   padding: 20px 10px 0;
   margin-inline: -10px;
-  overflow: hidden;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+.funnelScene {
+  width: 100%;
 }
 .funnelStage .funnelBars {
   gap: 12px;
@@ -692,6 +757,7 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 11px;
+  min-width: 0;
 }
 .funnelStage .funnelBars li:not(:first-child):not(:last-child) {
   align-items: center;
@@ -705,6 +771,8 @@
   text-align: inherit;
   font-size: 28px;
   font-weight: 550;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .funnelStage .funnelBars small {
   color: #94e8df;

@@ -313,13 +313,13 @@ test('guest mobile has accessible navigation and forms, explains synthetic data,
   await expect(
     page.getByRole('table', { name: 'Эквивалентная таблица данных воронки' }),
   ).toContainText('84');
-  await page.getByRole('button', { name: 'Сохранить инсайт', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'Сохранить инсайт', exact: true });
-  await dialog.getByLabel('Название инсайта').fill(`Мобильный анализ ${randomUUID().slice(0, 8)}`);
+  await page.getByRole('button', { name: 'Сохранить анализ', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Сохранить анализ', exact: true });
+  await dialog.getByLabel('Название анализа').fill(`Мобильный анализ ${randomUUID().slice(0, 8)}`);
   await noOverflowOrBlockingAxe(page);
   await page.keyboard.press('Escape');
   await expect(dialog).not.toBeVisible();
-  await expect(page.getByRole('button', { name: 'Сохранить инсайт', exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Сохранить анализ', exact: true })).toBeFocused();
 
   const endpoint = `**/api/projects/${guest.projectId}/analytics/query`;
   await page.route(endpoint, route =>

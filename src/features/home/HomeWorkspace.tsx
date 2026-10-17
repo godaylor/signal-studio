@@ -52,8 +52,8 @@ export function HomeWorkspace({
           <p>
             {activationTotal?.denominator != null
               ? t(
-                  `${activationTotal.value.toLocaleString(locale)} of ${activationTotal.denominator.toLocaleString(locale)} new users reached activation.`,
-                  `${activationTotal.value.toLocaleString(locale)} из ${activationTotal.denominator.toLocaleString(locale)} новых пользователей получили первую ценность.`,
+                  `${activationTotal.value.toLocaleString(locale)} of ${activationTotal.denominator.toLocaleString(locale)} new users used the core feature within seven days of signup.`,
+                  `${activationTotal.value.toLocaleString(locale)} из ${activationTotal.denominator.toLocaleString(locale)} новых пользователей использовали основную функцию за семь дней после регистрации.`,
                 )
               : t(
                   'Follow the path from signup to a lasting habit.',

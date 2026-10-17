@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
+import { useProjectAccess } from '@/features/access/useProjectAccess';
+import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import type { AnalysisQueryV1 } from '@/server/analytics/contracts';
 import type { DashboardWidgetDto } from '@/server/dashboards/dashboard-service';
 import { DashboardWidget, DashboardWorkspace } from './DashboardWorkspace';
@@ -9,6 +11,8 @@ vi.mock('@/lib/client', () => ({
   getClientAuthHeaders: () => ({ authorization: 'Bearer token' }),
 }));
 vi.mock('@/features/exports/ExportControls', () => ({ ExportControls: () => null }));
+vi.mock('@/features/access/useProjectAccess', () => ({ useProjectAccess: vi.fn() }));
+vi.mock('@/features/guest/GuestWorkspaceContext', () => ({ useGuestWorkspace: vi.fn() }));
 vi.mock('@/features/visual/MotionPreferences', () => ({
   useVisualMotion: () => ({ animate: false, ambient: false }),
 }));
@@ -75,6 +79,12 @@ function wrapper(children: React.ReactNode) {
 }
 
 afterEach(() => vi.restoreAllMocks());
+beforeEach(() => {
+  vi.mocked(useProjectAccess).mockReturnValue({
+    data: { capabilities: { editDashboards: true } },
+  } as ReturnType<typeof useProjectAccess>);
+  vi.mocked(useGuestWorkspace).mockReturnValue(null);
+});
 
 test('new dashboard is created in a focused dialog and context stays collapsed until requested', async () => {
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
@@ -129,6 +139,90 @@ test('failed dashboard creation retains the draft and a recoverable error in the
   expect(screen.getByRole('button', { name: 'Create dashboard' })).toBeEnabled();
 });
 
+test('a viewer cannot open or submit dashboard creation', async () => {
+  vi.mocked(useProjectAccess).mockReturnValue({
+    data: { capabilities: { editDashboards: false } },
+  } as ReturnType<typeof useProjectAccess>);
+  const fetchMock = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValue(Response.json({ data: [], nextCursor: null }));
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  const create = await screen.findByRole('button', { name: 'New dashboard' });
+  expect(create).toBeDisabled();
+  fireEvent.click(create);
+  expect(screen.queryByRole('dialog', { name: 'Create dashboard' })).not.toBeInTheDocument();
+  expect(screen.getByText(/A project editor can create one for you/)).toBeVisible();
+  expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false);
+});
+
+test('a failed note save retains its draft and successful retry clears it', async () => {
+  const dashboard = {
+    id: '20000000-0000-4000-8000-000000000001',
+    title: 'Product pulse',
+    updatedAt: '2026-03-10T00:00:00Z',
+    owner: { username: 'owner' },
+    widgets: [],
+    globalContext: {},
+    canEdit: true,
+  };
+  let saves = 0;
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (init?.method === 'POST') {
+      saves += 1;
+      return saves === 1
+        ? Response.json({ error: { message: 'Storage unavailable' } }, { status: 503 })
+        : Response.json(dashboard);
+    }
+    return Response.json(
+      String(url).includes('/insights') ? { data: [], nextCursor: null } : { data: [dashboard] },
+    );
+  });
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+  fireEvent.change(screen.getByLabelText('Note title'), {
+    target: { value: 'Activation finding' },
+  });
+  fireEvent.change(screen.getByLabelText('Note body'), { target: { value: 'Keep the evidence' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add note' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Your note draft');
+  expect(screen.getByLabelText('Note title')).toHaveValue('Activation finding');
+  expect(screen.getByLabelText('Note body')).toHaveValue('Keep the evidence');
+  fireEvent.click(screen.getByRole('button', { name: 'Add note' }));
+  await waitFor(() => expect(screen.getByLabelText('Note body')).toHaveValue(''));
+  expect(screen.getByLabelText('Note title')).toHaveValue('');
+  expect(saves).toBe(2);
+});
+
+test('clearing a shared date retains the valid period without sending an invalid context', async () => {
+  const dashboard = {
+    id: '20000000-0000-4000-8000-000000000001',
+    title: 'Product pulse',
+    updatedAt: '2026-03-10T00:00:00Z',
+    owner: { username: 'owner' },
+    widgets: [],
+    globalContext: { range: query.range },
+    canEdit: true,
+  };
+  const fetchMock = vi
+    .spyOn(globalThis, 'fetch')
+    .mockImplementation(async url =>
+      Response.json(
+        String(url).includes('/insights') ? { data: [], nextCursor: null } : { data: [dashboard] },
+      ),
+    );
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+  fireEvent.click(screen.getByText('Shared context', { exact: true }));
+  const start = screen.getByLabelText('Start date');
+  fireEvent.change(start, { target: { value: '' } });
+  expect(start).toHaveValue('2026-03-01');
+  expect(screen.getByRole('alert')).toHaveTextContent('previous period has been kept');
+  expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PATCH')).toBe(false);
+  fireEvent.change(start, { target: { value: '2026-03-02' } });
+  expect(start).toHaveValue('2026-03-02');
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
+
 test('identical dashboard widget queries share one TanStack request', async () => {
   const fetchMock = vi
     .spyOn(globalThis, 'fetch')
@@ -164,6 +258,55 @@ test('one widget error does not remove a successful sibling', async () => {
     expect(screen.getByText(/This widget could not be loaded/)).toBeInTheDocument(),
   );
   expect(screen.getByRole('table', { name: /Data for signup/ })).toBeInTheDocument();
+});
+
+test('a failed widget can retry without reloading the dashboard', async () => {
+  vi.spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(
+      Response.json({ error: { message: 'Temporary failure' } }, { status: 503 }),
+    )
+    .mockResolvedValueOnce(Response.json(success('signup')));
+  wrapper(<DashboardWidget widget={widget('10000000-0000-4000-8000-000000000009')} context={{}} />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Retry widget' }));
+  expect(await screen.findByRole('table', { name: /Data for signup/ })).toBeVisible();
+});
+
+test('a changed shared period never relabels the previous period result', async () => {
+  let finish: ((response: Response) => void) | undefined;
+  vi.spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(Response.json(success('signup')))
+    .mockImplementationOnce(
+      () =>
+        new Promise<Response>(resolve => {
+          finish = resolve;
+        }),
+    );
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const item = widget('10000000-0000-4000-8000-000000000010');
+  const { rerender } = render(
+    <QueryClientProvider client={client}>
+      <DashboardWidget widget={item} context={{}} />
+    </QueryClientProvider>,
+  );
+  expect(await screen.findByRole('table')).toBeVisible();
+  rerender(
+    <QueryClientProvider client={client}>
+      <DashboardWidget
+        widget={item}
+        context={{
+          range: {
+            startAt: '2026-03-02T00:00:00.000Z',
+            endAt: '2026-03-10T00:00:00.000Z',
+            timezone: 'UTC',
+          },
+        }}
+      />
+    </QueryClientProvider>,
+  );
+  expect(screen.getByRole('status')).toHaveTextContent('Loading Insight');
+  expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  finish?.(Response.json(success('signup')));
+  expect(await screen.findByRole('table')).toBeVisible();
 });
 
 test('widget headline uses the server total instead of adding analytical rows', async () => {
@@ -224,4 +367,50 @@ test('an empty analytical result explains the state and keeps its query availabl
     expect.stringContaining('event=signup'),
   );
   expect(screen.queryByText('0', { selector: 'strong' })).not.toBeInTheDocument();
+});
+
+test('guest funnel chart and its scrollable table use the same readable event labels', async () => {
+  vi.mocked(useGuestWorkspace).mockReturnValue({} as ReturnType<typeof useGuestWorkspace>);
+  const funnel: AnalysisQueryV1 = {
+    ...query,
+    mode: 'funnel',
+    funnel: {
+      steps: [
+        { type: 'event', value: 'signup', filters: [] },
+        { type: 'event', value: 'subscription_started', filters: [] },
+      ],
+      conversionWindowMinutes: 1440,
+    },
+    visualization: 'bar',
+  };
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    Response.json({
+      ...success('signup'),
+      data: {
+        mode: 'funnel',
+        rows: [336, 84].map((value, index) => ({
+          kind: 'funnel-step',
+          step: index + 1,
+          label: ['signup', 'subscription_started'][index],
+          value,
+          converted: value,
+          overallConversionRate: value / 336,
+        })),
+      },
+    }),
+  );
+  wrapper(
+    <DashboardWidget
+      widget={widget('10000000-0000-4000-8000-000000000008', funnel)}
+      context={{}}
+    />,
+  );
+  const table = await screen.findByRole('table');
+  expect(within(table).getByRole('rowheader', { name: 'Subscription' })).toBeVisible();
+  expect(screen.getByText('Subscription', { selector: 'span' })).toBeVisible();
+  expect(screen.getByRole('region', { name: 'Data for signup' })).toHaveAttribute('tabindex', '0');
+  expect(screen.getByRole('region', { name: 'Funnel conversion by step' })).toHaveAttribute(
+    'tabindex',
+    '0',
+  );
 });

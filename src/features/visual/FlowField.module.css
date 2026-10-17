@@ -27,19 +27,19 @@
   mask-image: linear-gradient(transparent, #000 30%, transparent 85%);
 }
 .body {
-  opacity: 0.28;
+  opacity: 0.38;
   transition: d 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .filament {
   fill: none;
-  stroke-width: 0.65;
-  opacity: 0.65;
+  stroke-width: 0.9;
+  opacity: 0.85;
   transition: d 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .pulse {
   fill: none;
   stroke: #b5ffff;
-  stroke-width: 1.5;
+  stroke-width: 1.8;
   filter: drop-shadow(0 0 2px #7effff70);
   stroke-linecap: round;
   stroke-dasharray: 0.6 99.4;

@@ -22,7 +22,7 @@ export function FunnelTrace({
       aria-label={t('Ordered funnel conversion chart', 'График конверсии упорядоченной воронки')}
     >
       <figcaption>
-        <span>{t('People, not just events', 'За событиями — люди')}</span>
+        <span>{t('The participant journey', 'Путь участников')}</span>
         <small>{t('Flow width = share of participants', 'Толщина потока = доля участников')}</small>
       </figcaption>
       {groups.map(segment => {
@@ -31,53 +31,65 @@ export function FunnelTrace({
           <div key={segment} className={styles.group}>
             {segment ? <h3>{segment}</h3> : null}
             <div
-              className={styles.labels}
-              style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0,1fr))` }}
+              className={styles.traceViewport}
+              role="region"
+              aria-label={t(
+                'Funnel stages, scroll horizontally for more',
+                'Этапы воронки: прокрутите по горизонтали, чтобы увидеть все',
+              )}
+              tabIndex={0}
             >
-              {rows.map((row, i) => (
-                <button
-                  key={row.step}
-                  type="button"
-                  onMouseEnter={() => setActive(i)}
-                  onMouseLeave={() => setActive(undefined)}
-                  onFocus={() => setActive(i)}
-                  onBlur={() => setActive(undefined)}
-                  onClick={() => onInspect(row)}
-                  aria-label={`${t('Explore drop-off', 'Исследовать отток')}: ${eventLabel(row.label, locale)}`}
-                  data-highlight={active === i || undefined}
+              <div style={{ minWidth: rows.length > 3 ? rows.length * 130 : undefined }}>
+                <div
+                  className={styles.labels}
+                  style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0,1fr))` }}
                 >
-                  <span className={styles.label}>{eventLabel(row.label, locale)}</span>
-                  <strong>
-                    {row.converted.toLocaleString(locale)}
-                    <small>
-                      {row.overallConversionRate.toLocaleString(locale, {
-                        style: 'percent',
-                        maximumFractionDigits: 1,
-                      })}
-                    </small>
-                  </strong>
-                </button>
-              ))}
-            </div>
-            <FlowField values={rows.map(row => row.converted)} active={active} />
-            <div
-              className={styles.losses}
-              style={{
-                gridTemplateColumns: `repeat(${Math.max(1, rows.length - 1)}, minmax(0,1fr))`,
-              }}
-            >
-              {rows.slice(1).map((row, i) => (
-                <button key={row.step} type="button" onClick={() => onInspect(row)}>
-                  <span className={styles.lossDot} aria-hidden="true" />
-                  <strong>
-                    {Math.max(0, rows[i].converted - row.converted).toLocaleString(locale)}
-                  </strong>
-                  <span>
-                    {t('did not reach', 'не дошли до')}{' '}
-                    {eventLabel(row.label, locale).toLocaleLowerCase(locale)}
-                  </span>
-                </button>
-              ))}
+                  {rows.map((row, i) => (
+                    <button
+                      key={row.step}
+                      type="button"
+                      onMouseEnter={() => setActive(i)}
+                      onMouseLeave={() => setActive(undefined)}
+                      onFocus={() => setActive(i)}
+                      onBlur={() => setActive(undefined)}
+                      onClick={() => onInspect(row)}
+                      aria-label={`${t('Explore drop-off', 'Исследовать отток')}: ${eventLabel(row.label, locale)}`}
+                      data-highlight={active === i || undefined}
+                    >
+                      <span className={styles.label}>{eventLabel(row.label, locale)}</span>
+                      <strong>
+                        {row.converted.toLocaleString(locale)}
+                        <small>
+                          {row.overallConversionRate.toLocaleString(locale, {
+                            style: 'percent',
+                            maximumFractionDigits: 1,
+                          })}
+                        </small>
+                      </strong>
+                    </button>
+                  ))}
+                </div>
+                <FlowField values={rows.map(row => row.converted)} active={active} />
+                <div
+                  className={styles.losses}
+                  style={{
+                    gridTemplateColumns: `repeat(${Math.max(1, rows.length - 1)}, minmax(0,1fr))`,
+                  }}
+                >
+                  {rows.slice(1).map((row, i) => (
+                    <button key={row.step} type="button" onClick={() => onInspect(row)}>
+                      <span className={styles.lossDot} aria-hidden="true" />
+                      <strong>
+                        {Math.max(0, rows[i].converted - row.converted).toLocaleString(locale)}
+                      </strong>
+                      <span>
+                        {t('did not reach', 'не дошли до')}{' '}
+                        {eventLabel(row.label, locale).toLocaleLowerCase(locale)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         );
