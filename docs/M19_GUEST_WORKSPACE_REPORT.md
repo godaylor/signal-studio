@@ -5,8 +5,9 @@ the older acceptance remains historical evidence, not acceptance of M19.
 
 ## Delivery state
 
-Local production acceptance passed. Public deployment acceptance is being verified;
-the deployment record below must be completed before claiming hosted acceptance.
+Local and public HTTPS guest acceptance passed on application revision
+`194eab4bac15f6690d469a2029c23083890035dd`. All six remote CI jobs passed.
+M19's end-to-end definition of done is satisfied within the limitations below.
 
 ## User-visible outcome
 
@@ -116,7 +117,7 @@ a task-owned Docker container. Local production app uses `127.0.0.1:32240`, DB `
 | --- | --- |
 | `pnpm typecheck` | PASS |
 | `pnpm lint` | PASS, zero errors; 38 nonblocking warnings and 60 informational diagnostics reported |
-| `pnpm test` | 165 files / 1,055 tests passed |
+| `pnpm test` / final `vitest run` | 165 files / 1,056 tests passed |
 | `vitest run --config vitest.studio.config.ts` | 9 files / 25 tests passed |
 | Guest PostgreSQL integration | 6 / 6 passed on local isolated DB |
 | Neon PostgreSQL 18 verification branch, guest integration | 6 / 6 passed after retention plan correction |
@@ -128,6 +129,11 @@ a task-owned Docker container. Local production app uses `127.0.0.1:32240`, DB `
 | Dark Explore/editor and 834px navigation/focus restore | PASS |
 | Actual synchronous guest CSV and JSON | 200 downloads; CSV 7,498 bytes, JSON 7,996 bytes, golden rows verified |
 | Existing-account production browser regressions | 14 / 14 passed, 18.1 s; auth/RU-EN/Viewer/Home/Explore/Insights/Dashboards |
+| Public-ingestion compatibility with leftover guest cookie | 72 / 72 focused auth/send/record/guest tests; public parsing retains existing bounds while guest management stays capped |
+| Public HTTPS guest + archived-tour browser suites | 6 / 6 passed, 35.5 s, exact deployed revision verified |
+| Public HTTPS Home, CSV, cookie, six desktop/mobile flagship screens | 28/56 activation (50%); 21/28 retention (75%); CSV 7,498 bytes; Secure/HttpOnly/Lax; 12 views with zero serious/critical axe findings and zero overflow |
+| Exact-revision remote CI verification | 4 release-contract tests; 165 files / 1,056 unit tests; 9 files / 25 Studio tests; 13 files / 64 PostgreSQL integration tests; 33 / 33 browser cases (1.3 min) |
+| Exact-revision remote serverless CI | PASS; build:vercel and 13 / 13 browser cases (23.4 s) |
 
 The production browser suite proves entry, actual parameter changes, Insight save/reload,
 dashboard assembly/reload, exports, two independent browser principals, foreign-resource
@@ -151,8 +157,8 @@ reference-scale or ClickHouse performance claim is made.
 
 ## Deployment and additional acceptance record
 
-Pending final deployment verification. Existing target: Vercel Hobby plus the existing
-Neon Free `signal-studio`, Frankfurt. Migration 37 was first applied through Prisma to the
+Deployed to the existing Vercel Hobby plus Neon Free `signal-studio`, Frankfurt.
+Migration 37 was first applied through Prisma to the
 separate `m19-guest-migration-verification-20261017` branch (`br-cool-pond-b1fpmjpd`).
 No existing provider project or user workspace was deleted. The branch exposed a
 PostgreSQL 18 planner issue: a correlated retention lookup was inlined under the entrant
@@ -167,8 +173,37 @@ compute was suspended after testing; the branch remains a task-owned verificatio
 
 Production migration 37 was then applied successfully with `pnpm db:migrate` through
 the existing direct Neon connection. It only created the two guest metadata tables;
-existing account/event tables were not rewritten. Source publication and final hosted
-browser acceptance are pending in this implementation commit.
+existing account/event tables were not rewritten.
+
+Application commits `70005542e` and `194eab4ba` were pushed to the owned `main` branch.
+The existing Vercel GitHub integration deployed
+[`194eab4ba`](https://github.com/godaylor/signal-studio/commit/194eab4bac15f6690d469a2029c23083890035dd)
+successfully to **https://signal-studio-smoky.vercel.app**. Public build metadata confirms
+that exact revision, serverless profile and Vercel-managed Node 22.23.2. `/api/ready`
+returned 200 with PostgreSQL ready. No new runtime secret or provider was required.
+
+The actual HTTPS browser suites passed 6/6 in 35.5 seconds, including query changes,
+Insight/dashboard reload persistence, JSON download, independent guests, foreign-resource
+denial, the 13th export's 429, revocation, forged-cookie denial, mobile error recovery,
+dark mode and tablet navigation. A separate synthetic guest checked Secure/HttpOnly/Lax,
+Home's 50% activation and 75% retention, the actual 7,498-byte CSV, and all six pages at
+1440 and 390 pixels: zero serious/critical axe findings and zero document overflow.
+Every acceptance guest was revoked afterward. The public screenshot set is named
+`design/guest-redesign/hosted-*.png`; no real account data is included.
+
+Exact-revision GitHub Actions run:
+[Signal Studio CI #14](https://github.com/godaylor/signal-studio/actions/runs/39010831638).
+Main verification and serverless jobs passed. The main job includes 33/33 browser
+cases, 64 PostgreSQL integration tests, typechecks, lint, production build, dependency
+inventory, secret exclusion and dependency-aware readiness. The serverless job includes
+13/13 browser cases. All four packaging jobs (runner, worker, migration and hosted)
+passed their build, legal/inventory and non-root checks; applicable offline Prisma
+checks passed. The full six-job workflow completed successfully in 9 min 49 s.
+
+Final acceptance screenshots, gallery and reports are a documentation-only follow-up
+commit. No runtime source changed after this exact-revision acceptance; CI is skipped
+for that follow-up to avoid rebuilding the same four images for documentation alone.
+All changes are task-owned and committed/pushed; the final working tree is clean.
 
 ## Remaining limits, legal and worktree safety
 

@@ -85,3 +85,12 @@ Compare live desktop/mobile screenshots to the selected images for shell contras
 `REVIEW.html` is the standalone Russian gallery of alternatives, selected mockups and real desktop/mobile screenshots. `compare.html` places the original and final analysis views beside each other, followed by selected Explore mockup versus implementation. All images link to the full local originals. Generated images and application screenshots are labeled separately; mockup numbers are illustrative. The working fictional fixture contains 1,281 events and the actual funnel is 336 → 252 → 168 (50%).
 
 `comparison-board.png` is rendered from the comparison page after final application recapture. `gallery-preview.png` is the desktop preview of the gallery itself. Both HTML documents use local assets and system fonts, with no network or runtime dependency. The gallery and comparison page were checked at 1600px and 390px: no document overflow, missing image or broken local file link.
+
+The final `hosted-*.png` set shows the actual HTTPS deployment of application revision
+`194eab4ba` on Vercel with Neon. Explore desktop and Home/Dashboard mobile were compared
+to the selected direction: the shell, Query Spine, result hierarchy and readable stacked
+layout are preserved. The mobile dashboard keeps the existing creation controls above
+widgets, so the first widget's figures require scrolling. Public acceptance separately
+passed the complete guest workflow, real Home/CSV results and all six pages at 1440/390px.
+The updated gallery's 21 images and comparison's seven images have no missing local files,
+broken anchors or document overflow at 1600/390px. See the M19 report for scope and limits.

@@ -2,6 +2,10 @@
 
 ## M19 — Real guest workspace and visual redesign (2026-10-17)
 
+Status: **Complete**. Local and public HTTPS guest acceptance passed on application
+revision `194eab4ba`; all six jobs of GitHub Actions run `39010831638` passed.
+See `docs/M19_GUEST_WORKSPACE_REPORT.md` for counts, deployment, mockups and limits.
+
 Explicit current user scope: replace the page-local public walkthrough as the
 primary trial with an isolated, server-persistent, expiring guest workspace.
 Reuse application authentication/authorization, PostgreSQL analytics, Insights,
