@@ -5,7 +5,7 @@ test('public auth exposes only RU/EN and persists the selected locale', async ({
 
   await expect(page).toHaveTitle(/Кинорит/);
   await expect(
-    page.getByRole('heading', { level: 1, name: /От следа\.\s*К ясному ответу\./ }),
+    page.getByRole('heading', { level: 1, name: /Увидеть путь\.\s*Найти рост\./ }),
   ).toBeVisible();
   await expect(page.getByText('Имя пользователя', { exact: true })).toBeVisible();
 

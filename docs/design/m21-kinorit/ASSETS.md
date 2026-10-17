@@ -70,3 +70,5 @@ Full prompts: [PROMPTS.md](PROMPTS.md). Original generation folder: C:/Users/lap
   }
 ]
 ```
+
+Initial reference captures used as imagegen inputs are retained as reference-initial-home-desktop.png and reference-initial-explore-mobile.png. They are development-stage records, not final release evidence. Final native screenshots use final-* names; public exact-revision screenshots use hosted-* names.

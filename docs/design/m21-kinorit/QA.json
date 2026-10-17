@@ -1,0 +1,552 @@
+{
+  "uiRevision": "0530d519415f87059c318617b67dcba5afc6304b",
+  "visual": {
+    "chrome": "155.0.8059.80",
+    "audit": [
+      {
+        "route": "login",
+        "theme": "light",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "home",
+        "theme": "light",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "explore",
+        "theme": "light",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "dashboards",
+        "theme": "light",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "audiences",
+        "theme": "light",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "experience",
+        "theme": "light",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "live",
+        "theme": "light",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "login",
+        "theme": "dark",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "home",
+        "theme": "dark",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "explore",
+        "theme": "dark",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "dashboards",
+        "theme": "dark",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "audiences",
+        "theme": "dark",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "experience",
+        "theme": "dark",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "live",
+        "theme": "dark",
+        "mobile": false,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "login",
+        "theme": "light",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "home",
+        "theme": "light",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "explore",
+        "theme": "light",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "dashboards",
+        "theme": "light",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "audiences",
+        "theme": "light",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "experience",
+        "theme": "light",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "live",
+        "theme": "light",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "login",
+        "theme": "dark",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "home",
+        "theme": "dark",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "explore",
+        "theme": "dark",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "dashboards",
+        "theme": "dark",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "audiences",
+        "theme": "dark",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "experience",
+        "theme": "dark",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "route": "live",
+        "theme": "dark",
+        "mobile": true,
+        "overflow": false,
+        "violations": []
+      }
+    ],
+    "errors": []
+  },
+  "responsive": [
+    {
+      "width": 320,
+      "route": "login",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "route": "home",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "route": "explore",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "route": "dashboards",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "login",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "home",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "explore",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "dashboards",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 1920,
+      "route": "login",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 1920,
+      "route": "home",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 1920,
+      "route": "explore",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 1920,
+      "route": "dashboards",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 2560,
+      "route": "login",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 2560,
+      "route": "home",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 2560,
+      "route": "explore",
+      "actualResultLoaded": true,
+      "overflow": false
+    },
+    {
+      "width": 2560,
+      "route": "dashboards",
+      "actualResultLoaded": true,
+      "overflow": false
+    }
+  ],
+  "performance": {
+    "environment": "Windows, installed Chrome 155.0.8059.80, headless, native 0530d519, 1440x1000, fresh browser contexts, warm localhost server, no CPU/network throttling, fixed synthetic entry example, no concurrent build/test",
+    "runs": [
+      {
+        "lcp": 1320,
+        "resources": [
+          {
+            "name": "GolosTextVariable-s.p.0zqwl8lk7zd7i.woff2",
+            "transferBytes": 76796,
+            "decodedBytes": 76496
+          },
+          {
+            "name": "horizon.webp",
+            "transferBytes": 73580,
+            "decodedBytes": 73280
+          }
+        ]
+      },
+      {
+        "lcp": 1016,
+        "resources": [
+          {
+            "name": "GolosTextVariable-s.p.0zqwl8lk7zd7i.woff2",
+            "transferBytes": 76796,
+            "decodedBytes": 76496
+          },
+          {
+            "name": "horizon.webp",
+            "transferBytes": 73580,
+            "decodedBytes": 73280
+          }
+        ]
+      },
+      {
+        "lcp": 1020,
+        "resources": [
+          {
+            "name": "GolosTextVariable-s.p.0zqwl8lk7zd7i.woff2",
+            "transferBytes": 76796,
+            "decodedBytes": 76496
+          },
+          {
+            "name": "horizon.webp",
+            "transferBytes": 73580,
+            "decodedBytes": 73280
+          }
+        ]
+      },
+      {
+        "lcp": 1036,
+        "resources": [
+          {
+            "name": "GolosTextVariable-s.p.0zqwl8lk7zd7i.woff2",
+            "transferBytes": 76796,
+            "decodedBytes": 76496
+          },
+          {
+            "name": "horizon.webp",
+            "transferBytes": 73580,
+            "decodedBytes": 73280
+          }
+        ]
+      },
+      {
+        "lcp": 1012,
+        "resources": [
+          {
+            "name": "GolosTextVariable-s.p.0zqwl8lk7zd7i.woff2",
+            "transferBytes": 76796,
+            "decodedBytes": 76496
+          },
+          {
+            "name": "horizon.webp",
+            "transferBytes": 73580,
+            "decodedBytes": 73280
+          }
+        ],
+        "frames": [
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.099999999999909,
+          4.100000000000364,
+          4.100000000000364,
+          4.100000000000364,
+          4.100000000000364,
+          4.100000000000364,
+          4.100000000000364,
+          4.100000000000364,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.199999999999818,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.200000000000273,
+          4.299999999999727,
+          4.299999999999727,
+          4.299999999999727,
+          4.299999999999727,
+          4.300000000000182,
+          4.300000000000182,
+          4.300000000000182,
+          4.300000000000182,
+          4.300000000000182,
+          4.300000000000182
+        ]
+      }
+    ],
+    "lcpMedian": 1020,
+    "lcpNearestRankP95": 1320,
+    "frameIntervalMedian": 4.199999999999818,
+    "frameIntervalP95": 4.299999999999727,
+    "frameIntervalsOver50": 0
+  },
+  "publicWorkflow": {
+    "url": "https://signal-studio-smoky.vercel.app",
+    "revision": "0530d519415f87059c318617b67dcba5afc6304b",
+    "sourceSha256": "caae04e9e3936a9b883ce42a081cc5689d3aad98a3bf363593aae3f340a0615d",
+    "profile": "vercel-serverless",
+    "ready": {
+      "ok": true,
+      "dependencies": {
+        "database": "ready"
+      }
+    },
+    "chrome": "155.0.8059.80",
+    "staleAccountGuestEntry": true,
+    "accountCredentialPreserved": true,
+    "reload": true,
+    "narrow320": {
+      "signInRight": 306,
+      "answerDoesNotOverlap": true
+    },
+    "homeNavigationToMatureCohortMs": 10816,
+    "funnel": [
+      336,
+      252,
+      84
+    ],
+    "insightPersisted": true,
+    "dashboardPersisted": true,
+    "jsonExport": true,
+    "crossProjectDenied": true,
+    "cookie": {
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    "pageErrors": []
+  },
+  "gallery": {
+    "toggles": 28,
+    "videoSeconds": 15.68,
+    "axeSeriousCritical": 0,
+    "overflow": false
+  }
+}

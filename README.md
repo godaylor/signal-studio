@@ -1,8 +1,8 @@
-# Яснослед · Signal Studio
+# Кинорит · Signal Studio
 
 [![Signal Studio CI](https://github.com/godaylor/signal-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/godaylor/signal-studio/actions/workflows/ci.yml)
 
-**From a trace to a clear answer.** Яснослед is the new Russian product identity of
+**Behavior in motion.** Кинорит (Kinorit) is the Russian product identity of
 Signal Studio, a self-hosted product intelligence workspace for activation,
 retention and feature
 adoption. Connect a source, explore behavior, save an Insight, build a Dashboard,
@@ -20,20 +20,22 @@ services. Edit a question, save an Insight, assemble a Dashboard and export CSV 
 JSON; server-saved work survives reloads for the 24-hour guest session. Each guest
 has a separate user, workspace and source, with bounded resource use. No shared
 administrator credentials are provided. The older guided example remains at `/demo/tour`.
-The published M20 release adds the Optical Trace identity, coordinated
-light/dark screens, responsive motion and explicit guest/account selection in each
-tab. It preserves the signed-in account when trying the guest workspace. Local
-production checks, all six CI jobs and public verification passed on application
-revision `7026491702e182b4454dc7e6f12b21b821dd12e6`. Results are recorded in the
-[M20 acceptance report](docs/M20_FINAL_REPORT.md); the earlier published guest
-acceptance remains in the [historical M19 report](docs/M19_GUEST_WORKSPACE_REPORT.md).
+The M21 release introduces a panoramic data workspace: real result-driven flows,
+coordinated light/dark screens, responsive motion and a new original identity.
+The entry scene is an explicitly fixed synthetic example; private workspaces
+calculate from their own events. Guest/account selection remains explicit per tab
+and preserves the signed-in account.
+[M21 acceptance report](docs/M21_FINAL_REPORT.md) records exact revisions, CI,
+public checks and limitations. Earlier releases remain documented in the
+[historical M20 report](docs/M20_FINAL_REPORT.md) and
+[M19 guest report](docs/M19_GUEST_WORKSPACE_REPORT.md).
 See [free deployment](docs/FREE_DEPLOYMENT.md).
 
-![Яснослед — actual Home in the public app](docs/design/m20-yasnosled/hosted-home-light-desktop.png)
+![Кинорит — actual entry in the public app](docs/design/m21-kinorit/hosted-entry-desktop.png)
 
-[Design alternatives, selected mockups and real screens](docs/design/m20-yasnosled/REVIEW.html)
-· [Before/after comparison](docs/design/m20-yasnosled/compare.html)
-· [Design contract](docs/design/m20-yasnosled/DESIGN.md)
+[Design alternatives, selected mockups and real screens](docs/design/m21-kinorit/REVIEW.html)
+· [Before/after comparison](docs/design/m21-kinorit/compare.html)
+· [Design contract](docs/design/m21-kinorit/DESIGN.md)
 
 The image above shows the working public app. The review gallery
 separately labels generated design concepts and actual application screens.
@@ -181,7 +183,7 @@ packaging. Publishing release images requires the same CI to pass first.
 
 ## Ownership and open source
 
-Яснослед / Signal Studio is an **MIT-licensed transformation of Umami 3.3.1**, not a claim that
+Кинорит / Signal Studio is an **MIT-licensed transformation of Umami 3.3.1**, not a claim that
 all code was written from scratch. The original Umami copyright and complete MIT
 notice remain intact in [LICENSE](LICENSE).
 
