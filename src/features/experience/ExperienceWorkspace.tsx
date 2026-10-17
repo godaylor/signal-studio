@@ -1,11 +1,13 @@
 'use client';
 
 import { ArrowLeft, Gauge, Play, ShieldCheck } from 'lucide-react';
+import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
+import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import styles from './ExperienceWorkspace.module.css';
 import { useEvidenceReplay, useSessionEvidence } from './useEvidence';
 
@@ -46,6 +48,7 @@ export function ExperienceWorkspace({
   projectName: string;
 }) {
   const { locale, t } = useStudioLocale();
+  const { animate, ambient } = useVisualMotion();
   const params = useSearchParams();
   const sessionId = params.get('sessionId') ?? undefined;
   const startAt = params.get('startAt') ?? undefined;
@@ -87,6 +90,18 @@ export function ExperienceWorkspace({
       </header>
       {!sessionId ? (
         <section className={styles.state}>
+          <motion.img
+            className={styles.emptyArtwork}
+            src="/brand/yasnosled/optical-flow.webp"
+            alt=""
+            aria-hidden="true"
+            width="1983"
+            height="793"
+            animate={ambient ? { y: [0, -7, 0] } : { y: 0 }}
+            transition={
+              ambient ? { duration: 8, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }
+            }
+          />
           <h2>{t('Choose a session from evidence', 'Выберите сессию из данных')}</h2>
           <p>
             {t(
@@ -169,8 +184,16 @@ export function ExperienceWorkspace({
               <h2>{t('Observed events', 'Наблюдаемые события')}</h2>
               {timeline.length ? (
                 <ol className={styles.timeline}>
-                  {timeline.map(event => (
-                    <li key={event.id}>
+                  {timeline.map((event, index) => (
+                    <motion.li
+                      key={event.id}
+                      initial={animate ? { y: 8 } : false}
+                      animate={{ y: 0 }}
+                      transition={{
+                        duration: animate ? 0.28 : 0,
+                        delay: animate ? Math.min(index, 6) * 0.025 : 0,
+                      }}
+                    >
                       <time>{formatDate(event.createdAt, locale)}</time>
                       <div>
                         <strong>{event.label}</strong>
@@ -187,7 +210,7 @@ export function ExperienceWorkspace({
                           </dl>
                         ) : null}
                       </div>
-                    </li>
+                    </motion.li>
                   ))}
                 </ol>
               ) : (

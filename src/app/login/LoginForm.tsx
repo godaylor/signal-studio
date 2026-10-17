@@ -37,7 +37,7 @@ export function LoginForm() {
   return (
     <Column justifyContent="center" alignItems="center" gap="6" style={{ width: '100%' }}>
       <LanguageButton />
-      <Heading>Signal Studio</Heading>
+      <Heading>{t(labels.login)}</Heading>
       <Form onSubmit={handleSubmit} error={getErrorMessage(error)} style={{ width: '100%' }}>
         <FormField
           label={t(labels.username)}

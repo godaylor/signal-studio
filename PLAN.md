@@ -1,5 +1,29 @@
 # Signal Studio transformation plan
 
+## M20 — Яснослед: cohesive identity, expressive motion and reliable browser entry
+
+Current explicit user scope (2026-10-17): M19's visual treatment is rejected as
+too fragmented and static. Preserve the product and its data/services, while
+reworking composition, Russian naming/identity, imagery and motion across the
+working application in light/dark themes and on mobile. Fix guest entry in an
+ordinary browser with existing account/session state. This user direction
+supersedes M19's restrained visual treatment, without changing analytical semantics.
+
+Subsystems: authentication-mode selection and guest-entry recovery; brand/metadata;
+login, Studio shell and the six primary feature surfaces; shared visual/motion
+components; focused tests, visual evidence and release documentation. No provider,
+account, tenant data, ingestion contract or analytical-definition migration is planned.
+
+Definition of done: mixed account/guest/stale browser states work without weakening
+server authorization or revoking the account; original account remains usable;
+Russian interface and distinctive original identity; useful results visible in the
+first mobile viewport; cohesive light/dark visual hierarchy; visible coordinated
+transitions, chart/trace motion and pointer interactions that retain keyboard/touch
+usability, reduced-motion behavior and hidden-tab restraint; actual browser frame
+and screenshot review; real guest persistence/calculation/export and normal-account
+regressions; typecheck/lint/build/appropriate CI; public HTTPS verification and
+truthful design, performance, provenance and limitation records. Initial tree clean.
+
 ## M19 — Real guest workspace and visual redesign (2026-10-17)
 
 Status: **Complete**. Local and public HTTPS guest acceptance passed on application

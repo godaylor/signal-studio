@@ -4,8 +4,8 @@ import { StudioShell } from '@/features/studio-shell/StudioShell';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Signal Studio',
-    default: 'Signal Studio',
+    template: '%s | Яснослед',
+    default: 'Яснослед',
   },
 };
 

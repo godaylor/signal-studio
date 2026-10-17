@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { type FormEvent, useState } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { getStudioPath } from '@/features/studio-shell/navigation';
 import styles from './SourcesWorkspace.module.css';
@@ -41,7 +41,7 @@ export function CreateProject({ onStart }: { onStart?: () => void }) {
 
   return (
     <section className={styles.create} aria-labelledby="create-project-title">
-      <p className={styles.eyebrow}>Signal Studio</p>
+      <p className={styles.eyebrow}>Яснослед</p>
       <h1 id="create-project-title">
         {t('Understand how people use your product', 'Узнайте, как люди используют ваш продукт')}
       </h1>

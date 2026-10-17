@@ -3,8 +3,10 @@ import { expect, test } from '@playwright/test';
 test('public auth exposes only RU/EN and persists the selected locale', async ({ page }) => {
   await page.goto('/login?locale=fr-FR');
 
-  await expect(page).toHaveTitle(/Signal Studio/);
-  await expect(page.getByRole('heading', { name: 'Signal Studio' })).toBeVisible();
+  await expect(page).toHaveTitle(/Яснослед/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: /От следа\.\s*К ясному ответу\./ }),
+  ).toBeVisible();
   await expect(page.getByText('Имя пользователя', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Выбрать язык' }).click();

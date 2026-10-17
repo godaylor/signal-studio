@@ -12,14 +12,18 @@ import {
   Settings2,
   Trash2,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { dateInputToUtc } from '@/features/explore/model';
 import { useAnalysisResult } from '@/features/explore/useAnalysisQuery';
 import { ExportControls } from '@/features/exports/ExportControls';
+import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { useInsights } from '@/features/insights/useInsights';
+import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
 import { StudioState } from '@/features/studio-shell/StudioState';
+import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import type { AnalysisFunnelStepRow } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import { applyDashboardContext, type DashboardGlobalContext } from '@/server/dashboards/context';
@@ -46,6 +50,7 @@ export function DashboardWorkspace({
   projectName: string;
 }) {
   const { locale, t } = useStudioLocale();
+  const { animate } = useVisualMotion();
   const dashboards = useDashboards(projectId);
   const create = useCreateDashboard(projectId);
   const update = useUpdateDashboard(projectId);
@@ -60,6 +65,7 @@ export function DashboardWorkspace({
   const [selectedId, setSelectedId] = useState<string>();
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [newTitle, setNewTitle] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
   const [selectedInsightId, setSelectedInsightId] = useState('');
   const [noteTitle, setNoteTitle] = useState('');
   const [noteBody, setNoteBody] = useState('');
@@ -99,6 +105,7 @@ export function DashboardWorkspace({
       setNewTitle('');
       setSelectedId(dashboard.id);
       setMode('edit');
+      setCreateOpen(false);
     } catch {
       // A localized mutation error is rendered below.
     }
@@ -120,26 +127,16 @@ export function DashboardWorkspace({
             )}
           </span>
         </div>
-        <form
-          onSubmit={event => {
-            event.preventDefault();
-            createDashboard();
+        <button
+          className={styles.newDashboard}
+          type="button"
+          onClick={() => {
+            create.reset();
+            setCreateOpen(true);
           }}
         >
-          <label>
-            <span className="sr-only">{t('New dashboard title', 'Название нового дашборда')}</span>
-            <input
-              aria-label={t('New dashboard title', 'Название нового дашборда')}
-              value={newTitle}
-              onChange={event => setNewTitle(event.target.value)}
-              placeholder={t('Executive product pulse', 'Пульс продукта для руководства')}
-              required
-            />
-          </label>
-          <button type="submit" disabled={create.isPending}>
-            <Plus aria-hidden="true" /> {t('Create dashboard', 'Создать дашборд')}
-          </button>
-        </form>
+          <Plus aria-hidden="true" /> {t('New dashboard', 'Новый дашборд')}
+        </button>
       </header>
 
       {!list.length ? (
@@ -147,46 +144,48 @@ export function DashboardWorkspace({
           variant="empty"
           title={t('No dashboards yet', 'Дашбордов пока нет')}
           message={t(
-            'Name the first dashboard above, then add existing Insights.',
-            'Назовите первый дашборд и добавьте существующие инсайты.',
+            'Create your first dashboard and add a saved Insight.',
+            'Создайте первый дашборд и добавьте сохранённый инсайт.',
           )}
         />
       ) : selected ? (
         <div className={styles.layout}>
-          <nav
-            aria-label={t('Project dashboards', 'Дашборды проекта')}
-            className={styles.dashboardList}
-          >
-            {list.map(dashboard => (
-              <button
-                key={dashboard.id}
-                type="button"
-                data-selected={dashboard.id === selected.id || undefined}
-                onClick={() => {
-                  setSelectedId(dashboard.id);
-                  setMode('view');
-                }}
-              >
-                <LayoutDashboard aria-hidden="true" />
-                <span>
-                  <strong>{dashboard.title}</strong>
-                  <small>
-                    {dashboard.widgets.length.toLocaleString(locale)} {t('widgets', 'виджетов')}
-                  </small>
-                </span>
-              </button>
-            ))}
-          </nav>
+          {list.length > 1 ? (
+            <nav
+              aria-label={t('Project dashboards', 'Дашборды проекта')}
+              className={styles.dashboardList}
+            >
+              {list.map(dashboard => (
+                <button
+                  key={dashboard.id}
+                  type="button"
+                  data-selected={dashboard.id === selected.id || undefined}
+                  onClick={() => {
+                    setSelectedId(dashboard.id);
+                    setMode('view');
+                  }}
+                >
+                  <LayoutDashboard aria-hidden="true" />
+                  <span>
+                    <strong>{dashboard.title}</strong>
+                    <small>
+                      {dashboard.widgets.length.toLocaleString(locale)} {t('widgets', 'виджетов')}
+                    </small>
+                  </span>
+                </button>
+              ))}
+            </nav>
+          ) : null}
 
           <main className={styles.canvas}>
             <div className={styles.dashboardHeader}>
               <div>
+                <h2>{selected.title}</h2>
+                {selected.description ? <span>{selected.description}</span> : null}
                 <p>
                   <span className="sr-only">{selected.owner.username} · </span>
                   {t('updated', 'обновлено')} {new Date(selected.updatedAt).toLocaleString(locale)}
                 </p>
-                <h2>{selected.title}</h2>
-                {selected.description ? <span>{selected.description}</span> : null}
               </div>
               <div className={styles.modeSwitch} aria-label={t('Dashboard mode', 'Режим дашборда')}>
                 <button
@@ -212,107 +211,109 @@ export function DashboardWorkspace({
                 className={styles.editor}
                 aria-label={t('Dashboard editor', 'Редактор дашборда')}
               >
-                <div className={styles.contextEditor}>
-                  <h3>
-                    <Settings2 aria-hidden="true" /> {t('Global context', 'Общий контекст')}
-                  </h3>
-                  <label>
-                    {t('Start date', 'Дата начала')}
-                    <input
-                      type="date"
-                      value={utcDate(contextDraft.range?.startAt)}
-                      onChange={event =>
-                        setContextDraft(current => ({
-                          ...current,
-                          range: {
-                            startAt: dateInputToUtc(event.target.value),
-                            endAt: current.range?.endAt ?? dateInputToUtc(event.target.value),
-                            timezone: current.range?.timezone ?? 'UTC',
-                          },
-                        }))
-                      }
-                    />
-                  </label>
-                  <label>
-                    {t('End date', 'Дата окончания')}
-                    <input
-                      type="date"
-                      value={utcDate(contextDraft.range?.endAt)}
-                      onChange={event =>
-                        setContextDraft(current => ({
-                          ...current,
-                          range: {
-                            startAt: current.range?.startAt ?? dateInputToUtc(event.target.value),
-                            endAt: dateInputToUtc(event.target.value),
-                            timezone: current.range?.timezone ?? 'UTC',
-                          },
-                        }))
-                      }
-                    />
-                  </label>
-                  <label>
-                    {t('Segment field', 'Поле сегмента')}
-                    <select
-                      value={contextDraft.segment?.field ?? ''}
-                      onChange={event =>
-                        setContextDraft(current =>
-                          event.target.value
-                            ? {
-                                ...current,
-                                segment: {
-                                  field: event.target.value as any,
-                                  operator: 'equals',
-                                  value: current.segment?.value ?? 'US',
-                                },
-                              }
-                            : { ...current, segment: undefined },
-                        )
-                      }
-                    >
-                      <option value="">{t('No override', 'Без переопределения')}</option>
-                      <option value="urlPath">{t('URL path', 'Путь URL')}</option>
-                      <option value="country">{t('Country', 'Страна')}</option>
-                      <option value="browser">{t('Browser', 'Браузер')}</option>
-                      <option value="device">{t('Device', 'Устройство')}</option>
-                    </select>
-                  </label>
-                  <label>
-                    {t('Segment value', 'Значение сегмента')}
-                    <input
-                      value={contextDraft.segment?.value ?? ''}
-                      disabled={!contextDraft.segment}
-                      onChange={event =>
-                        setContextDraft(current =>
-                          current.segment
-                            ? {
-                                ...current,
-                                segment: { ...current.segment, value: event.target.value },
-                              }
-                            : current,
-                        )
-                      }
-                    />
-                  </label>
-                  <div className={styles.contextActions}>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        update.mutate({ id: selected.id, patch: { globalContext: contextDraft } })
-                      }
-                    >
-                      {t('Apply shared context', 'Применить общий контекст')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setContextDraft({});
-                        update.mutate({ id: selected.id, patch: { globalContext: {} } });
-                      }}
-                    >
-                      {t('Clear', 'Очистить')}
-                    </button>
+                <details className={styles.contextPanel}>
+                  <summary>
+                    <Settings2 aria-hidden="true" /> {t('Shared context', 'Общий контекст')}
+                  </summary>
+                  <div className={styles.contextEditor}>
+                    <label>
+                      {t('Start date', 'Дата начала')}
+                      <input
+                        type="date"
+                        value={utcDate(contextDraft.range?.startAt)}
+                        onChange={event =>
+                          setContextDraft(current => ({
+                            ...current,
+                            range: {
+                              startAt: dateInputToUtc(event.target.value),
+                              endAt: current.range?.endAt ?? dateInputToUtc(event.target.value),
+                              timezone: current.range?.timezone ?? 'UTC',
+                            },
+                          }))
+                        }
+                      />
+                    </label>
+                    <label>
+                      {t('End date', 'Дата окончания')}
+                      <input
+                        type="date"
+                        value={utcDate(contextDraft.range?.endAt)}
+                        onChange={event =>
+                          setContextDraft(current => ({
+                            ...current,
+                            range: {
+                              startAt: current.range?.startAt ?? dateInputToUtc(event.target.value),
+                              endAt: dateInputToUtc(event.target.value),
+                              timezone: current.range?.timezone ?? 'UTC',
+                            },
+                          }))
+                        }
+                      />
+                    </label>
+                    <label>
+                      {t('Segment field', 'Поле сегмента')}
+                      <select
+                        value={contextDraft.segment?.field ?? ''}
+                        onChange={event =>
+                          setContextDraft(current =>
+                            event.target.value
+                              ? {
+                                  ...current,
+                                  segment: {
+                                    field: event.target.value as any,
+                                    operator: 'equals',
+                                    value: current.segment?.value ?? 'US',
+                                  },
+                                }
+                              : { ...current, segment: undefined },
+                          )
+                        }
+                      >
+                        <option value="">{t('No override', 'Без переопределения')}</option>
+                        <option value="urlPath">{t('URL path', 'Путь URL')}</option>
+                        <option value="country">{t('Country', 'Страна')}</option>
+                        <option value="browser">{t('Browser', 'Браузер')}</option>
+                        <option value="device">{t('Device', 'Устройство')}</option>
+                      </select>
+                    </label>
+                    <label>
+                      {t('Segment value', 'Значение сегмента')}
+                      <input
+                        value={contextDraft.segment?.value ?? ''}
+                        disabled={!contextDraft.segment}
+                        onChange={event =>
+                          setContextDraft(current =>
+                            current.segment
+                              ? {
+                                  ...current,
+                                  segment: { ...current.segment, value: event.target.value },
+                                }
+                              : current,
+                          )
+                        }
+                      />
+                    </label>
+                    <div className={styles.contextActions}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          update.mutate({ id: selected.id, patch: { globalContext: contextDraft } })
+                        }
+                      >
+                        {t('Apply shared context', 'Применить общий контекст')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setContextDraft({});
+                          update.mutate({ id: selected.id, patch: { globalContext: {} } });
+                        }}
+                      >
+                        {t('Clear', 'Очистить')}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </details>
 
                 <div className={styles.adders}>
                   <form
@@ -412,8 +413,12 @@ export function DashboardWorkspace({
             ) : (
               <div className={styles.grid} data-mode={mode}>
                 {selected.widgets.map((widget, index) => (
-                  <article
+                  <motion.article
                     key={widget.id}
+                    layout={animate ? 'position' : false}
+                    initial={animate ? { y: 12 } : false}
+                    animate={{ y: 0 }}
+                    transition={{ type: 'tween', duration: animate ? 0.32 : 0, ease: 'easeOut' }}
                     style={{ gridColumn: `span ${widget.width}` }}
                     data-height={widget.height}
                   >
@@ -493,13 +498,54 @@ export function DashboardWorkspace({
                       </div>
                     ) : null}
                     <DashboardWidget widget={widget} context={selected.globalContext} />
-                  </article>
+                  </motion.article>
                 ))}
               </div>
             )}
           </main>
         </div>
       ) : null}
+      <AccessibleDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        title={t('Create dashboard', 'Создать дашборд')}
+        description={t(
+          'Give this collection of answers a name.',
+          'Назовите подборку ответов на ваши вопросы.',
+        )}
+      >
+        <form
+          className={styles.createForm}
+          onSubmit={event => {
+            event.preventDefault();
+            createDashboard();
+          }}
+        >
+          <label>
+            {t('New dashboard title', 'Название нового дашборда')}
+            <input
+              data-autofocus
+              value={newTitle}
+              onChange={event => setNewTitle(event.target.value)}
+              placeholder={t('Product pulse', 'Пульс продукта')}
+              maxLength={200}
+              required
+            />
+          </label>
+          {create.error ? (
+            <p role="alert">
+              {t(
+                'Dashboard could not be created. Try again.',
+                'Не удалось создать дашборд. Попробуйте ещё раз.',
+              )}
+            </p>
+          ) : null}
+          <button type="submit" disabled={create.isPending}>
+            <Plus size={16} aria-hidden="true" />
+            {t('Create dashboard', 'Создать дашборд')}
+          </button>
+        </form>
+      </AccessibleDialog>
     </section>
   );
 }
@@ -512,6 +558,8 @@ export function DashboardWidget({
   context: DashboardGlobalContext;
 }) {
   const { locale, t } = useStudioLocale();
+  const guest = useGuestWorkspace();
+  const { animate } = useVisualMotion();
   const applied = useMemo(
     () => (widget.insight?.query ? applyDashboardContext(widget.insight.query, context) : null),
     [context, widget.insight?.query],
@@ -526,6 +574,14 @@ export function DashboardWidget({
         )
       : [];
   const hasFunnelSegments = funnelSteps.some(row => row.segment !== undefined);
+  const eventLabel = (label: string) =>
+    guest
+      ? ({
+          signup: t('Signup', 'Регистрация'),
+          onboarding_completed: t('Onboarding completed', 'Завершили онбординг'),
+          core_feature_used: t('Core feature used', 'Использовали функцию'),
+        }[label] ?? label)
+      : label;
   const rows = result.data?.data.mode === 'funnel' ? funnelSteps : (result.data?.data.rows ?? []);
   const visibleRows = rows.slice(
     0,
@@ -547,6 +603,12 @@ export function DashboardWidget({
     }
     return `${new Date(row.cohortStart).toLocaleDateString(locale, { timeZone: 'UTC' })} · P${row.period}`;
   };
+  const rangeDate = (value: string | number) =>
+    new Date(value).toLocaleDateString(locale, {
+      timeZone: applied?.query.range.timezone ?? 'UTC',
+      day: 'numeric',
+      month: 'short',
+    });
 
   if (widget.kind === 'header')
     return (
@@ -625,13 +687,27 @@ export function DashboardWidget({
                   : t('Estimate', 'Оценка')}{' '}
                 · {new Date(result.data.freshnessAt).toLocaleTimeString(locale)}
               </small>
+              <small>
+                {rangeDate(applied.query.range.startAt)} —{' '}
+                {rangeDate(new Date(applied.query.range.endAt).getTime() - 1)} ·{' '}
+                {applied.query.range.timezone}
+              </small>
             </div>
             <ExportControls
+              className={styles.exportAction}
               projectId={applied.query.projectId}
               source={{ kind: 'analysis', query: applied.query }}
               disabled={result.isFetching}
             />
           </div>
+          {!rows.length && !result.data.data.total?.value ? (
+            <p className={styles.emptyResult} role="status">
+              {t(
+                'No matching results. Try a different period or filters in Explore.',
+                'Нет подходящих результатов. Попробуйте другой период или фильтры в анализе.',
+              )}
+            </p>
+          ) : null}
           {funnelSteps.length && !hasFunnelSegments ? (
             <ol
               className={styles.funnelBars}
@@ -639,9 +715,22 @@ export function DashboardWidget({
             >
               {funnelSteps.map(row => (
                 <li key={row.step}>
-                  <span>{row.label}</span>
+                  <span title={row.label}>{eventLabel(row.label)}</span>
                   <div aria-hidden="true">
-                    <i style={{ width: `${row.overallConversionRate * 100}%` }} />
+                    <motion.i
+                      style={{
+                        width: `${row.overallConversionRate * 100}%`,
+                        transformOrigin: 'left',
+                      }}
+                      initial={animate ? { scaleX: 0 } : false}
+                      animate={{ scaleX: 1 }}
+                      transition={{
+                        type: 'tween',
+                        duration: animate ? 0.6 : 0,
+                        delay: animate ? row.step * 0.08 : 0,
+                        ease: 'easeOut',
+                      }}
+                    />
                   </div>
                   <strong>
                     {row.converted.toLocaleString(locale)}{' '}
@@ -688,6 +777,14 @@ export function DashboardWidget({
             <summary>{t('Definition and freshness', 'Определение и свежесть')}</summary>
             <p>
               {t('Owner', 'Владелец')}: {widget.insight.owner.username}
+            </p>
+            <p>
+              {t('Period', 'Период')}: [{applied.query.range.startAt}, {applied.query.range.endAt})
+              · {applied.query.range.timezone}
+            </p>
+            <p>
+              {t('Updated', 'Обновлено')}:{' '}
+              {new Date(result.data.freshnessAt).toLocaleString(locale)}
             </p>
             {rows.length > visibleRows.length ? (
               <p>

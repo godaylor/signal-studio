@@ -99,3 +99,30 @@
     width: 100%;
   }
 }
+.startButton {
+  min-height: 52px;
+  border-radius: 14px;
+  padding: 14px 23px;
+  background: #6857f3;
+  border-color: #6857f3;
+  font-weight: 550;
+  box-shadow: 0 5px 20px #6857f329;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+.startButton:hover {
+  background: #5945e6;
+  transform: translateY(-2px);
+  box-shadow: 0 9px 28px #6857f33d;
+}
+.startButton:active {
+  transform: translateY(0) scale(0.98);
+}
+.startButton svg {
+  transition: transform 0.2s;
+}
+.startButton:hover svg {
+  transform: translate(2px, -2px);
+}

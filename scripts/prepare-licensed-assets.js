@@ -2,12 +2,21 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 // Explicit maintenance command, never a network step of a normal build.
-const assets = [
-  { file: 'src/assets/fonts/InterVariable.woff2', url: 'https://raw.githubusercontent.com/rsms/inter/353b61b9f4430d5f420d56605a6e7993e0941470/docs/font-files/InterVariable.woff2', gitBlob: '5a8d3e72ad7ffb62af3b146e1b1f54ab5813a212', license: 'OFL-1.1', author: 'The Inter Project Authors / Rasmus Andersson' },
-  { file: 'docs/licenses/Inter-OFL.txt', url: 'https://raw.githubusercontent.com/rsms/inter/353b61b9f4430d5f420d56605a6e7993e0941470/LICENSE.txt', gitBlob: '9b2ca37b3ffc77391d8b2ebef4a974ef32bf46ea', license: 'OFL-1.1', author: 'The Inter Project Authors / Rasmus Andersson' },
-];
+const assets = JSON.parse(readFileSync('docs/licenses/pinned-assets.json', 'utf8'));
 mkdirSync('src/assets/fonts', { recursive: true }); mkdirSync('docs/licenses', { recursive: true });
 for (const asset of assets) {
+  if (asset.derivedFrom) {
+    const source = assets.find(item => item.file === asset.derivedFrom);
+    if (!source || source.sha256 !== asset.derivedFromSha256 ||
+      createHash('sha256').update(readFileSync(source.file)).digest('hex') !== source.sha256) {
+      throw new Error(`Converted font source mismatch: ${asset.file}`);
+    }
+    if (!existsSync(asset.file)) throw new Error(`Missing converted font: ${asset.file}. See docs/licenses/font-conversion.json for the explicit maintenance procedure.`);
+    const actual = createHash('sha256').update(readFileSync(asset.file)).digest('hex');
+    if (actual !== asset.sha256) throw new Error(`Converted font integrity mismatch: ${asset.file}`);
+    console.log(`Verified ${asset.file}: ${actual}`);
+    continue;
+  }
   let bytes;
   if (existsSync(asset.file)) bytes = readFileSync(asset.file);
   else {

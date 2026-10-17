@@ -4,7 +4,7 @@ import { ArrowUpRight, LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { getApiUrl } from '@/lib/api-url';
-import { getClientAuthHeaders } from '@/lib/client';
+import { activateClientGuestSession } from '@/lib/client';
 import styles from './GuestWorkspace.module.css';
 
 export function GuestStartButton({ className }: { className?: string }) {
@@ -19,7 +19,7 @@ export function GuestStartButton({ className }: { className?: string }) {
       const response = await fetch(getApiUrl('/guest'), {
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'content-type': 'application/json', ...getClientAuthHeaders() },
+        headers: { 'content-type': 'application/json' },
         body: '{}',
       });
       const data = await response.json();
@@ -42,6 +42,7 @@ export function GuestStartButton({ className }: { className?: string }) {
         typeof data.redirect === 'string' && data.redirect.startsWith('/studio')
           ? data.redirect
           : '/studio';
+      activateClientGuestSession();
       window.location.assign(`${process.env.basePath || ''}${path}`);
     } catch {
       setError(

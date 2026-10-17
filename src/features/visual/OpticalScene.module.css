@@ -1,0 +1,69 @@
+.scene {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  overflow: hidden;
+  contain: paint;
+}
+.art {
+  position: absolute;
+  inset: -3%;
+  will-change: transform;
+}
+.art img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+.traces {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.pulse {
+  stroke-dasharray: 4 96;
+  stroke-linecap: round;
+  animation: followTrace 8s linear infinite;
+  filter: drop-shadow(0 0 4px #8877ff);
+}
+.reflection {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, #ffffff15 45%, transparent 55%);
+  animation: reflect 12s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+.scene[data-active="false"] .pulse,
+.scene[data-active="false"] .reflection {
+  animation: none;
+}
+@keyframes followTrace {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes reflect {
+  0%,
+  100% {
+    transform: translateX(-35%);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateX(30%);
+    opacity: 0.7;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse,
+  .reflection {
+    animation: none;
+  }
+  .art {
+    will-change: auto;
+  }
+}

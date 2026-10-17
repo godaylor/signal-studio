@@ -1,0 +1,221 @@
+{
+  "generatedAt": "2026-10-17T18:31:32.541Z",
+  "tool": {
+    "name": "wawoff2",
+    "version": "2.0.1",
+    "license": "MIT",
+    "repository": "https://github.com/fontello/wawoff2",
+    "sourceRevision": "2ba75100c9ec6031a5a1d32ddd1120409aa68573",
+    "npmTarball": "https://registry.npmjs.org/wawoff2/-/wawoff2-2.0.1.tgz",
+    "npmIntegrity": "sha512-r0CEmvpH63r4T15ebFqeOjGqU4+EgTx4I510NtK35EMciSdcTxCw3Byy3JnBonz7iyIFZ0AbVo0bbFpEVuhCYA==",
+    "tarballSha256": "c356059ab809228e0c93b7da8862bc8b52b7b84d69f16255eaec304fc9d99a56",
+    "files": [
+      {
+        "file": "index.js",
+        "gitBlob": "6fc6fd154bbc434248aeb7e973dd4eccc76c7ff6",
+        "sha256": "9c7bd028434b600fbef351710555152476d808ddda3e92f80e291ca2c5cb8bab"
+      },
+      {
+        "file": "compress.js",
+        "gitBlob": "f2a9de76c152cf74bcc9e3642a0c0d8974e8e483",
+        "sha256": "3b44ff80ada1e3e4305831942dcfa6df6314f7b1d539055af5be4c5916c77100"
+      },
+      {
+        "file": "decompress.js",
+        "gitBlob": "1ce5a311a4717a73072089bd43a008fdeadc563d",
+        "sha256": "f9dee5dcd810246083df4c8f09e3ae096dbecb6da61727d669b6e85006a64bef"
+      },
+      {
+        "file": "build/compress_binding.js",
+        "gitBlob": "844fabe8f7ed2987103f5c6d017be5e8fe577ff4",
+        "sha256": "b7a0737960a500034ce45cecb350c66024760b246105cc59d46b74f9ca7dba32"
+      },
+      {
+        "file": "build/decompress_binding.js",
+        "gitBlob": "70edcc58f930fcd1f13d0da1d4d0c8f11a1a4cb2",
+        "sha256": "112a89e7497a856698103e2ce530d2b6fc27668c0cd56f45bcbf7850d73b7c2b"
+      },
+      {
+        "file": "LICENSE",
+        "gitBlob": "4f9441b6e1b9c321534f4645db138f2cdec7d845",
+        "sha256": "d42a3e363d99da22b860ab760faa37dfa9781d74c9f3ed634d05109081616513"
+      }
+    ],
+    "licenseFile": "docs/licenses/wawoff2@2.0.1.txt",
+    "licenseSha256": "d42a3e363d99da22b860ab760faa37dfa9781d74c9f3ed634d05109081616513",
+    "installation": "One-time ignored .local/m20-yasnosled/tools; canonical Node 22.22.2; npm --ignore-scripts --no-save --no-package-lock. Not an application dependency, lockfile entry, build requirement or browser/runtime asset."
+  },
+  "operation": "Full-font WOFF2 format conversion only; no subsetting, axis instancing, glyph removal or outline editing.",
+  "fonts": [
+    {
+      "input": "src/assets/fonts/GolosTextVariable.ttf",
+      "output": "src/assets/fonts/GolosTextVariable.woff2",
+      "originalBytes": 184292,
+      "encodedBytes": 76496,
+      "originalSha256": "17bb58fb69aec2dfb047a2ebf52534023e9b688c97a6b7ac795b0a72912c2063",
+      "encodedSha256": "b7ff164eb7b6ade534312bc97c390be5ccd31fc42e2ec19ea6e579fd4e010e56",
+      "decodedSha256": "68af3cf61d88dde474dafd7879826288db4440be4e6230f8cd47dd07629291bb",
+      "sfntTables": [
+        "GDEF",
+        "GPOS",
+        "GSUB",
+        "HVAR",
+        "OS/2",
+        "STAT",
+        "VVAR",
+        "cmap",
+        "fvar",
+        "gasp",
+        "glyf",
+        "gvar",
+        "head",
+        "hhea",
+        "hmtx",
+        "loca",
+        "maxp",
+        "name",
+        "post",
+        "prep",
+        "vhea",
+        "vmtx"
+      ],
+      "exactRoundTripTables": [
+        "GDEF",
+        "GPOS",
+        "GSUB",
+        "HVAR",
+        "OS/2",
+        "STAT",
+        "VVAR",
+        "cmap",
+        "fvar",
+        "gasp",
+        "gvar",
+        "hhea",
+        "hmtx",
+        "maxp",
+        "name",
+        "post",
+        "prep",
+        "vhea",
+        "vmtx"
+      ],
+      "reserializedTables": ["glyf", "head", "loca"],
+      "glyphs": 643,
+      "axes": [
+        {
+          "tag": "wght",
+          "minimum": 400,
+          "default": 400,
+          "maximum": 900
+        }
+      ],
+      "roundTripGlyphGeometryVerified": 643,
+      "browserRendering": {
+        "browser": "155.0.8059.80",
+        "browserAcceptedWoff2": true,
+        "exactPixelComparison": true,
+        "weights": [400, 650, 900],
+        "text": "Яснослед Ёж Щука Юность · ABC xyz 0123456789 → 75%"
+      },
+      "officialSource": {
+        "url": "https://raw.githubusercontent.com/googlefonts/golos-text/cf2e27222937d97c2d858fff0499bcc667a64e9d/fonts/variable/GolosText%5Bwght%5D.ttf",
+        "gitBlob": "05ee5ecc570b97818e24e58693662cd8294fdfc9",
+        "sourceRevision": "cf2e27222937d97c2d858fff0499bcc667a64e9d",
+        "license": "OFL-1.1",
+        "author": "The Golos Text Project Authors"
+      }
+    },
+    {
+      "input": "src/assets/fonts/UnboundedVariable.ttf",
+      "output": "src/assets/fonts/UnboundedVariable.woff2",
+      "originalBytes": 778272,
+      "encodedBytes": 261028,
+      "originalSha256": "323b511be380c8d474ef030686b71aedde501f8d9cd46da558b7c40454372c3f",
+      "encodedSha256": "67f88b70fb2e5f442c934de72d8419d647345f72c80ef3dc983018b0f98a5ed9",
+      "decodedSha256": "72c67141e21240be18a24218934ab25412f68767811ab88da9be8c3d3acd0936",
+      "sfntTables": [
+        "GDEF",
+        "GPOS",
+        "GSUB",
+        "HVAR",
+        "MVAR",
+        "OS/2",
+        "STAT",
+        "avar",
+        "cmap",
+        "fvar",
+        "gasp",
+        "glyf",
+        "gvar",
+        "head",
+        "hhea",
+        "hmtx",
+        "loca",
+        "maxp",
+        "name",
+        "post",
+        "prep"
+      ],
+      "exactRoundTripTables": [
+        "GDEF",
+        "GPOS",
+        "GSUB",
+        "HVAR",
+        "MVAR",
+        "OS/2",
+        "STAT",
+        "avar",
+        "cmap",
+        "fvar",
+        "gasp",
+        "gvar",
+        "hhea",
+        "hmtx",
+        "maxp",
+        "name",
+        "post",
+        "prep"
+      ],
+      "reserializedTables": ["glyf", "head", "loca"],
+      "glyphs": 1419,
+      "axes": [
+        {
+          "tag": "wght",
+          "minimum": 200,
+          "default": 400,
+          "maximum": 900
+        }
+      ],
+      "roundTripGlyphGeometryVerified": 1419,
+      "browserRendering": {
+        "browser": "155.0.8059.80",
+        "browserAcceptedWoff2": true,
+        "exactPixelComparison": true,
+        "weights": [200, 400, 650, 900],
+        "text": "Яснослед Ёж Щука Юность · ABC xyz 0123456789 → 75%"
+      },
+      "officialSource": {
+        "url": "https://raw.githubusercontent.com/googlefonts/unbounded/f3ec43228a864a72487e41552e2140efab9884ea/fonts/variable/Unbounded%5Bwght%5D.ttf",
+        "gitBlob": "e3c064ddfa3acdd3af2e0f06cd2f2288cc4fcae3",
+        "sourceRevision": "f3ec43228a864a72487e41552e2140efab9884ea",
+        "license": "OFL-1.1",
+        "author": "The Unbounded Project Authors"
+      }
+    }
+  ],
+  "reproduction": {
+    "install": "node <Node22-directory>/node_modules/npm/bin/npm-cli.js install --prefix .local/m20-yasnosled/tools --ignore-scripts --no-save --no-package-lock --no-audit --no-fund wawoff2@2.0.1",
+    "convert": [
+      "node .local/m20-yasnosled/tools/node_modules/wawoff2/bin/woff2_compress.js src/assets/fonts/GolosTextVariable.ttf src/assets/fonts/GolosTextVariable.woff2",
+      "node .local/m20-yasnosled/tools/node_modules/wawoff2/bin/woff2_compress.js src/assets/fonts/UnboundedVariable.ttf src/assets/fonts/UnboundedVariable.woff2"
+    ],
+    "normalBuild": "No font download or conversion occurs in normal builds. Existing font binaries and source/license checksums are verified; explicit prepare-licensed-assets maintenance verifies source Git blobs and derived SHA256 values."
+  },
+  "summary": {
+    "originalBytes": 962564,
+    "woff2Bytes": 337524,
+    "allGlyphsVerified": 2062,
+    "limitations": "Byte sizes describe complete local files, not measured compressed HTTP transfer or LCP. The browser pixel check covers a stated RU/EN/numeric sample; the structural verification covers every glyph and all variation/cmap/layout tables."
+  }
+}

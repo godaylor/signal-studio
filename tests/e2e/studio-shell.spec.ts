@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { expect, test } from '@playwright/test';
 import { loginPage } from './helpers';
 
 const projectId = 'd5a950d4-4d31-4c0f-b7a4-41dce9e0a003';
@@ -20,7 +20,9 @@ test('desktop shell exposes the product IA and light visual contract', async ({ 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(studioHome);
 
-  await expect(page.getByRole('heading', { level: 1, name: 'Home' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'How do users find value?' }),
+  ).toBeVisible();
   const desktopNav = page.locator('aside').getByRole('navigation', { name: 'Primary' });
   await expect(desktopNav.getByRole('link')).toHaveText(primaryLabels);
   await expect(desktopNav.getByRole('link', { name: 'Home' })).toHaveAttribute(
@@ -57,12 +59,14 @@ test('desktop command palette is bounded and restores focus in dark theme', asyn
   await expect(paletteTrigger).toBeFocused();
 });
 
-test('tablet navigation keeps all primary destinations and closes after navigation', async ({ page }) => {
+test('tablet navigation keeps all primary destinations and closes after navigation', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 834, height: 1112 });
   await page.goto(studioHome);
 
-  await page.getByRole('button', { name: 'Open navigation' }).click();
-  const drawer = page.getByRole('dialog', { name: 'Signal Studio' });
+  await page.getByRole('button', { name: 'Open navigation' }).first().click();
+  const drawer = page.getByRole('dialog', { name: 'Яснослед' });
   const drawerNav = drawer.getByRole('navigation', { name: 'Primary' });
   await expect(drawerNav.getByRole('link')).toHaveText(primaryLabels);
 
@@ -72,7 +76,9 @@ test('tablet navigation keeps all primary destinations and closes after navigati
   await drawerNav.getByRole('link', { name: 'Explore' }).click();
   await expect(drawer).toBeHidden();
   await expect(page).toHaveURL(new RegExp(`/studio/${projectId}/explore$`));
-  await expect(page.getByRole('heading', { level: 1, name: 'Explore' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'How is product use changing?' }),
+  ).toBeVisible();
 });
 
 test('mobile shell honors reduced motion and preserves the same IA', async ({ page }) => {
@@ -83,8 +89,8 @@ test('mobile shell honors reduced motion and preserves the same IA', async ({ pa
   await expect
     .poll(() => page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches))
     .toBe(true);
-  await page.getByRole('button', { name: 'Open navigation' }).click();
-  const drawer = page.getByRole('dialog', { name: 'Signal Studio' });
+  await page.getByRole('button', { name: 'Open navigation' }).first().click();
+  const drawer = page.getByRole('dialog', { name: 'Яснослед' });
   await expect(drawer.getByRole('navigation', { name: 'Primary' }).getByRole('link')).toHaveText(
     primaryLabels,
   );

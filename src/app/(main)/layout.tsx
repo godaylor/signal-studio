@@ -12,7 +12,7 @@ export default function ({ children }) {
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Signal Studio',
-    default: 'Signal Studio',
+    template: '%s | Яснослед',
+    default: 'Яснослед',
   },
 };

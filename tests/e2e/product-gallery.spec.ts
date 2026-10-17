@@ -18,9 +18,9 @@ test('capture the real product on desktop and mobile', async ({ page, request })
   const project = projects.find(item => item.name === 'Portfolio · Activation Lab');
   expect(project).toBeTruthy();
   await page.goto(`/studio/${project.id}/home?locale=en-US`);
-  await expect(page.getByRole('link', { name: 'Open definition in Explore', exact: true }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Explore the journey', exact: true })).toBeVisible();
   await page.screenshot({ path: `${output}/home-desktop.png` });
-  await page.getByRole('link', { name: 'Open definition in Explore', exact: true }).first().click();
+  await page.getByRole('link', { name: 'Explore the journey', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Range total' })).toBeVisible();
   await page.screenshot({ path: `${output}/explore-desktop.png` });
   await page.goto(`/studio/${project.id}/sources?locale=en-US`);

@@ -5,6 +5,9 @@ import { HomeWorkspace } from './HomeWorkspace';
 import { useHome } from './useHome';
 
 vi.mock('./useHome', () => ({ useHome: vi.fn() }));
+vi.mock('@/features/visual/MotionPreferences', () => ({
+  useVisualMotion: () => ({ animate: false, ambient: false }),
+}));
 let russian = false;
 vi.mock('@/features/i18n/useStudioLocale', () => ({
   useStudioLocale: () => ({
@@ -50,20 +53,60 @@ describe('Home product states and defined KPI links', () => {
   });
   test('shows activation comparison and canonical Explore source, never identity data for Viewer', () => {
     render(<HomeWorkspace projectId={projectId} projectName="Demo" />);
-    expect(screen.getAllByText('50%')).toHaveLength(2);
+    expect(screen.getAllByText('50%')).toHaveLength(3);
     expect(screen.getByText(/Your role cannot view account identities/)).toBeVisible();
+    expect(screen.getByRole('link', { name: /Explore the journey/ })).toHaveAttribute(
+      'href',
+      expect.stringContaining('source=lifecycle'),
+    );
+    expect(screen.getByRole('link', { name: /Activated/ })).toHaveAttribute(
+      'href',
+      expect.stringContaining('event=activated'),
+    );
     const links = screen.getAllByRole('link', { name: 'Open definition in Explore' });
-    expect(links[0]).toHaveAttribute('href', expect.stringContaining('source=lifecycle'));
-    expect(links[4]).toHaveAttribute('href', expect.stringContaining('property=USD'));
+    expect(links[2]).toHaveAttribute('href', expect.stringContaining('property=USD'));
   });
   test('RU copy has meaningful empty data and recent Insight guidance', () => {
     russian = true;
     render(<HomeWorkspace projectId={projectId} projectName="Demo" />);
     expect(
-      screen.getByRole('heading', { level: 1, name: 'От регистрации — к привычке пользоваться.' }),
+      screen.getByRole('heading', { level: 1, name: 'Как пользователи находят ценность?' }),
     ).toBeVisible();
     expect(screen.getByText('События ещё не поступали')).toBeVisible();
     expect(screen.getByText(/Сохраните результат анализа/)).toBeVisible();
+  });
+  test('flow keeps the two server-defined denominators and distinct query links', () => {
+    const state = vi.mocked(useHome)(projectId);
+    const values = {
+      signups: { value: 56 },
+      activation: { value: 28, denominator: 56, rate: 0.5 },
+      retention: { value: 21, denominator: 28, rate: 0.75 },
+    };
+    vi.mocked(useHome).mockReturnValue({
+      ...state,
+      data: {
+        ...state.data,
+        metrics: state.data.metrics.map((metric: any) => ({
+          ...metric,
+          result: {
+            ...metric.result,
+            data: {
+              ...metric.result.data,
+              total: values[metric.id as keyof typeof values] ?? metric.result.data.total,
+            },
+          },
+        })),
+      },
+    } as any);
+    render(<HomeWorkspace projectId={projectId} projectName="Demo" />);
+    expect(screen.getByText('28 of 56')).toBeVisible();
+    expect(screen.getByText('21 of 28')).toBeVisible();
+    expect(screen.getByText('75%')).toBeVisible();
+    expect(screen.getByText('+52 vs previous period')).toBeVisible();
+    expect(screen.getByRole('link', { name: /Returned/ })).toHaveAttribute(
+      'href',
+      expect.stringContaining('event=retained'),
+    );
   });
   test('has a recoverable loading state', () => {
     vi.mocked(useHome).mockReturnValue({ isPending: true } as any);

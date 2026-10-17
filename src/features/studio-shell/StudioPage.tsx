@@ -10,9 +10,9 @@ import { AudiencesWorkspace } from '@/features/audiences/AudiencesWorkspace';
 import { DashboardWorkspace } from '@/features/dashboards/DashboardWorkspace';
 import { ExperienceWorkspace } from '@/features/experience/ExperienceWorkspace';
 import { ExploreWorkspace } from '@/features/explore/ExploreWorkspace';
+import { HomeWorkspace } from '@/features/home/HomeWorkspace';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { LiveWorkspace } from '@/features/live/LiveWorkspace';
-import { HomeWorkspace } from '@/features/home/HomeWorkspace';
 import { SourcesWorkspace } from '@/features/sources/SourcesWorkspace';
 import { getStudioPath } from './navigation';
 import styles from './StudioPage.module.css';
@@ -106,7 +106,9 @@ export function StudioPage({ section, projectId }: { section: string; projectId:
 
   if (section === 'sources') {
     if (!access.data?.capabilities.manageSources) return <PermissionState projectId={projectId} />;
-    return <SourcesWorkspace projectId={projectId} projectName={projectName} domain={project?.domain} />;
+    return (
+      <SourcesWorkspace projectId={projectId} projectName={projectName} domain={project?.domain} />
+    );
   }
 
   if (section === 'legal') {
@@ -116,8 +118,8 @@ export function StudioPage({ section, projectId }: { section: string; projectId:
           eyebrow={t('Open source provenance', 'Происхождение открытого кода')}
           title={t('Legal & notices', 'Лицензии и уведомления')}
           description={t(
-            'Signal Studio preserves the license and attribution of its Umami foundation.',
-            'Signal Studio сохраняет лицензию и атрибуцию основы Umami.',
+            'Яснослед preserves the license and attribution of its Umami foundation.',
+            'Яснослед сохраняет лицензию и атрибуцию основы Umami.',
           )}
         />
         <article className={styles.legalNotice}>
@@ -126,23 +128,47 @@ export function StudioPage({ section, projectId }: { section: string; projectId:
             <h2>{t('Based on Umami', 'На основе Umami')}</h2>
             <p>
               {t(
-                'Signal Studio is based on Umami 3.3.1, Copyright © 2022 Umami Software, Inc., and is distributed under the MIT License.',
-                'Signal Studio основан на Umami 3.3.1, Copyright © 2022 Umami Software, Inc., и распространяется по лицензии MIT.',
+                'Яснослед is based on Umami 3.3.1, Copyright © 2022 Umami Software, Inc., and is distributed under the MIT License.',
+                'Яснослед основан на Umami 3.3.1, Copyright © 2022 Umami Software, Inc., и распространяется по лицензии MIT.',
               )}
             </p>
             <p>
               {t(
-                'The original MIT notice is preserved. Inter is OFL-1.1; Lorelei design is CC0 by Lisa Wischofsky, with MIT code by Florian Körner. Dependency notices and the exact build inventory are available below.',
-                'Исходное уведомление MIT сохранено. Inter — OFL-1.1; дизайн Lorelei — CC0, автор Lisa Wischofsky, код MIT — Florian Körner. Уведомления зависимостей и точный состав сборки доступны ниже.',
+                'The original MIT notice is preserved. Unbounded, Golos Text and Inter use OFL-1.1. The Яснослед mark and optical illustration were generated for this project. Sources, dependency notices and the exact build inventory are available below.',
+                'Исходное уведомление MIT сохранено. Unbounded, Golos Text и Inter — OFL-1.1. Знак и оптическая иллюстрация Ясноследа созданы для этого проекта. Источники, уведомления компонентов и точный состав сборки доступны ниже.',
               )}
             </p>
             <ul>
-              <li><a href={`${process.env.basePath || ''}/legal/LICENSE.txt`}>{t('Original MIT license', 'Исходная лицензия MIT')}</a></li>
-              <li><a href={`${process.env.basePath || ''}/legal/THIRD_PARTY_NOTICES.md`}>{t('Third-party notices', 'Уведомления сторонних компонентов')}</a></li>
-              <li><a href={`${process.env.basePath || ''}/legal/DEPENDENCY_LICENSES.txt`}>{t('Full dependency license texts', 'Полные тексты лицензий зависимостей')}</a></li>
-              <li><a href={`${process.env.basePath || ''}/legal/application.cdx.json`}>{t('Application SBOM (CycloneDX)', 'SBOM приложения (CycloneDX)')}</a></li>
-              <li><a href={`${process.env.basePath || ''}/legal/ASSET_PROVENANCE.json`}>{t('Asset sources and checksums', 'Источники и контрольные суммы ресурсов')}</a></li>
-              <li><a href={`${process.env.basePath || ''}/legal/BUILD_METADATA.json`}>{t('Build identity', 'Идентификатор сборки')}</a></li>
+              <li>
+                <a href={`${process.env.basePath || ''}/legal/LICENSE.txt`}>
+                  {t('Original MIT license', 'Исходная лицензия MIT')}
+                </a>
+              </li>
+              <li>
+                <a href={`${process.env.basePath || ''}/legal/THIRD_PARTY_NOTICES.md`}>
+                  {t('Third-party notices', 'Уведомления сторонних компонентов')}
+                </a>
+              </li>
+              <li>
+                <a href={`${process.env.basePath || ''}/legal/DEPENDENCY_LICENSES.txt`}>
+                  {t('Full dependency license texts', 'Полные тексты лицензий зависимостей')}
+                </a>
+              </li>
+              <li>
+                <a href={`${process.env.basePath || ''}/legal/application.cdx.json`}>
+                  {t('Application SBOM (CycloneDX)', 'SBOM приложения (CycloneDX)')}
+                </a>
+              </li>
+              <li>
+                <a href={`${process.env.basePath || ''}/legal/ASSET_PROVENANCE.json`}>
+                  {t('Asset sources and checksums', 'Источники и контрольные суммы ресурсов')}
+                </a>
+              </li>
+              <li>
+                <a href={`${process.env.basePath || ''}/legal/BUILD_METADATA.json`}>
+                  {t('Build identity', 'Идентификатор сборки')}
+                </a>
+              </li>
             </ul>
           </div>
         </article>
@@ -150,24 +176,23 @@ export function StudioPage({ section, projectId }: { section: string; projectId:
     );
   }
 
-    return (
-      <div className={styles.page}>
-        <StudioState
-          variant="error"
-          title={t('Unknown Studio page', 'Неизвестная страница Studio')}
-          message={t(
-            'Use the primary navigation to open a supported project page.',
-            'Откройте поддерживаемую страницу проекта через основную навигацию.',
-          )}
-          action={
-            <Link href={getStudioPath(projectId, 'home')}>
-              {t('Return to Home', 'Вернуться на главную')}
-            </Link>
-          }
-        />
-      </div>
-    );
-
+  return (
+    <div className={styles.page}>
+      <StudioState
+        variant="error"
+        title={t('Unknown Studio page', 'Неизвестная страница Studio')}
+        message={t(
+          'Use the primary navigation to open a supported project page.',
+          'Откройте поддерживаемую страницу проекта через основную навигацию.',
+        )}
+        action={
+          <Link href={getStudioPath(projectId, 'home')}>
+            {t('Return to Home', 'Вернуться на главную')}
+          </Link>
+        }
+      />
+    </div>
+  );
 }
 
 function PermissionState({ projectId }: { projectId: string }) {

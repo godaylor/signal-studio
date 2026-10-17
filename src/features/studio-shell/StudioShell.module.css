@@ -854,3 +854,419 @@
     font-weight: 650;
   }
 }
+
+/* M20 optical workspace: one continuous canvas and shared navigation track. */
+.studioFrame {
+  --studio-canvas: #f6f7fb;
+  --studio-surface: #fff;
+  --studio-surface-muted: #f0f2f9;
+  --studio-ink: #111326;
+  --studio-ink-muted: #626881;
+  --studio-grid: #e0e4f0;
+  --studio-grid-strong: #cbd1e5;
+  --studio-cobalt: #6857f3;
+  --studio-on-accent: #fff;
+  --studio-cobalt-text: #5140d3;
+  --studio-cobalt-soft: #edebff;
+  --studio-coral: #b8493e;
+  --studio-mint: #126c61;
+  --studio-focus: #6857f3;
+  display: block;
+  font-family: var(--font-ui), var(--font-inter), sans-serif;
+}
+:global([data-theme="dark"]) .studioFrame {
+  --studio-canvas: #0d1020;
+  --studio-surface: #15192d;
+  --studio-surface-muted: #1c223b;
+  --studio-ink: #f0f2ff;
+  --studio-ink-muted: #a3abc6;
+  --studio-grid: #2a304b;
+  --studio-grid-strong: #424b6b;
+  --studio-cobalt: #a99aff;
+  --studio-on-accent: #111326;
+  --studio-cobalt-text: #bbadff;
+  --studio-cobalt-soft: #272340;
+  --studio-coral: #ff9e8f;
+  --studio-mint: #7ee0ce;
+  --studio-focus: #b3a4ff;
+}
+.desktopSidebar {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  height: 76px;
+  padding: 0 clamp(20px, 3vw, 48px);
+  display: grid;
+  grid-template-columns: 240px 1fr auto;
+  align-items: center;
+  gap: 20px;
+  background: color-mix(in srgb, var(--studio-canvas) 90%, transparent);
+  backdrop-filter: blur(18px);
+  border: 0;
+  border-bottom: 1px solid var(--studio-grid);
+  overflow: visible;
+  color: var(--studio-ink);
+  --studio-ink: inherit;
+  --studio-ink-muted: inherit;
+  --studio-canvas: inherit;
+  --studio-surface: inherit;
+  --studio-grid: inherit;
+  --studio-grid-strong: inherit;
+  --studio-cobalt-soft: inherit;
+  --studio-cobalt-text: inherit;
+  --studio-cobalt: inherit;
+  --studio-on-accent: inherit;
+}
+.brandRow {
+  padding: 0;
+  min-height: 44px;
+}
+.brandRow .iconButton {
+  display: none;
+}
+.brand {
+  gap: 0;
+  color: var(--studio-ink);
+}
+.desktopSidebar > .projectSelector,
+.desktopSidebar > .userSummary {
+  display: none;
+}
+.primaryNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+}
+.navLink {
+  position: relative;
+  isolation: isolate;
+  min-height: 44px;
+  padding: 0 15px;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  color: var(--studio-ink-muted);
+  transition: color 0.18s;
+}
+.desktopSidebar .navLink > svg {
+  display: none;
+}
+.navLink[data-selected],
+.navLink:hover {
+  background: transparent;
+  color: var(--studio-cobalt-text);
+}
+.navLink[data-selected]::before {
+  display: none;
+}
+.navMarker {
+  position: absolute;
+  left: 15px;
+  right: 15px;
+  bottom: -16px;
+  height: 2px;
+  background: var(--studio-cobalt);
+  border-radius: 2px;
+  box-shadow: 0 0 16px #6857f34d;
+}
+.sidebarUtility {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.sidebarUtility .utilityLink {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+}
+.sidebarUtility .utilityLink span,
+.sidebarUtility .utilityLink kbd {
+  display: none;
+}
+.sidebarUtility .utilityLink:hover {
+  background: var(--studio-cobalt-soft);
+}
+.workspace {
+  min-height: calc(100dvh - 76px);
+  display: block;
+}
+.topbar {
+  position: relative;
+  z-index: 35;
+  min-height: 50px;
+  padding: 4px clamp(20px, 3vw, 48px);
+  border: 0;
+  border-bottom: 1px solid var(--studio-grid);
+  background: transparent;
+  gap: 12px;
+}
+.breadcrumb {
+  font-size: 11px;
+  gap: 10px;
+}
+.breadcrumb strong {
+  font-weight: 500;
+  max-width: 280px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.commandButton {
+  border: 0;
+  background: transparent;
+  min-height: 32px;
+}
+.commandButton span,
+.commandButton kbd {
+  display: none;
+}
+.iconButton,
+.avatarButton {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+  border-radius: 50%;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+}
+.iconButton:active,
+.avatarButton:active {
+  transform: scale(0.92);
+}
+.mainContent {
+  min-height: calc(100dvh - 180px);
+}
+.mainContent h1 {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: -0.055em;
+  font-weight: 550;
+}
+.mainContent :is(button, a) {
+  -webkit-tap-highlight-color: transparent;
+}
+.footer {
+  min-height: 54px;
+  font-size: 10px;
+  padding: 14px clamp(20px, 3vw, 48px);
+}
+.dialogBackdrop {
+  backdrop-filter: blur(10px);
+  background: #080d2280;
+  animation: backdropIn 0.2s ease both;
+}
+.dialogCenter,
+.dialogLeft {
+  border-radius: 20px;
+  box-shadow: 0 24px 90px #080d2240;
+  animation: dialogIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dialogLeft {
+  border-radius: 0 24px 24px 0;
+  animation: drawerIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dialogHeader {
+  min-height: 66px;
+  padding: 18px 22px;
+}
+.dialogTitle {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+.mobileBottomNav {
+  background: color-mix(in srgb, var(--studio-surface) 92%, transparent);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 -8px 30px #11132605;
+}
+.mobileBottomNav a,
+.mobileBottomNav button {
+  transition:
+    color 0.18s,
+    background 0.18s;
+}
+.mobileBottomNav [aria-current="page"] {
+  background: var(--studio-cobalt-soft);
+  border-radius: 14px;
+}
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes drawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 1250px) and (min-width: 1100px) {
+  .desktopSidebar {
+    grid-template-columns: 210px 1fr auto;
+    gap: 8px;
+    padding-inline: 24px;
+  }
+  .navLink {
+    padding-inline: 10px;
+  }
+  .navMarker {
+    left: 10px;
+    right: 10px;
+  }
+  .sidebarUtility .utilityLink {
+    width: 32px;
+  }
+  .brand img {
+    width: 36px;
+    height: 36px;
+  }
+}
+@media (max-width: 1099px) {
+  .desktopSidebar {
+    display: none;
+  }
+  .workspace {
+    min-height: 100dvh;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    min-height: 68px;
+    padding: 10px 20px;
+    background: color-mix(in srgb, var(--studio-canvas) 92%, transparent);
+    backdrop-filter: blur(16px);
+  }
+  .mobileBrand {
+    display: flex;
+  }
+  .topbarProject {
+    display: none;
+  }
+  .mobileNavBody .primaryNav {
+    display: grid;
+    justify-content: stretch;
+    gap: 6px;
+  }
+  .mobileNavBody .navLink {
+    font-size: 15px;
+    min-height: 50px;
+    border-radius: 12px;
+    padding-inline: 14px;
+  }
+  .mobileNavBody .navMarker {
+    inset: 0;
+    height: auto;
+    border-radius: 12px;
+    background: var(--studio-cobalt-soft);
+    box-shadow: none;
+    z-index: -1;
+  }
+  .mobileNavBody .navLink > svg {
+    display: block;
+  }
+  .guestMeta {
+    font-size: 10px;
+    margin-right: 8px;
+  }
+  .commandButton {
+    display: none;
+  }
+}
+@media (max-width: 699px) {
+  .topbar {
+    padding: 8px 12px;
+    gap: 8px;
+    min-height: 70px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .mobileBrand {
+    display: flex;
+    margin-right: auto;
+  }
+  .mobileBrand img {
+    width: 32px;
+    height: 32px;
+  }
+  .mobileBrand span span {
+    font-size: 14px;
+  }
+  .topbarActions {
+    display: contents;
+  }
+  .topbarActions > .iconButton {
+    width: 30px;
+    height: 32px;
+    flex-basis: 30px;
+  }
+  .guestMeta {
+    order: 5;
+    width: 100%;
+    margin: 0 0 0 38px;
+    min-height: 20px;
+    gap: 10px;
+    font-size: 9px;
+  }
+  .guestMeta button {
+    padding: 0;
+    min-height: 18px;
+    font-size: 9px;
+  }
+  .guestMeta strong {
+    font-weight: 400;
+  }
+  .mobileMenuButton {
+    width: 28px;
+    flex-basis: 28px;
+  }
+  .mobileBottomNav {
+    padding: 5px 10px calc(5px + env(safe-area-inset-bottom));
+    height: auto;
+    min-height: 62px;
+  }
+  .mobileBottomNav a,
+  .mobileBottomNav button {
+    min-height: 48px;
+    font-size: 10px;
+    gap: 4px;
+  }
+  .mainContent {
+    padding-bottom: 62px;
+  }
+  .footer {
+    display: none;
+  }
+  .dialogCenter[data-fullscreen-mobile] {
+    border-radius: 0;
+  }
+  .dialogHeader {
+    padding: 14px 18px;
+  }
+}

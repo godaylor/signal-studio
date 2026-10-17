@@ -1,197 +1,237 @@
 .workspace {
-  width: min(100%, 1480px);
-  min-height: calc(100vh - 64px);
+  width: min(100%, 1600px);
+  min-height: calc(100vh - 116px);
   margin-inline: auto;
-  padding: clamp(24px, 3.2vw, 42px) clamp(16px, 3.2vw, 42px) 76px;
+  padding: 32px clamp(24px, 4vw, 64px) 60px;
   color: var(--studio-ink);
-  background: var(--studio-canvas);
 }
 .heading {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 24px;
-  align-items: end;
-  margin-bottom: 28px;
+  margin-bottom: 26px;
 }
 .heading p {
-  margin: 0 0 6px;
-  color: var(--studio-cobalt-text, var(--studio-cobalt));
+  margin: 0 0 10px;
+  color: var(--studio-ink-muted);
   font-size: 11px;
-  font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .heading h1 {
   margin: 0;
-  font-size: clamp(28px, 3.3vw, 40px);
-  letter-spacing: -0.04em;
-  line-height: 1.12;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(27px, 3vw, 36px);
+  font-weight: 650;
+  letter-spacing: -0.055em;
+  line-height: 1.2;
 }
 .heading span {
   display: block;
-  margin-top: 7px;
+  margin-top: 12px;
   color: var(--studio-ink-muted);
   line-height: 1.5;
   font-size: 14px;
 }
-.heading form {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.heading input,
-.editor input,
-.editor select {
-  min-height: 42px;
-  max-width: 100%;
-  padding: 8px 10px;
-  color: var(--studio-ink);
-  background: var(--studio-surface);
-  border: 1px solid var(--studio-grid-strong);
-  border-radius: 6px;
+.workspace button,
+.workspace input,
+.workspace select {
   font: inherit;
 }
-.heading button,
-.editor button {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 8px 12px;
-  color: var(--studio-on-accent, #fff);
-  background: var(--studio-cobalt);
-  border: 1px solid var(--studio-cobalt);
-  border-radius: 6px;
-  font-weight: 750;
+.workspace button {
   cursor: pointer;
 }
-.heading button svg,
+.workspace :is(button, input, select, summary, a):focus-visible {
+  outline: 3px solid var(--studio-focus);
+  outline-offset: 4px;
+}
+.workspace button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.newDashboard,
+.editor button,
+.createForm button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  color: var(--studio-on-accent, #fff);
+  background: var(--studio-cobalt);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-weight: 600;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+.newDashboard:hover,
+.createForm button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px color-mix(in srgb, var(--studio-cobalt) 18%, transparent);
+}
+.newDashboard svg,
 .editor button svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  min-height: calc(100vh - 172px);
 }
 .dashboardList {
   display: flex;
-  gap: 8px;
-  padding: 0 0 16px;
+  gap: 28px;
+  padding: 0;
   overflow-x: auto;
   border-bottom: 1px solid var(--studio-grid);
+  scrollbar-width: thin;
 }
 .dashboardList button {
+  position: relative;
   display: flex;
   flex: 0 0 auto;
-  gap: 9px;
+  gap: 10px;
   align-items: center;
-  min-height: 52px;
-  padding: 10px 14px;
+  min-height: 54px;
+  padding: 10px 0 14px;
   color: var(--studio-ink-muted);
   text-align: left;
   background: transparent;
-  border: 1px solid var(--studio-grid);
-  border-radius: 6px;
-  cursor: pointer;
+  border: 0;
+  border-bottom: 2px solid transparent;
 }
 .dashboardList button[data-selected] {
-  color: var(--studio-cobalt-text, var(--studio-cobalt));
-  background: var(--studio-cobalt-soft);
-  border-color: color-mix(in srgb, var(--studio-cobalt) 40%, var(--studio-grid));
+  color: var(--studio-cobalt-text);
+  border-bottom-color: var(--studio-cobalt);
 }
-.dashboardList svg {
-  width: 17px;
+.dashboardList button > svg {
+  width: 16px;
+  height: 16px;
 }
-.dashboardList span {
-  display: grid;
-  gap: 3px;
+.dashboardList button span {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.dashboardList strong {
+  font-size: 13px;
+  font-weight: 600;
 }
 .dashboardList small {
   color: var(--studio-ink-muted);
-  font-size: 11px;
+  font-size: 10px;
 }
 .canvas {
   min-width: 0;
-  padding: 28px 0 0;
+  padding-top: 24px;
 }
 .dashboardHeader {
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  align-items: start;
-  margin-bottom: 22px;
-}
-.dashboardHeader p {
-  margin: 0 0 5px;
-  color: var(--studio-ink-muted);
-  font-size: 12px;
+  align-items: center;
+  margin-bottom: 24px;
 }
 .dashboardHeader h2 {
   margin: 0;
-  font-size: clamp(24px, 2.5vw, 30px);
-  letter-spacing: -0.035em;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
   overflow-wrap: anywhere;
 }
+.dashboardHeader p {
+  margin: 7px 0 0;
+  color: var(--studio-ink-muted);
+  font-size: 11px;
+}
 .dashboardHeader span {
+  display: block;
+  margin-top: 7px;
   color: var(--studio-ink-muted);
   font-size: 12px;
 }
 .modeSwitch {
   display: inline-flex;
+  flex-shrink: 0;
   padding: 3px;
   background: var(--studio-surface);
   border: 1px solid var(--studio-grid);
-  border-radius: 7px;
+  border-radius: 12px;
 }
 .modeSwitch button {
   min-height: 38px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   color: var(--studio-ink-muted);
   background: transparent;
   border: 0;
-  border-radius: 5px;
-  font-weight: 750;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
 }
 .modeSwitch button[aria-pressed="true"] {
-  color: var(--studio-cobalt-text, var(--studio-cobalt));
+  color: var(--studio-cobalt-text);
   background: var(--studio-cobalt-soft);
 }
 .editor {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 20px;
-  padding: 22px;
-  background: color-mix(in srgb, var(--studio-cobalt-soft) 50%, var(--studio-surface));
-  border: 1px solid var(--studio-grid);
-  border-radius: 8px;
+  padding: 16px 0;
+  border-block: 1px solid var(--studio-grid);
+}
+.contextPanel > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 44px;
+  color: var(--studio-cobalt-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.contextPanel > summary::after {
+  content: "+";
+  font-size: 16px;
+}
+.contextPanel[open] > summary::after {
+  content: "−";
+}
+.contextPanel > summary > svg {
+  width: 15px;
+  height: 15px;
 }
 .contextEditor {
   display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr)) auto;
+  grid-template-columns: repeat(4, minmax(100px, 1fr)) auto;
   gap: 10px;
   align-items: end;
-}
-.contextEditor h3 {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  margin: 0;
-  font-size: 14px;
-}
-.contextEditor h3 svg {
-  width: 16px;
+  padding: 12px 0;
 }
 .contextEditor label,
-.adders label {
+.adders label,
+.createForm label {
   display: grid;
-  gap: 5px;
+  gap: 7px;
   color: var(--studio-ink-muted);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
+}
+.editor input,
+.editor select,
+.createForm input {
+  min-width: 0;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 12px;
+  color: var(--studio-ink);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-grid-strong);
+  border-radius: 10px;
 }
 .contextActions {
   display: flex;
@@ -199,15 +239,13 @@
 }
 .contextActions button:last-child {
   color: var(--studio-ink);
-  background: var(--studio-surface);
+  background: transparent;
   border-color: var(--studio-grid-strong);
 }
 .adders {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding-top: 14px;
-  border-top: 1px solid var(--studio-grid);
+  grid-template-columns: 1fr 1.3fr;
+  gap: 24px;
 }
 .adders form {
   display: grid;
@@ -218,10 +256,30 @@
 .adders form:last-child {
   grid-template-columns: 1fr 1.5fr auto;
 }
-.error {
-  padding: 10px;
-  border-left: 3px solid var(--studio-coral);
+.adders form:last-child button:last-child {
+  grid-column: 1 / -1;
+  justify-self: end;
+  min-height: 36px;
+  padding-block: 5px;
+  color: var(--studio-cobalt-text);
+  background: transparent;
+  font-size: 11px;
+}
+.error,
+.createForm p[role="alert"] {
+  padding: 12px;
+  color: var(--studio-coral);
+  border-left: 2px solid var(--studio-coral);
   background: var(--studio-surface);
+  font-size: 12px;
+}
+.createForm {
+  display: grid;
+  gap: 22px;
+  padding-top: 24px;
+}
+.createForm button {
+  justify-self: end;
 }
 .grid {
   display: grid;
@@ -233,10 +291,10 @@
   position: relative;
   min-width: 0;
   min-height: 260px;
-  padding: 22px;
+  padding: 24px;
   background: var(--studio-surface);
   border: 1px solid var(--studio-grid);
-  border-radius: 8px;
+  border-radius: 18px;
 }
 .grid > article[data-height="2"] {
   min-height: 440px;
@@ -245,22 +303,25 @@
   display: flex;
   justify-content: flex-end;
   gap: 4px;
-  margin: -7px -7px 8px;
+  margin: -8px -8px 10px;
 }
 .layoutControls button {
-  width: 31px;
-  height: 31px;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
   color: var(--studio-ink-muted);
-  background: var(--studio-canvas);
+  background: transparent;
   border: 1px solid var(--studio-grid);
-  border-radius: 5px;
+  border-radius: 8px;
 }
 .layoutControls button svg {
   width: 14px;
+  height: 14px;
 }
 .widget {
   display: grid;
-  gap: 13px;
+  gap: 16px;
 }
 .widget > header {
   display: flex;
@@ -269,25 +330,28 @@
   align-items: start;
 }
 .widget header p {
-  margin: 0 0 4px;
+  margin: 0 0 7px;
   color: var(--studio-ink-muted);
-  font-size: 11px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 .widget h3,
 .note h3,
 .sectionHeader h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.35;
-  letter-spacing: -0.025em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   overflow-wrap: anywhere;
 }
 .widget header > span {
   height: max-content;
-  max-width: 130px;
+  max-width: 110px;
   color: var(--studio-ink-muted);
   text-align: right;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.4;
 }
 .widget header > span[data-context="incompatible"] {
@@ -298,33 +362,50 @@
   justify-content: space-between;
   gap: 10px;
   align-items: center;
-  padding: 16px 0;
-  border-block: 1px solid var(--studio-grid);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--studio-grid);
 }
 .widgetMeta strong {
-  font-size: 32px;
-  letter-spacing: -0.04em;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.055em;
   font-variant-numeric: tabular-nums;
 }
 .widgetMeta span,
 .widgetMeta small {
   color: var(--studio-ink-muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 .widgetMeta small {
   display: block;
   margin-top: 4px;
 }
+.exportAction {
+  min-height: 44px;
+  padding: 8px 0 8px 14px;
+  color: var(--studio-cobalt-text);
+  background: transparent;
+  border: 0;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+.emptyResult {
+  max-width: 46ch;
+  margin: 4px 0;
+  color: var(--studio-ink-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
 .funnelBars {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   margin: 4px 0 12px;
   padding: 0;
   list-style: none;
 }
 .funnelBars li {
   display: grid;
-  grid-template-columns: minmax(100px, 1fr) minmax(70px, 1.5fr) auto;
+  grid-template-columns: minmax(90px, 1fr) minmax(70px, 1.5fr) auto;
   align-items: center;
   gap: 12px;
   font-size: 12px;
@@ -333,15 +414,22 @@
   overflow-wrap: anywhere;
 }
 .funnelBars li > div {
-  height: 25px;
+  height: 28px;
   overflow: hidden;
   background: var(--studio-cobalt-soft);
-  border-radius: 2px;
+  border-radius: 5px;
 }
 .funnelBars i {
   display: block;
   height: 100%;
   background: var(--studio-cobalt);
+  border-radius: inherit;
+}
+.funnelBars li:nth-child(2) i {
+  background: color-mix(in srgb, var(--studio-cobalt) 80%, var(--studio-cyan, #8de1e7));
+}
+.funnelBars li:nth-child(3) i {
+  background: color-mix(in srgb, var(--studio-cobalt) 65%, var(--studio-cyan, #8de1e7));
 }
 .funnelBars strong {
   min-width: 46px;
@@ -358,49 +446,62 @@
 .widget table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 .widget caption {
-  padding-bottom: 7px;
+  padding-bottom: 9px;
   color: var(--studio-ink-muted);
   text-align: left;
+  font-size: 10px;
 }
 .widget th,
 .widget td {
-  padding: 10px 7px;
+  padding: 11px 6px;
   text-align: left;
   border-top: 1px solid var(--studio-grid);
   overflow-wrap: anywhere;
+}
+.widget tbody th {
+  font-weight: 500;
 }
 .widget td:last-child {
   text-align: right;
 }
 .widget thead th {
   color: var(--studio-ink-muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
 }
 .widget a {
   display: inline-flex;
-  gap: 6px;
+  gap: 7px;
   align-items: center;
-  color: var(--studio-cobalt-text, var(--studio-cobalt));
+  min-height: 44px;
+  color: var(--studio-cobalt-text);
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 550;
+  text-decoration: none;
+}
+.widget a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .widget a svg {
   width: 14px;
+  height: 14px;
 }
 .widget details {
   color: var(--studio-ink-muted);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11px;
+  line-height: 1.6;
 }
 .widget summary {
+  display: flex;
+  align-items: center;
   width: fit-content;
+  min-height: 44px;
   cursor: pointer;
-  padding-block: 6px;
 }
 .widgetError {
   display: flex;
@@ -408,7 +509,8 @@
   padding: 12px;
   color: var(--studio-coral);
   background: color-mix(in srgb, var(--studio-coral) 7%, var(--studio-surface));
-  border: 1px solid color-mix(in srgb, var(--studio-coral) 24%, var(--studio-grid));
+  border-left: 2px solid var(--studio-coral);
+  font-size: 12px;
 }
 .widgetError svg {
   flex: 0 0 auto;
@@ -419,7 +521,6 @@
 }
 .note {
   padding: 12px;
-  background: color-mix(in srgb, var(--studio-cobalt-soft) 50%, var(--studio-surface));
   border-left: 3px solid var(--studio-cobalt);
 }
 .note p,
@@ -432,15 +533,14 @@
   border-bottom: 2px solid var(--studio-ink);
 }
 @media (max-width: 1050px) {
-  .heading {
-    align-items: start;
-    flex-direction: column;
-  }
   .contextEditor {
     grid-template-columns: 1fr 1fr;
   }
   .contextActions {
     grid-column: 1 / -1;
+  }
+  .adders {
+    grid-template-columns: 1fr;
   }
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -450,62 +550,125 @@
   }
 }
 @media (max-width: 720px) {
-  .funnelBars li {
-    grid-template-columns: minmax(80px, 1fr) minmax(60px, 1fr) auto;
-    gap: 8px;
-    font-size: 11px;
+  .workspace {
+    padding: 20px 18px 32px;
   }
   .heading {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: start;
+    gap: 12px;
+    margin-bottom: 18px;
   }
-  .heading form {
-    display: grid;
+  .heading p {
+    margin-bottom: 8px;
+    font-size: 10px;
   }
-  .layout {
-    grid-template-columns: 1fr;
+  .heading h1 {
+    font-size: 26px;
+  }
+  .heading span {
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .newDashboard {
+    min-height: 44px;
+    padding: 10px;
+    font-size: 0 !important;
+    border-radius: 12px;
+  }
+  .newDashboard svg {
+    width: 20px;
+    height: 20px;
   }
   .dashboardList {
-    display: flex;
-    overflow-x: auto;
-    border-right: 0;
-    border-bottom: 1px solid var(--studio-grid);
+    gap: 22px;
   }
   .dashboardList button {
-    flex: 0 0 auto;
+    min-height: 48px;
+    padding-bottom: 12px;
+  }
+  .dashboardList button > svg,
+  .dashboardList small {
+    display: none;
+  }
+  .dashboardList strong {
+    max-width: 270px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .canvas {
+    padding-top: 18px;
   }
   .dashboardHeader {
-    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
   }
-  .editor,
+  .dashboardHeader h2 {
+    font-size: 17px;
+  }
+  .dashboardHeader p {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .modeSwitch {
+    padding: 2px;
+    border-radius: 10px;
+  }
+  .modeSwitch button {
+    min-height: 40px;
+    padding: 7px 10px;
+    font-size: 11px;
+  }
   .contextEditor,
   .adders,
   .adders form,
   .adders form:last-child {
     grid-template-columns: 1fr;
   }
+  .adders form:last-child button:last-child {
+    justify-self: start;
+  }
   .grid {
     grid-template-columns: 1fr;
   }
   .grid > article {
     grid-column: 1 !important;
+    padding: 20px;
+    border-radius: 16px;
+  }
+  .widget {
+    gap: 13px;
+  }
+  .widget h3 {
+    font-size: 18px;
+  }
+  .widget header > span {
+    max-width: 90px;
+  }
+  .funnelBars li {
+    grid-template-columns: minmax(70px, 1fr) minmax(60px, 1fr) auto;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .funnelBars li > div {
+    height: 24px;
   }
   .widgetMeta {
     flex-wrap: wrap;
+    padding-bottom: 10px;
   }
-  .grid > article {
-    padding: 18px;
+  .createForm button {
+    justify-self: stretch;
   }
-  .heading input,
-  .heading button,
-  .editor input,
-  .editor select,
-  .editor button,
-  .modeSwitch button {
-    min-height: 44px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .newDashboard,
+  .createForm button {
+    transition: none;
   }
-  .layoutControls button {
-    width: 40px;
-    height: 40px;
+  .newDashboard:hover,
+  .createForm button:hover {
+    transform: none;
   }
 }

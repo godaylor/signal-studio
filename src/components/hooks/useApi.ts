@@ -23,7 +23,6 @@ export function useApi() {
     shareId && shareToken ? { [SHARE_TOKEN_HEADER]: shareToken, [SHARE_CONTEXT_HEADER]: '1' } : {};
 
   const defaultHeaders = {
-    ...getClientAuthHeaders(),
     ...shareHeaders,
   };
   const getUrl = (url: string) => {
@@ -31,7 +30,9 @@ export function useApi() {
   };
 
   const getHeaders = (headers: any = {}) => {
-    return { ...defaultHeaders, ...headers };
+    // Read the active tab's credential when sending, including callbacks created
+    // before a login or explicit switch to the HttpOnly guest session.
+    return { ...getClientAuthHeaders(), ...defaultHeaders, ...headers };
   };
 
   return {

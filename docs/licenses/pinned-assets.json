@@ -14,5 +14,73 @@
     "license": "OFL-1.1",
     "author": "The Inter Project Authors / Rasmus Andersson",
     "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a"
+  },
+  {
+    "file": "src/assets/fonts/UnboundedVariable.ttf",
+    "url": "https://raw.githubusercontent.com/googlefonts/unbounded/f3ec43228a864a72487e41552e2140efab9884ea/fonts/variable/Unbounded%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "author": "The Unbounded Project Authors",
+    "sourceRevision": "f3ec43228a864a72487e41552e2140efab9884ea",
+    "gitBlob": "e3c064ddfa3acdd3af2e0f06cd2f2288cc4fcae3",
+    "sha256": "323b511be380c8d474ef030686b71aedde501f8d9cd46da558b7c40454372c3f"
+  },
+  {
+    "file": "docs/licenses/Unbounded-OFL.txt",
+    "url": "https://raw.githubusercontent.com/googlefonts/unbounded/f3ec43228a864a72487e41552e2140efab9884ea/OFL.txt",
+    "license": "OFL-1.1",
+    "author": "The Unbounded Project Authors",
+    "sourceRevision": "f3ec43228a864a72487e41552e2140efab9884ea",
+    "gitBlob": "1c7db28325aa3a1e8bd8978ef1d760daf3bb357b",
+    "sha256": "31e5d4e83955e7103c34570dd49b0570ef490800bd65b42923c0dd02445263b3"
+  },
+  {
+    "file": "src/assets/fonts/GolosTextVariable.ttf",
+    "url": "https://raw.githubusercontent.com/googlefonts/golos-text/cf2e27222937d97c2d858fff0499bcc667a64e9d/fonts/variable/GolosText%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "author": "The Golos Text Project Authors",
+    "sourceRevision": "cf2e27222937d97c2d858fff0499bcc667a64e9d",
+    "gitBlob": "05ee5ecc570b97818e24e58693662cd8294fdfc9",
+    "sha256": "17bb58fb69aec2dfb047a2ebf52534023e9b688c97a6b7ac795b0a72912c2063"
+  },
+  {
+    "file": "docs/licenses/GolosText-OFL.txt",
+    "url": "https://raw.githubusercontent.com/googlefonts/golos-text/cf2e27222937d97c2d858fff0499bcc667a64e9d/OFL.txt",
+    "license": "OFL-1.1",
+    "author": "The Golos Text Project Authors",
+    "sourceRevision": "cf2e27222937d97c2d858fff0499bcc667a64e9d",
+    "gitBlob": "4db2dc99dd31ec2dd9655d3b71565a9959394ab1",
+    "sha256": "ff532f9e8789f09a9fdffc3c0954eedfb0a48be77b2e2eb90f5f82e4f347f50c"
+  },
+  {
+    "file": "src/assets/fonts/GolosTextVariable.woff2",
+    "url": "https://raw.githubusercontent.com/googlefonts/golos-text/cf2e27222937d97c2d858fff0499bcc667a64e9d/fonts/variable/GolosText%5Bwght%5D.ttf",
+    "sourceRevision": "cf2e27222937d97c2d858fff0499bcc667a64e9d",
+    "license": "OFL-1.1",
+    "author": "The Golos Text Project Authors",
+    "sha256": "b7ff164eb7b6ade534312bc97c390be5ccd31fc42e2ec19ea6e579fd4e010e56",
+    "derivedFrom": "src/assets/fonts/GolosTextVariable.ttf",
+    "derivedFromSha256": "17bb58fb69aec2dfb047a2ebf52534023e9b688c97a6b7ac795b0a72912c2063",
+    "conversion": {
+      "tool": "wawoff2@2.0.1",
+      "sourceRevision": "2ba75100c9ec6031a5a1d32ddd1120409aa68573",
+      "provenance": "docs/licenses/font-conversion.json",
+      "operation": "Full-font WOFF2 format conversion only"
+    }
+  },
+  {
+    "file": "src/assets/fonts/UnboundedVariable.woff2",
+    "url": "https://raw.githubusercontent.com/googlefonts/unbounded/f3ec43228a864a72487e41552e2140efab9884ea/fonts/variable/Unbounded%5Bwght%5D.ttf",
+    "sourceRevision": "f3ec43228a864a72487e41552e2140efab9884ea",
+    "license": "OFL-1.1",
+    "author": "The Unbounded Project Authors",
+    "sha256": "67f88b70fb2e5f442c934de72d8419d647345f72c80ef3dc983018b0f98a5ed9",
+    "derivedFrom": "src/assets/fonts/UnboundedVariable.ttf",
+    "derivedFromSha256": "323b511be380c8d474ef030686b71aedde501f8d9cd46da558b7c40454372c3f",
+    "conversion": {
+      "tool": "wawoff2@2.0.1",
+      "sourceRevision": "2ba75100c9ec6031a5a1d32ddd1120409aa68573",
+      "provenance": "docs/licenses/font-conversion.json",
+      "operation": "Full-font WOFF2 format conversion only"
+    }
   }
 ]

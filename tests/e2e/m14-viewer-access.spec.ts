@@ -90,7 +90,7 @@ test('Viewer login exposes aggregate navigation and server-enforces restricted c
 
   await page.goto(`/studio/${ids.project}/home`);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'From signup to a product habit.' }),
+    page.getByRole('heading', { level: 1, name: 'How do users find value?' }),
   ).toBeVisible();
   const navigation = page.locator('aside').getByRole('navigation', { name: 'Primary' });
   await expect(navigation.getByRole('link')).toHaveText(['Home', 'Explore', 'Dashboards', 'Live']);

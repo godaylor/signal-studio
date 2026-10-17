@@ -90,7 +90,7 @@ export function StudioSharePage() {
               textTransform: 'uppercase',
             }}
           >
-            Signal Studio · {t.publicView}
+            Яснослед · {t.publicView}
           </div>
           <h1 style={{ margin: '8px 0', fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 1.05 }}>
             {resource.title}

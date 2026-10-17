@@ -138,6 +138,7 @@ test('Insight is assembled into a responsive accessible Dashboard with deduplica
   });
 
   await page.goto(`/studio/${projectId}/dashboards`);
+  await page.getByRole('button', { name: 'New dashboard', exact: true }).click();
   await page.getByLabel('New dashboard title').fill('UI dashboard visual');
   await page.getByRole('button', { name: 'Create dashboard' }).click();
   await expect(page.getByRole('heading', { name: 'UI dashboard visual' })).toBeVisible();
@@ -153,6 +154,7 @@ test('Insight is assembled into a responsive accessible Dashboard with deduplica
 
   await page.getByRole('button', { name: 'Widen widget' }).first().click();
   await expect(page.getByRole('button', { name: 'Narrow widget' }).first()).toBeEnabled();
+  await page.getByText('Shared context', { exact: true }).click();
   await page.getByLabel('Start date').fill('2026-03-03');
   await page.getByLabel('End date').fill('2026-03-06');
   await page.getByLabel('Segment field').selectOption('country');
@@ -178,7 +180,9 @@ test('Insight is assembled into a responsive accessible Dashboard with deduplica
   ).toEqual([]);
   expect(analysisRequests).toBeLessThanOrEqual(2);
   if (process.platform !== 'win32') return; // Pixel baseline is Windows-specific; axe/flows run on CI too.
-  await expect(page.locator('main').last()).toHaveScreenshot('dashboard-mobile.png', {
+  // Keep fixed app navigation outside the card's pixel baseline; the whole
+  // mobile workspace is covered by the accessibility and workflow assertions.
+  await expect(page.getByRole('article').first()).toHaveScreenshot('dashboard-mobile.png', {
     animations: 'disabled',
     maxDiffPixelRatio: 0.02,
     mask: [page.getByText(/updated /), page.getByText(/exact count ·/i)],

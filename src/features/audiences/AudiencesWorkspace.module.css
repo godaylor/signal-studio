@@ -1,27 +1,30 @@
 .workspace {
-  width: min(100%, 1480px);
+  width: min(100%, 1600px);
   margin-inline: auto;
-  padding: clamp(24px, 3.2vw, 42px) clamp(16px, 3.2vw, 42px) 76px;
+  padding: 34px clamp(24px, 4vw, 64px) 76px;
   color: var(--studio-ink);
 }
 .heading {
-  max-width: 780px;
-  margin-bottom: 24px;
+  max-width: 1100px;
+  margin-bottom: 28px;
 }
 .heading p,
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--studio-cobalt-text, var(--studio-cobalt));
+  color: var(--studio-ink-muted);
   font-size: 11px;
-  font-weight: 750;
+  font-weight: 600;
   letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 .heading h1 {
   margin: 0;
-  font-size: clamp(28px, 3.3vw, 40px);
-  letter-spacing: -0.045em;
-  line-height: 1.08;
+  font-family: var(--font-display, var(--font-unbounded, sans-serif));
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 650;
+  letter-spacing: -0.055em;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 .heading span {
   display: block;
@@ -32,39 +35,48 @@
 }
 .tabs {
   display: flex;
-  gap: 4px;
-  margin-bottom: 18px;
+  gap: 24px;
+  margin-bottom: 0;
   border-bottom: 1px solid var(--studio-grid);
 }
 .tabs button {
+  position: relative;
+  isolation: isolate;
   min-height: 44px;
-  padding: 11px 14px;
+  padding: 14px 0;
   color: var(--studio-ink-muted);
   background: transparent;
   border: 0;
-  border-bottom: 2px solid transparent;
   cursor: pointer;
+}
+.tabs button > span:not(.tabIndicator) {
+  position: relative;
+}
+.tabIndicator {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 3px;
+  background: var(--studio-cobalt);
+  border-radius: 3px 3px 0 0;
 }
 .tabs button[aria-current="page"] {
   color: var(--studio-cobalt-text, var(--studio-cobalt));
-  border-color: var(--studio-cobalt);
-  font-weight: 750;
+  font-weight: 650;
 }
 .panel {
   min-width: 0;
-  padding: clamp(16px, 2.5vw, 26px);
-  background: var(--studio-surface);
-  border: 1px solid var(--studio-grid);
-  border-radius: 8px;
+  padding: 26px 0 0;
+  background: transparent;
 }
 .panel h2 {
   margin: 0 0 18px;
-  font-size: 20px;
-  letter-spacing: -0.025em;
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
 }
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(130px, 0.7fr) minmax(190px, 1.3fr) auto auto auto;
+  grid-template-columns: minmax(130px, 0.7fr) minmax(190px, 1.3fr) auto auto auto auto;
   gap: 12px;
   align-items: end;
   margin-bottom: 18px;
@@ -89,12 +101,13 @@
 .builderControls select,
 .condition input,
 .condition select {
-  min-height: 42px;
-  padding: 7px 9px;
+  min-height: 44px;
+  min-width: 0;
+  padding: 9px 12px;
   color: var(--studio-ink);
-  background: var(--studio-surface);
-  border: 1px solid var(--studio-grid-strong);
-  border-radius: 6px;
+  background: var(--studio-surface-muted);
+  border: 1px solid transparent;
+  border-radius: 10px;
 }
 .searchField {
   position: relative;
@@ -102,7 +115,7 @@
 .searchField svg {
   position: absolute;
   left: 10px;
-  bottom: 11px;
+  bottom: 14px;
   color: var(--studio-ink-muted);
 }
 .searchField input {
@@ -112,14 +125,17 @@
 .state {
   padding: 14px;
   color: var(--studio-ink-muted);
-  background: var(--studio-canvas);
-  border-left: 3px solid var(--studio-cobalt);
+  background: color-mix(in srgb, var(--studio-cobalt-soft) 30%, transparent);
+  border-left: 2px solid var(--studio-cobalt);
+  font-size: 13px;
+  line-height: 1.55;
 }
 .tableWrap {
   overflow: auto;
   margin-bottom: 16px;
   scrollbar-width: thin;
   border-top: 1px solid var(--studio-grid);
+  background: color-mix(in srgb, var(--studio-surface) 72%, transparent);
 }
 .tableWrap table {
   width: 100%;
@@ -137,19 +153,22 @@
 }
 .tableWrap th,
 .tableWrap td {
-  padding: 16px 12px;
+  padding: 18px 16px;
   text-align: left;
   border-bottom: 1px solid var(--studio-grid);
   font-size: 13px;
 }
 .tableWrap thead th {
   color: var(--studio-ink-muted);
-  background: var(--studio-canvas);
+  background: var(--studio-surface-muted);
   font-size: 11px;
   font-weight: 500;
 }
 .tableWrap tbody tr:hover {
   background: color-mix(in srgb, var(--studio-cobalt-soft) 40%, var(--studio-surface));
+}
+.tableWrap tbody tr {
+  transition: background-color 160ms ease;
 }
 .stage {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -169,10 +188,10 @@
 }
 .primaryButton,
 .secondaryButton {
-  min-height: 42px;
-  padding: 8px 13px;
-  border-radius: 6px;
-  font-weight: 700;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 650;
   cursor: pointer;
 }
 .primaryButton {
@@ -183,7 +202,7 @@
 .secondaryButton {
   color: var(--studio-ink);
   background: var(--studio-surface);
-  border: 1px solid var(--studio-grid-strong);
+  border: 1px solid var(--studio-grid);
 }
 .primaryButton:disabled,
 .secondaryButton:disabled,
@@ -204,10 +223,8 @@
 .definitionBand {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  border: 1px solid var(--studio-grid-strong);
-  border-left: 4px solid var(--studio-cobalt);
-  border-radius: 6px;
-  background: var(--studio-cobalt-soft);
+  border-block: 1px solid var(--studio-grid);
+  background: color-mix(in srgb, var(--studio-cobalt-soft) 35%, var(--studio-surface));
 }
 .definitionBand div {
   display: grid;
@@ -244,7 +261,7 @@
 .memberList,
 .segmentList {
   display: grid;
-  gap: 8px;
+  gap: 0;
   padding: 0;
   list-style: none;
 }
@@ -254,9 +271,8 @@
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  padding: 12px;
-  border: 1px solid var(--studio-grid);
-  border-radius: 6px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--studio-grid);
 }
 .memberList li > div,
 .segmentList li > div {
@@ -280,7 +296,11 @@
 .segmentGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
-  gap: 18px;
+  gap: 32px;
+}
+.segmentGrid > .panel + .panel {
+  padding-left: 28px;
+  border-left: 1px solid var(--studio-grid);
 }
 .builderControls {
   display: grid;
@@ -293,10 +313,10 @@
   grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
   gap: 8px;
   margin: 8px 0;
-  padding: 10px;
+  padding: 16px;
   background: color-mix(in srgb, var(--studio-cobalt-soft) 50%, var(--studio-surface));
-  border: 1px solid var(--studio-grid);
-  border-radius: 7px;
+  border-left: 2px solid var(--studio-cobalt);
+  border-radius: 0 10px 10px 0;
 }
 .condition button {
   color: var(--studio-coral);
@@ -345,11 +365,28 @@
   .segmentGrid {
     grid-template-columns: 1fr;
   }
+  .segmentGrid > .panel + .panel {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--studio-grid);
+  }
   .condition {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 620px) {
+  .workspace {
+    padding: 24px 20px 88px;
+  }
+  .heading {
+    margin-bottom: 20px;
+  }
+  .heading h1 {
+    font-size: 27px;
+  }
+  .heading span {
+    font-size: 13px;
+  }
   .tabs {
     overflow-x: auto;
   }
@@ -368,7 +405,20 @@
     width: 100%;
     min-height: 44px;
   }
-  .toolbar,
+  .toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .toolbar > div:first-child,
+  .searchField {
+    grid-column: 1 / -1;
+  }
+  .toolbar label:not(.searchField) {
+    grid-template-columns: 1fr;
+  }
+  .toolbar label > svg {
+    display: none;
+  }
   .builderControls,
   .definitionBand {
     grid-template-columns: 1fr;
@@ -389,5 +439,6 @@
 @media (prefers-reduced-motion: reduce) {
   .workspace * {
     scroll-behavior: auto !important;
+    transition-duration: 0s !important;
   }
 }

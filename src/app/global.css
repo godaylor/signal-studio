@@ -1,8 +1,14 @@
 :root {
+  --font-display: var(--font-unbounded);
+  --font-ui: var(--font-golos);
   --font-family: var(--font-inter), sans-serif;
   --primary: oklch(62.3% 0.214 259.815);
   --primary-foreground: oklch(98.5% 0 0);
 }
+
+html[data-visual-motion="off"] *, html[data-visual-motion="off"] *::before, html[data-visual-motion="off"] *::after { animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important; }
+html[data-visual-ambient="off"] [data-ambient], html[data-visual-ambient="off"] [data-ambient] * { animation-play-state:paused !important; }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important; } }
 
 html,
 body {

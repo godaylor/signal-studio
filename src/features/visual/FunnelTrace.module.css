@@ -1,0 +1,167 @@
+.figure {
+  margin: 0;
+  min-width: 0;
+  padding: 18px 0 4px;
+}
+.figure figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 26px;
+}
+.figure figcaption > span {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--studio-ink-muted);
+}
+.group {
+  min-width: 0;
+}
+.group h3 {
+  font-size: 12px;
+  color: var(--studio-ink-muted);
+}
+.labels {
+  display: grid;
+  gap: 0;
+}
+.labels button {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  min-height: 68px;
+  text-align: left;
+  padding: 4px 14px 4px 8px;
+  background: transparent;
+  color: var(--studio-ink);
+  border: 0;
+  border-right: 1px dashed var(--studio-grid);
+  cursor: pointer;
+  border-radius: 0;
+}
+.labels button:last-child {
+  border: 0;
+}
+.labels button:hover,
+.labels button:focus-visible {
+  background: var(--studio-cobalt-soft);
+  border-radius: 10px;
+}
+.label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.label i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.labels strong {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 550;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.labels small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--studio-ink-muted);
+  letter-spacing: 0;
+}
+.flow {
+  display: block;
+  width: 100%;
+  height: 130px;
+  overflow: visible;
+}
+.flow g {
+  transition: opacity 0.2s;
+}
+.bar {
+  transform-origin: left;
+  transform-box: fill-box;
+  filter: drop-shadow(0 5px 10px #6857f312);
+}
+.figure[data-animate="true"] .bar {
+  animation: grow 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mobileTrack {
+  display: none;
+}
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (max-width: 700px) {
+  .figure {
+    padding: 8px 0;
+  }
+  .figure figcaption {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+  .figure figcaption > span {
+    display: none;
+  }
+  .labels {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  .labels button {
+    position: relative;
+    min-height: 56px;
+    grid-template-columns: 1fr auto;
+    padding: 0;
+    border: 0;
+    gap: 8px;
+  }
+  .label {
+    font-size: 11px;
+  }
+  .labels strong {
+    font-size: 14px;
+    gap: 8px;
+    letter-spacing: 0;
+  }
+  .labels small {
+    font-size: 10px;
+  }
+  .mobileTrack {
+    display: block;
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 17px;
+    border-radius: 6px;
+    background: var(--studio-surface-muted);
+    overflow: hidden;
+  }
+  .mobileTrack i {
+    display: block;
+    height: 100%;
+    border-radius: 6px;
+    min-width: 0;
+    transform-origin: left;
+  }
+  .figure[data-animate="true"] .mobileTrack i {
+    animation: grow 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .flow {
+    display: none;
+  }
+}

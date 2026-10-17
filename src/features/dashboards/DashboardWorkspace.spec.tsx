@@ -1,14 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
 import type { AnalysisQueryV1 } from '@/server/analytics/contracts';
 import type { DashboardWidgetDto } from '@/server/dashboards/dashboard-service';
-import { DashboardWidget } from './DashboardWorkspace';
+import { DashboardWidget, DashboardWorkspace } from './DashboardWorkspace';
 
 vi.mock('@/lib/client', () => ({
   getClientAuthHeaders: () => ({ authorization: 'Bearer token' }),
 }));
 vi.mock('@/features/exports/ExportControls', () => ({ ExportControls: () => null }));
+vi.mock('@/features/visual/MotionPreferences', () => ({
+  useVisualMotion: () => ({ animate: false, ambient: false }),
+}));
 const projectId = 'd5a950d4-4d31-4c0f-b7a4-41dce9e0a003';
 const query: AnalysisQueryV1 = {
   version: 1,
@@ -72,6 +75,59 @@ function wrapper(children: React.ReactNode) {
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+test('new dashboard is created in a focused dialog and context stays collapsed until requested', async () => {
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (init?.method === 'POST')
+      return Response.json({
+        id: '20000000-0000-4000-8000-000000000001',
+        title: JSON.parse(String(init.body)).title,
+        updatedAt: '2026-10-17T00:00:00Z',
+        owner: { username: 'owner' },
+        widgets: [],
+        globalContext: {},
+        canEdit: true,
+      });
+    return Response.json(
+      String(url).includes('/insights') ? { data: [], nextCursor: null } : { data: [] },
+    );
+  });
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  const trigger = await screen.findByRole('button', { name: 'New dashboard' });
+  expect(screen.queryByLabelText('New dashboard title')).not.toBeInTheDocument();
+  trigger.focus();
+  fireEvent.click(trigger);
+  const dialog = screen.getByRole('dialog', { name: 'Create dashboard' });
+  const input = within(dialog).getByLabelText('New dashboard title');
+  await waitFor(() => expect(input).toHaveFocus());
+  fireEvent.change(input, { target: { value: 'Activation pulse' } });
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Create dashboard' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(screen.getByRole('heading', { name: 'Activation pulse' })).toBeVisible();
+  expect(screen.getByLabelText('Dashboard editor')).toBeVisible();
+  expect(screen.getByLabelText('Start date')).not.toBeVisible();
+  fireEvent.click(screen.getByText('Shared context', { exact: true }));
+  expect(screen.getByLabelText('Start date')).toBeVisible();
+  expect(fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(1);
+  await waitFor(() => expect(trigger).toHaveFocus());
+});
+
+test('failed dashboard creation retains the draft and a recoverable error in the dialog', async () => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) =>
+    init?.method === 'POST'
+      ? Response.json({ error: { message: 'Bounded storage unavailable' } }, { status: 503 })
+      : Response.json({ data: [], nextCursor: null }),
+  );
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  fireEvent.click(await screen.findByRole('button', { name: 'New dashboard' }));
+  fireEvent.change(screen.getByLabelText('New dashboard title'), {
+    target: { value: 'Keep my title' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Create dashboard' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Try again');
+  expect(screen.getByLabelText('New dashboard title')).toHaveValue('Keep my title');
+  expect(screen.getByRole('button', { name: 'Create dashboard' })).toBeEnabled();
+});
 
 test('identical dashboard widget queries share one TanStack request', async () => {
   const fetchMock = vi
@@ -151,4 +207,21 @@ test('widget does not invent a headline total when the response has none', async
   expect(screen.queryByText('15', { selector: 'strong' })).not.toBeInTheDocument();
   expect(screen.getByRole('cell', { name: '7' })).toBeInTheDocument();
   expect(screen.getByRole('cell', { name: '8' })).toBeInTheDocument();
+});
+
+test('an empty analytical result explains the state and keeps its query available', async () => {
+  const response = success('signup');
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    Response.json({
+      ...response,
+      data: { ...response.data, rows: [] },
+    }),
+  );
+  wrapper(<DashboardWidget widget={widget('10000000-0000-4000-8000-000000000007')} context={{}} />);
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('No matching results.'));
+  expect(screen.getByRole('link', { name: 'Open Insight in Explore' })).toHaveAttribute(
+    'href',
+    expect.stringContaining('event=signup'),
+  );
+  expect(screen.queryByText('0', { selector: 'strong' })).not.toBeInTheDocument();
 });

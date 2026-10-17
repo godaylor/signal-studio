@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { AnalysisResult } from '@/server/analytics/contracts';
@@ -149,17 +149,22 @@ describe('ExploreWorkspace', () => {
     const user = userEvent.setup();
     render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
 
-    expect(screen.getByRole('heading', { name: 'Question definition' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Edit query' })).toBeVisible();
     expect(screen.getByRole('img')).toHaveAccessibleName(/signup returned 6 exact events/);
     expect(screen.getByRole('table')).toHaveAccessibleName(/Equivalent data table/);
     expect(screen.getAllByRole('cell', { name: '100.0%' })).toHaveLength(2);
 
     await user.click(screen.getByRole('button', { name: /Filters/ }));
-    expect(screen.getByRole('button', { name: /Filters/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(
+      within(screen.getByRole('dialog', { name: 'Edit query' })).getByRole('button', {
+        name: /Filters/,
+      }),
+    ).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Add filter' })).toBeVisible();
   });
 
-  test('keeps the query editable when the result is empty', () => {
+  test('keeps the query editable when the result is empty', async () => {
+    const user = userEvent.setup();
     vi.mocked(useAnalysisResult).mockReturnValue({
       data: { ...result, data: { mode: 'trend', rows: [] } },
       dataUpdatedAt: Date.now(),
@@ -170,6 +175,7 @@ describe('ExploreWorkspace', () => {
 
     render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
     expect(screen.getByRole('heading', { name: 'No events matched this question' })).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Edit query' }));
     expect(screen.getByRole('button', { name: 'Run analysis' })).toBeVisible();
   });
 
@@ -184,19 +190,23 @@ describe('ExploreWorkspace', () => {
 
     render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
     expect(screen.getByRole('heading', { name: 'Analysis permission required' })).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Question definition' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Edit query' })).toBeVisible();
   });
 
   test('edits two-to-eight ordered funnel steps from the Query Spine', async () => {
     const user = userEvent.setup();
     render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
     await user.click(
-      within(screen.getByRole('complementary', { name: 'Query Spine' })).getByRole('button', {
+      within(screen.getByRole('group', { name: 'Query Spine' })).getByRole('button', {
         name: /Breakdown/,
       }),
     );
     await user.selectOptions(screen.getByRole('combobox', { name: 'Analysis mode' }), 'funnel');
-    await user.click(screen.getByRole('button', { name: /Signal/ }));
+    await user.click(
+      within(screen.getByRole('dialog', { name: 'Edit query' })).getByRole('button', {
+        name: /Signal/,
+      }),
+    );
     expect(screen.getByRole('group', { name: 'Ordered funnel steps' })).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Step 1 · value' })).toHaveValue('signup');
     expect(screen.getByRole('button', { name: 'Add funnel step' })).toBeEnabled();
@@ -248,7 +258,10 @@ describe('ExploreWorkspace', () => {
     const cell = screen.getByRole('button', { name: /2026-03-01, period 1/ });
     cell.focus();
     await user.keyboard('{Enter}');
+    const dialog = screen.getByRole('dialog', { name: 'Exact members' });
+    expect(dialog).toBeVisible();
+    await waitFor(() => expect(dialog).toHaveFocus());
+    await user.keyboard('{Escape}');
     expect(cell).toHaveFocus();
-    expect(screen.getByRole('dialog', { name: 'Exact members' })).toBeVisible();
   });
 });

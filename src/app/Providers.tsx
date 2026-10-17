@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { useEffect } from 'react';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useLocale } from '@/components/hooks';
+import { MotionPreferences } from '@/features/visual/MotionPreferences';
 import 'chartjs-adapter-date-fns';
 
 const client = new QueryClient({
@@ -38,7 +39,9 @@ export function Providers({ children }) {
       <RouterProvider>
         <MessagesProvider>
           <QueryClientProvider client={client}>
-            <ErrorBoundary>{children}</ErrorBoundary>
+            <ErrorBoundary>
+              <MotionPreferences>{children}</MotionPreferences>
+            </ErrorBoundary>
           </QueryClientProvider>
         </MessagesProvider>
       </RouterProvider>

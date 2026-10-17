@@ -1,0 +1,104 @@
+Яснослед — original visual assets (M20, 2026-10-17)
+
+Signal Studio, now named Яснослед, is based on Umami 3.3.1.
+The root MIT license and Copyright (c) 2022 Umami Software, Inc. are preserved.
+The following artwork is new project-supplied material, not Umami artwork.
+It was generated with the built-in OpenAI imagegen tool from original prompts,
+without external reference images or third-party stock artwork. Generation
+does not establish trademark registration or exclusive copyright protection.
+No analytical values in the application are calculated from generated images.
+
+Full original prompts: docs/design/m20-yasnosled/PROMPTS.md
+Prompt-file SHA256: a7504d9a418858f609c65f8540849723b234287eaf858364fe730bc801e61c12
+Generation details and alpha checks: docs/design/m20-yasnosled/ASSETS.md
+Original generation directory (creation provenance, not a build dependency):
+C:/Users/lapha/.codex/generated_images/01a146ff-91ea-7af2-9494-d3ffeed78503/
+
+ORIGINAL GENERATIONS
+
+File: docs/design/m20-yasnosled/concept-a-home-light.png
+Source: built-in imagegen / exec-9e7fe46a-68b3-4a96-a3ef-ca2832ca2580.png
+Prompt section: AHome
+SHA256: e8f66313d6b3948ab51b9d8ba10a298c8a1243da949f5a84d7bd000c52b27240
+
+File: docs/design/m20-yasnosled/concept-b-home-dark.png
+Source: built-in imagegen / exec-6efc20cb-6a3b-4054-97c7-b994367dc019.png
+Prompt section: BHome
+SHA256: 5bfd710ae268671376240a7857412e09527fe73e3d5f5765937c892bc481d280
+
+File: docs/design/m20-yasnosled/selected-a-explore-dark-mobile.png
+Source: built-in imagegen / exec-d4cf83e4-b30b-4505-bbe1-b69b524c0a62.png
+Prompt section: AResponsive
+SHA256: 8a4d05198ef3014ec90f05b7119d7d83f4c122b5daaf442b8150e480ef218c21
+
+File: public/brand/yasnosled/optical-flow.png
+Source: built-in imagegen / exec-ded5c0c2-3c10-44e8-bc7a-9d996851bf8e.png
+Prompt section: Hero
+SHA256: dc2bbdaea31e9c04ccfb32f819799d76e71f1715662c9ff355caeaba4a205ef1
+
+File: public/brand/yasnosled/yasnosled-mark.png
+Source: built-in imagegen / exec-dba2a0c6-3722-44c0-a17f-a5b8000f388c.png
+Prompt section: Mark
+SHA256: f592efed5b5ba74a7e7c3b8c947b8b5cffc4a7673d7954cc4c42efc2dfb67d68
+
+RUNTIME DERIVATIVES
+WebP conversion and PNG resizing use the installed Next Sharp dependency.
+The ICO file contains PNG frames at 16, 32, 48, 64, 128 and 256 pixels.
+The original composition and transparency are preserved; no redraw,
+background removal, recoloring, font embedding or semantic image edit occurs.
+
+File: public/brand/yasnosled/optical-flow.webp
+Derived from: public/brand/yasnosled/optical-flow.png
+SHA256: 98afb160966f916c9ae9765244ffefad73c9192a737c26a13506c8d258dac7da
+
+File: public/brand/yasnosled/mark.webp
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: 4ca3a39df92e334dca01c319e0db193b126fc2be3df3c98bccfff5c46ec4eed3
+
+File: public/favicon-16x16.png
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: 90491a4db7d3c7f1cc41bbd37ba3888f232cabfa85fb35781e044dbe3f082af4
+
+File: public/favicon-32x32.png
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: c430dc247ef3a51f7091365f2d56e3a1e6d9b1322267b9cf2ec7dc719460adb8
+
+File: public/apple-touch-icon.png
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: e9ddc87d19e473f9439a802616bed9be7ef31e83c1214503d1b1da374107d21b
+
+File: public/android-chrome-192x192.png
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: 4ac01cb79c4ea2999a5748d320ff423c7dde7d31cff73524119e82a7aed3b7cf
+
+File: public/android-chrome-512x512.png
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: f09b9f9647a7173232433d3de22888f8ad9961a245bdfc32a4ed04367301cc26
+
+File: public/mstile-150x150.png
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: 951c3ccfae52d74680fb6b3d2037156c9920665f099a1fbfa8cbb420b2e5763d
+
+File: public/favicon.ico
+Derived from: public/brand/yasnosled/yasnosled-mark.png
+SHA256: 607dae026b7db9cb6aa5142d33b6ae02e02afbb43fe7079acaf999d1cf82138b
+
+APPLICATION METADATA
+public/site.webmanifest and public/browserconfig.xml are project-authored
+metadata for the Яснослед name, original icon derivatives and product colors.
+The legacy public/safari-pinned-tab.svg remains inherited Umami MIT artwork
+and is not used as the new brand mark.
+
+FONTS
+Unbounded: Copyright 2022 The Unbounded Project Authors.
+Official source: https://github.com/googlefonts/unbounded/tree/f3ec43228a864a72487e41552e2140efab9884ea
+Golos Text: Copyright 2019 The Golos Text Project Authors.
+Official source: https://github.com/googlefonts/golos-text/tree/cf2e27222937d97c2d858fff0499bcc667a64e9d
+The original variable fonts and complete WOFF2 format derivatives use SIL
+Open Font License 1.1. No glyph, outline, variable axis or character map is
+removed. One-time conversion and verification evidence is recorded in
+docs/licenses/font-conversion.json; the MIT conversion-tool notice is
+docs/licenses/wawoff2@2.0.1.txt. Full font notices:
+docs/licenses/Unbounded-OFL.txt and docs/licenses/GolosText-OFL.txt.
+Immutable download URLs, Git blob IDs and SHA256 checksums for both fonts and
+their licenses are recorded in docs/licenses/pinned-assets.json.

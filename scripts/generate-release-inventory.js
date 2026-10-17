@@ -120,7 +120,40 @@ function walk(directory) {
 const { sourceSha256, entries } = sourceFingerprint();
 writeFileSync(path.join(out, 'SOURCE_MANIFEST.json'), JSON.stringify(entries, null, 2) + '\n');
 const upstream = 'ca661c7057984aa98ed4f7083d84dae2f65bfcb0';
-const assets = [...walk('public'), ...walk('src/assets')].sort().map(file => ({ path: file, sha256: sha(readFileSync(file)), provenance: file.includes('/fonts/') ? 'docs/licenses/pinned-assets.json' : file.startsWith('public/intl/country/') ? 'Umami snapshot; umpirsky/country-list (MIT)' : file.startsWith('public/intl/language/') ? 'Umami snapshot; umpirsky/language-list (MIT)' : file === 'public/datamaps.world.json' ? 'Umami snapshot; Datamaps (MIT), Natural Earth (public domain)' : `Umami MIT source snapshot ${upstream}; Signal Studio modifications under root MIT`, source: `https://github.com/umami-software/umami/tree/${upstream}/${file}` }));
+const yasnosledIcons = new Set([
+  'public/favicon.ico',
+  'public/favicon-16x16.png',
+  'public/favicon-32x32.png',
+  'public/apple-touch-icon.png',
+  'public/android-chrome-192x192.png',
+  'public/android-chrome-512x512.png',
+  'public/mstile-150x150.png',
+]);
+const assets = [...walk('public'), ...walk('src/assets')].sort().map(file => {
+  const yasnosledArtwork = file.startsWith('public/brand/yasnosled/') || yasnosledIcons.has(file);
+  const yasnosledMetadata = ['public/site.webmanifest', 'public/browserconfig.xml'].includes(file);
+  return {
+    path: file,
+    sha256: sha(readFileSync(file)),
+    provenance: yasnosledArtwork
+      ? 'Original Яснослед M20 imagegen artwork and format/resize derivatives; no external image references'
+      : yasnosledMetadata
+        ? 'Original Яснослед application metadata'
+        : file.includes('/fonts/')
+          ? 'docs/licenses/pinned-assets.json'
+          : file.startsWith('public/intl/country/')
+            ? 'Umami snapshot; umpirsky/country-list (MIT)'
+            : file.startsWith('public/intl/language/')
+              ? 'Umami snapshot; umpirsky/language-list (MIT)'
+              : file === 'public/datamaps.world.json'
+                ? 'Umami snapshot; Datamaps (MIT), Natural Earth (public domain)'
+                : `Umami MIT source snapshot ${upstream}; Signal Studio modifications under root MIT`,
+    source:
+      yasnosledArtwork || yasnosledMetadata
+        ? 'docs/licenses/Yasnosled-assets.txt'
+        : `https://github.com/umami-software/umami/tree/${upstream}/${file}`,
+  };
+});
 for (const asset of JSON.parse(readFileSync('docs/licenses/pinned-assets.json', 'utf8'))) {
   const entry = assets.find(item => item.path === asset.file);
   if (entry) entry.source = asset.url;

@@ -3,6 +3,9 @@
 Signal Studio is based on Umami 3.3.1, Copyright (c) 2022 Umami Software, Inc.,
 and is distributed under the MIT License included in the root `LICENSE` file.
 
+Яснослед is the current product name of this Signal Studio transformation.
+The new name and artwork do not change its Umami foundation or MIT notice.
+
 Runtime and build dependencies retain their respective licenses. The build
 generates `legal/application.cdx.json`, `legal/DEPENDENCY_LICENSES.txt`,
 `legal/ASSET_PROVENANCE.json` and `legal/BUILD_METADATA.json`. These files are
@@ -24,6 +27,25 @@ SBOMs describe the actual runner, worker and migration images.
 - Inter is Copyright The Inter Project Authors, SIL Open Font License 1.1.
   The unmodified font and full OFL text are pinned to Inter source revision
   353b61b9f4430d5f420d56605a6e7993e0941470, with verified Git blob and SHA256 hashes.
+- Unbounded is Copyright 2022 The Unbounded Project Authors; Golos Text is
+  Copyright 2019 The Golos Text Project Authors. Their complete original
+  variable fonts and WOFF2 format derivatives use SIL Open Font License 1.1.
+  Their official source
+  revisions, Git blob hashes, SHA256 checksums and complete OFL notices are
+  recorded in `docs/licenses/pinned-assets.json`, `Unbounded-OFL.txt` and
+  `GolosText-OFL.txt`.
+- The one-time font format conversion used `wawoff2` 2.0.1, an MIT-licensed
+  WebAssembly build of Google's WOFF2, Copyright (c) 2013–2017 by the WOFF2
+  Authors. No converter code is an application dependency or browser asset.
+  `docs/licenses/font-conversion.json` records the published source revision,
+  NPM archive integrity, tool-file hashes, original/output hashes and full-font
+  preservation checks; `wawoff2@2.0.1.txt` preserves the complete tool notice.
+- The Яснослед optical-flow illustration and ribbon mark are original imagegen
+  outputs from this project, generated without external image references.
+  WebP and browser-icon derivatives use resizing/format conversion only.
+  These assets are not inherited Umami artwork. Prompts, generation identifiers,
+  source files and exact checksums are recorded in
+  `docs/licenses/Yasnosled-assets.txt` and `docs/design/m20-yasnosled`.
 - Lucide icons retain their ISC notice. Inherited UI icons, PNG flags/device/
   browser/OS illustrations, translations and subdivision data retain their Umami
   source snapshot and MIT attribution. Per-file hashes and modifications are

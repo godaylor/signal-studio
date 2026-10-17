@@ -1,12 +1,14 @@
 'use client';
 
 import { ArrowRight, Filter, Search, X } from 'lucide-react';
+import { LayoutGroup, motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { ExportControls } from '@/features/exports/ExportControls';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
+import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import type {
   IdentityListQuery,
   OperationalSegmentCondition,
@@ -79,6 +81,7 @@ export function AudiencesWorkspace({
   projectName: string;
 }) {
   const { t } = useStudioLocale();
+  const { animate } = useVisualMotion();
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -128,9 +131,9 @@ export function AudiencesWorkspace({
     <main className={styles.workspace}>
       <header className={styles.heading}>
         <p>
-          {t('Operational audiences', 'Рабочие аудитории')} · {projectName}
+          {t('Audiences', 'Аудитории')} · {projectName}
         </p>
-        <h1>{t('Accounts, users and segments', 'Аккаунты, пользователи и сегменты')}</h1>
+        <h1>{t('The people behind your metrics', 'Люди за метриками')}</h1>
         <span>
           {t(
             'Find the people behind your metrics and see how they use your product.',
@@ -138,22 +141,36 @@ export function AudiencesWorkspace({
           )}
         </span>
       </header>
-      <nav className={styles.tabs} aria-label={t('Audience view', 'Представление аудитории')}>
-        {(['accounts', 'users', 'segments'] as const).map(item => (
-          <button
-            key={item}
-            type="button"
-            aria-current={view === item ? 'page' : undefined}
-            onClick={() => replaceParams({ view: item === 'accounts' ? undefined : item })}
-          >
-            {item === 'accounts'
-              ? t('Accounts', 'Аккаунты')
-              : item === 'users'
-                ? t('Tracked users', 'Пользователи')
-                : t('Segments', 'Сегменты')}
-          </button>
-        ))}
-      </nav>
+      <LayoutGroup id={`audience-views-${projectId}`}>
+        <nav className={styles.tabs} aria-label={t('Audience view', 'Представление аудитории')}>
+          {(['accounts', 'users', 'segments'] as const).map(item => (
+            <button
+              key={item}
+              type="button"
+              aria-current={view === item ? 'page' : undefined}
+              onClick={() => replaceParams({ view: item === 'accounts' ? undefined : item })}
+            >
+              {view === item ? (
+                <motion.span
+                  className={styles.tabIndicator}
+                  layoutId="audience-selection"
+                  transition={
+                    animate ? { type: 'spring', stiffness: 420, damping: 38 } : { duration: 0 }
+                  }
+                  aria-hidden="true"
+                />
+              ) : null}
+              <span>
+                {item === 'accounts'
+                  ? t('Accounts', 'Аккаунты')
+                  : item === 'users'
+                    ? t('Tracked users', 'Пользователи')
+                    : t('Segments', 'Сегменты')}
+              </span>
+            </button>
+          ))}
+        </nav>
+      </LayoutGroup>
 
       {view === 'segments' ? (
         <SegmentView projectId={projectId} onOpenProfile={setProfile} />
@@ -210,21 +227,6 @@ function IdentityView({
   const scope = list.data?.pages[0]?.permissionScope;
   return (
     <section className={styles.panel} aria-labelledby="audience-ledger-title">
-      <ExportControls
-        projectId={projectId}
-        disabled={!rows.length || list.isFetching}
-        source={{
-          kind: entity === 'account' ? 'accounts' : 'users',
-          visibleRows: Math.max(1, Math.min(rows.length, 100_000)),
-          list: {
-            limit: 50,
-            search: params.get('q') ?? undefined,
-            sort: sort as IdentityListQuery['sort'],
-            direction: direction as IdentityListQuery['direction'],
-            lifecycle,
-          },
-        }}
-      />
       <div className={styles.toolbar}>
         <div>
           <p className={styles.eyebrow}>{t('Product activity', 'Активность в продукте')}</p>
@@ -279,6 +281,22 @@ function IdentityView({
         >
           {direction === 'desc' ? t('Descending', 'По убыванию') : t('Ascending', 'По возрастанию')}
         </button>
+        <ExportControls
+          projectId={projectId}
+          className={styles.secondaryButton}
+          disabled={!rows.length || list.isFetching}
+          source={{
+            kind: entity === 'account' ? 'accounts' : 'users',
+            visibleRows: Math.max(1, Math.min(rows.length, 100_000)),
+            list: {
+              limit: 50,
+              search: params.get('q') ?? undefined,
+              sort: sort as IdentityListQuery['sort'],
+              direction: direction as IdentityListQuery['direction'],
+              lifecycle,
+            },
+          }}
+        />
       </div>
       {scope === 'identity-standard' ? (
         <p className={styles.notice} role="status">

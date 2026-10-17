@@ -88,9 +88,12 @@ for (const russian of [false, true]) {
     if (russian) await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/studio/' + ids.project + '/home?locale=' + (russian ? 'ru-RU' : 'en-US'));
     await expect(page.getByRole('heading', { name: 'Home golden product', exact: true })).toHaveCount(0);
-    const open = page.getByRole('link', { name: russian ? 'Открыть определение в анализе' : 'Open definition in Explore', exact: true }).first();
+    const open = page.getByRole('link', { name: russian ? 'Исследовать путь' : 'Explore the journey', exact: true }).first();
     await expect(open).toBeVisible();
     await expect(page.getByText('Activation declined', { exact: true })).toBeVisible();
+    // Audit the settled interface while retaining normal entrance motion.
+    await expect(page.locator('#studio-main > div')).toHaveCSS('opacity', '1');
+    await expect(page.locator('[data-stage="retention"]')).toHaveCSS('opacity', '1');
     const accessibility = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(accessibility.violations).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -103,6 +106,7 @@ for (const russian of [false, true]) {
     await page.goto('/studio/' + ids.project + '/home?locale=' + (russian ? 'ru-RU' : 'en-US'));
     await page.getByRole('link', { name: 'Home at-risk account', exact: true }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toHaveCount(0);
   });

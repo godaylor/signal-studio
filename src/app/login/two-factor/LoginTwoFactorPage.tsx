@@ -88,7 +88,7 @@ export function LoginTwoFactorPage() {
   return (
     <Column justifyContent="center" alignItems="center" gap="6">
       <LanguageButton />
-      <Heading>Signal Studio</Heading>
+      <Heading>Яснослед</Heading>
       <Column gap="4" style={{ minWidth: 300 }}>
         <Heading size="xl">{t(labels.twoFactorLogin)}</Heading>
         <Text>{t(messages.twoFactorLoginDescription)}</Text>

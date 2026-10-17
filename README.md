@@ -1,9 +1,10 @@
-# Signal Studio
+# Яснослед · Signal Studio
 
 [![Signal Studio CI](https://github.com/godaylor/signal-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/godaylor/signal-studio/actions/workflows/ci.yml)
 
-**Turn product events into answers your team can reuse.** Signal Studio is a
-self-hosted product intelligence workspace for activation, retention and feature
+**From a trace to a clear answer.** Яснослед is the new Russian product identity of
+Signal Studio, a self-hosted product intelligence workspace for activation,
+retention and feature
 adoption. Connect a source, explore behavior, save an Insight, build a Dashboard,
 inspect an Audience and export the results.
 
@@ -11,7 +12,7 @@ This is a working full-stack application with PostgreSQL persistence, authentica
 APIs and background jobs. Production runs on **Vercel Hobby + Neon Free ($0 within
 quotas)**, with encrypted PostgreSQL exports, request-triggered jobs and scheduled recovery.
 
-**[Try the public demo — no login](https://signal-studio-smoky.vercel.app/demo)** ·
+**[Open the hosted app](https://signal-studio-smoky.vercel.app/demo)** ·
 [Sign in to a real workspace](https://signal-studio-smoky.vercel.app/login)
 
 Choose **Try without signing up** to open a private guest workspace with 1,281
@@ -20,16 +21,24 @@ services. Edit a question, save an Insight, assemble a Dashboard and export CSV 
 JSON; server-saved work survives reloads for the 24-hour guest session. Each guest
 has a separate user, workspace and source, with bounded resource use. No shared
 administrator credentials are provided. The older guided example remains at `/demo/tour`.
-See [free deployment](docs/FREE_DEPLOYMENT.md) and
-[guest workspace/redesign evidence](docs/M19_GUEST_WORKSPACE_REPORT.md).
+The current M20 source candidate adds the Optical Trace identity, coordinated
+light/dark screens, responsive motion and explicit guest/account selection in each
+tab. It preserves the signed-in account when trying the guest workspace. Local
+production checks passed; exact-revision CI and public verification are tracked in the
+[M20 acceptance report](docs/M20_FINAL_REPORT.md); the earlier published guest
+acceptance remains in the [historical M19 report](docs/M19_GUEST_WORKSPACE_REPORT.md).
+See [free deployment](docs/FREE_DEPLOYMENT.md).
 
-![Signal Studio Explore](docs/design/guest-redesign/after-explore-desktop.png)
+![Яснослед — actual Home in the local production app](docs/design/m20-yasnosled/actual-home-light-desktop.png)
 
-[Design alternatives, selected mockups and real screens](docs/design/guest-redesign/REVIEW.html)
-· [Before/after comparison](docs/design/guest-redesign/comparison-board.png)
+[Design alternatives, selected mockups and real screens](docs/design/m20-yasnosled/REVIEW.html)
+· [Before/after comparison](docs/design/m20-yasnosled/compare.html)
+· [Design contract](docs/design/m20-yasnosled/DESIGN.md)
 
-Screenshots show the actual application running against explicitly synthetic
-portfolio data. They are not mock interfaces or production traffic.
+The image above shows the working local production app. The review gallery
+separately labels generated design concepts and actual application screens.
+All displayed application calculations use explicitly synthetic events; artwork
+never substitutes for an analytical result.
 
 ## What works
 
@@ -66,7 +75,7 @@ Browser → Next.js UI → authenticated services → analytics / saved entities
 
 | Layer | Actual technology |
 |---|---|
-| UI | React 19, Next.js 16 App Router, TypeScript 6, CSS Modules, Inter |
+| UI | React 19, Next.js 16 App Router, TypeScript 6, CSS Modules, self-hosted Golos Text / Unbounded; Inter for legacy surfaces |
 | Client state | TanStack Query 5, versioned URL codec, Zustand for existing app preferences |
 | UI/visualization | Chart.js, Lucide, Motion, react-window, @umami/react-zen |
 | Server | Next.js route handlers, Zod 4, reusable permission/domain services |
@@ -137,14 +146,15 @@ Additional variables are documented in [.env.example](.env.example).
 GeoLite2 is skipped unless the operator explicitly provides a licensed dataset.
 Never disable TLS verification to solve a production database connection problem.
 
-**Current portfolio deployment:** Vercel Hobby + Supabase Free, with no paid
+**Current portfolio deployment:** Vercel Hobby + Neon Free, with no paid
 resources. `pnpm build:vercel` builds the Node application; request-triggered jobs
-and Supabase Cron replace the persistent worker, and encrypted artifacts live in
-private Supabase Storage. Migrations remain an explicit operator step. The Docker
+and GitHub Actions recovery replace the persistent worker, and bounded encrypted
+artifacts live in PostgreSQL. Migrations remain an explicit operator step. The Docker
 `hosted`, `runner`, `worker` and `migration` targets remain available for self-hosting.
 
 [Free hosting configuration, quotas and first-administrator setup](docs/FREE_DEPLOYMENT.md).
-A hosting account must be connected before the public release can be verified.
+The published M19 acceptance and the current M20 candidate acceptance are recorded
+separately; a successful local build alone does not verify a public release.
 
 ## Verification
 
@@ -170,7 +180,7 @@ packaging. Publishing release images requires the same CI to pass first.
 
 ## Ownership and open source
 
-Signal Studio is an **MIT-licensed transformation of Umami 3.3.1**, not a claim that
+Яснослед / Signal Studio is an **MIT-licensed transformation of Umami 3.3.1**, not a claim that
 all code was written from scratch. The original Umami copyright and complete MIT
 notice remain intact in [LICENSE](LICENSE).
 

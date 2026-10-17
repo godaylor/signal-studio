@@ -31,7 +31,15 @@ async function currentGuest(request: APIRequestContext): Promise<Guest> {
 }
 
 async function startGuest(context: BrowserContext): Promise<Guest> {
-  const response = await context.request.post('/api/guest');
+  let response = await context.request.post('/api/guest');
+  for (let retry = 0; response.status() === 429 && retry < 2; retry++) {
+    const seconds = Number(response.headers()['retry-after']);
+    // Separate test guests share the real global minute budget. Longer
+    // per-client/capacity limits still fail instead of resetting server state.
+    if (!Number.isFinite(seconds) || seconds < 1 || seconds > 61) break;
+    await new Promise(resolve => setTimeout(resolve, seconds * 1000 + 100));
+    response = await context.request.post('/api/guest');
+  }
   expect(response.status(), await response.text()).toBe(200);
   return (await response.json()).guest;
 }
@@ -90,6 +98,7 @@ test('guest enters the working app, changes a real calculation, persists an Insi
   await noOverflowOrBlockingAxe(page);
 
   // Editing the behavior must change SQL results, rather than a scripted demo number.
+  await page.getByRole('button', { name: 'Edit query', exact: true }).click();
   await page.getByLabel('Step 3 · value', { exact: true }).fill('subscription_started');
   const recalculated = page.waitForResponse(
     response =>
@@ -122,9 +131,11 @@ test('guest enters the working app, changes a real calculation, persists an Insi
     .getByRole('button', { name: 'Reopen', exact: true })
     .click();
   await page.reload();
+  await page.getByRole('button', { name: 'Edit query', exact: true }).click();
   await expect(page.getByLabel('Step 3 · value', { exact: true })).toHaveValue(
     'subscription_started',
   );
+  await page.keyboard.press('Escape');
   await expect(table).toContainText('84');
   await page.getByRole('button', { name: 'Insight library', exact: true }).click();
   await expect(library.getByRole('heading', { name: title, exact: true })).toBeVisible();
@@ -135,6 +146,7 @@ test('guest enters the working app, changes a real calculation, persists an Insi
 
   await page.goto(`/studio/${guest.projectId}/dashboards?locale=en-US`);
   const dashboardTitle = `Guest decisions ${randomUUID().slice(0, 8)}`;
+  await page.getByRole('button', { name: 'New dashboard', exact: true }).click();
   await page.getByLabel('New dashboard title').fill(dashboardTitle);
   const created = page.waitForResponse(
     response =>
@@ -332,13 +344,16 @@ test('guest mobile has accessible navigation and forms, explains synthetic data,
   ).toContainText('84');
   expect((await currentGuest(page.request)).id).toBe(guest.id);
   await page.getByRole('button', { name: 'Включить тёмную тему', exact: true }).click();
+  await expect(
+    page.getByRole('table', { name: 'Эквивалентная таблица данных воронки' }),
+  ).toHaveCSS('color', 'rgb(240, 242, 255)');
   await noOverflowOrBlockingAxe(page);
   await page.setViewportSize({ width: 834, height: 1112 });
   const navigationTrigger = page
     .getByRole('button', { name: 'Открыть навигацию', exact: true })
     .first();
   await navigationTrigger.click();
-  const navigation = page.getByRole('dialog', { name: 'Signal Studio', exact: true });
+  const navigation = page.getByRole('dialog', { name: 'Яснослед', exact: true });
   for (const name of ['Главная', 'Анализ', 'Дашборды', 'Аудитории', 'Опыт', 'Сейчас']) {
     await expect(navigation.getByRole('link', { name, exact: true })).toBeVisible();
   }

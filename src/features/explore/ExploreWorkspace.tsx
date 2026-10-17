@@ -21,6 +21,8 @@ import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { InsightLibrary, SaveInsightDialog } from '@/features/insights/InsightLibrary';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
 import { StudioState } from '@/features/studio-shell/StudioState';
+import { eventLabel } from '@/features/visual/eventLabel';
+import { OpticalScene } from '@/features/visual/OpticalScene';
 import type {
   AnalysisFilter,
   AnalysisOperator,
@@ -114,14 +116,8 @@ function setFilter(
   return { ...query, filters };
 }
 
-export function ExploreWorkspace({
-  projectId,
-  projectName,
-}: {
-  projectId: string;
-  projectName: string;
-}) {
-  const { t } = useStudioLocale();
+export function ExploreWorkspace({ projectId }: { projectId: string; projectName: string }) {
+  const { t, locale } = useStudioLocale();
   const guest = useGuestWorkspace();
   const router = useRouter();
   const pathname = usePathname();
@@ -253,22 +249,20 @@ export function ExploreWorkspace({
       aria-label={t('Explore analysis workspace', 'Рабочая область анализа')}
     >
       <header className={styles.heading}>
+        <OpticalScene className={styles.exploreArt} />
         <div>
-          <p className={styles.eyebrow}>
-            {projectName} / {t('Explore', 'Анализ')}
-          </p>
+          <p className={styles.eyebrow}>{t('Behavior research', 'Исследование поведения')}</p>
           <h1>
             {restored.query.mode === 'funnel'
-              ? t('Where do new users drop off?', 'Где теряются новые пользователи?')
+              ? t('Where does activation break?', 'Где теряется активация?')
               : restored.query.mode === 'retention'
-                ? t('What brings people back?', 'Что возвращает пользователей?')
-                : t('How is product use changing?', 'Как меняется использование продукта?')}
+                ? t('What brings people back?', 'Что возвращает людей?')
+                : t('How is product use changing?', 'Как используют продукт?')}
           </h1>
           <p>
-            {t(
-              'Follow the behavior. Compare the result. Save your answer.',
-              'Исследуйте поведение. Сравнивайте результаты. Сохраняйте выводы.',
-            )}
+            {restored.query.mode === 'funnel'
+              ? restored.query.funnel?.steps.map(step => eventLabel(step.value, locale)).join(' → ')
+              : t('Your question. A reproducible answer.', 'Ваш вопрос. Воспроизводимый ответ.')}
           </p>
         </div>
         <div className={styles.headerActions}>
@@ -282,8 +276,11 @@ export function ExploreWorkspace({
             type="button"
             className={styles.secondaryButton}
             onClick={() => setLibraryOpen(true)}
+            aria-label={t('Insight library', 'Библиотека инсайтов')}
+            title={t('Insight library', 'Библиотека инсайтов')}
           >
-            <BookOpen aria-hidden="true" /> {t('Insight library', 'Библиотека инсайтов')}
+            <BookOpen aria-hidden="true" />{' '}
+            <span>{t('Insight library', 'Библиотека инсайтов')}</span>
           </button>
           <button
             type="button"
@@ -293,15 +290,27 @@ export function ExploreWorkspace({
           >
             <Save aria-hidden="true" /> {t('Save insight', 'Сохранить инсайт')}
           </button>
-          <button type="button" className={styles.secondaryButton} onClick={copyUrl}>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={copyUrl}
+            aria-label={
+              copyState === 'copied'
+                ? t('URL copied', 'URL скопирован')
+                : t('Copy URL', 'Копировать URL')
+            }
+            title={t('Copy URL', 'Копировать URL')}
+          >
             {copyState === 'copied' ? (
               <Check aria-hidden="true" />
             ) : (
               <Clipboard aria-hidden="true" />
             )}
-            {copyState === 'copied'
-              ? t('URL copied', 'URL скопирован')
-              : t('Copy URL', 'Копировать URL')}
+            <span>
+              {copyState === 'copied'
+                ? t('URL copied', 'URL скопирован')
+                : t('Copy URL', 'Копировать URL')}
+            </span>
           </button>
         </div>
       </header>
@@ -370,11 +379,38 @@ export function ExploreWorkspace({
       </div>
       {restored.query ? (
         <div className={styles.instrument}>
-          <aside className={styles.spine} aria-label={t('Query Spine', 'Цепочка анализа')}>
-            {composer}
-          </aside>
-
-          <main className={styles.canvas}>
+          <div
+            className={styles.queryTrack}
+            role="group"
+            aria-label={t('Query Spine', 'Цепочка анализа')}
+          >
+            {blocks.map(block => (
+              <button
+                key={block.id}
+                type="button"
+                onClick={() => {
+                  setActiveBlock(block.id);
+                  setEditorOpen(true);
+                }}
+              >
+                <i aria-hidden="true" />
+                <span>
+                  {t(
+                    block.label,
+                    {
+                      signal: 'События',
+                      measure: 'Метрика',
+                      breakdown: 'Вид',
+                      filters: 'Фильтры',
+                      context: 'Период',
+                    }[block.id],
+                  )}
+                </span>
+                <strong>{blockValue(block.id, restored.query, t)}</strong>
+              </button>
+            ))}
+          </div>
+          <div className={styles.canvas}>
             {restored.error ? (
               <StudioState
                 variant="empty"
@@ -387,7 +423,7 @@ export function ExploreWorkspace({
             ) : (
               <ResultCanvas query={restored.query} result={result} onSelectRow={setSelectedRow} />
             )}
-          </main>
+          </div>
         </div>
       ) : null}
 
@@ -439,8 +475,20 @@ function blockValue(block: BlockId, query: AnalysisQueryV1, t: (en: string, ru: 
         ? t('All custom events', 'Все пользовательские события')
         : query.measure.key;
     case 'measure':
-      if (query.mode === 'funnel')
-        return `${query.funnel?.conversionWindowMinutes ?? 0} ${t('minute window', 'минут на прохождение')}`;
+      if (query.mode === 'funnel') {
+        const minutes = query.funnel?.conversionWindowMinutes ?? 0;
+        return minutes % 60 === 0
+          ? new Intl.NumberFormat(t('en-US', 'ru-RU'), {
+              style: 'unit',
+              unit: 'hour',
+              unitDisplay: 'long',
+            }).format(minutes / 60)
+          : new Intl.NumberFormat(t('en-US', 'ru-RU'), {
+              style: 'unit',
+              unit: 'minute',
+              unitDisplay: 'long',
+            }).format(minutes);
+      }
       if (query.mode === 'retention')
         return `${query.retention?.periods ?? 0} ${query.retention?.granularity} periods`;
       return query.measure.source === 'event' && query.measure.aggregation === 'count'
@@ -459,7 +507,7 @@ function blockValue(block: BlockId, query: AnalysisQueryV1, t: (en: string, ru: 
         ? `${query.filters.length} · ${query.match === 'all' ? t('match all', 'все условия') : t('match any', 'любое условие')}`
         : t('No filters', 'Без фильтров');
     case 'context':
-      return `${query.range.timezone} · ${t(comparisonLabel(query), comparisonLabel(query, 'ru-RU'))}`;
+      return `${new Intl.NumberFormat(t('en-US', 'ru-RU'), { style: 'unit', unit: 'day', unitDisplay: 'long' }).format(Math.ceil((new Date(query.range.endAt).getTime() - new Date(query.range.startAt).getTime()) / 86_400_000))} · ${query.range.timezone}`;
   }
 }
 

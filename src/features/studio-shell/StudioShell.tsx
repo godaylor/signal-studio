@@ -9,13 +9,16 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
+  Pause,
+  Play,
   Search,
   Sun,
 } from 'lucide-react';
+import { LayoutGroup, motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import {
   useConfig,
   useLoginQuery,
@@ -27,9 +30,12 @@ import { TwoFactorSetupModal } from '@/components/modals/TwoFactorSetupModal';
 import { useProjectAccess } from '@/features/access/useProjectAccess';
 import guestStyles from '@/features/guest/GuestWorkspace.module.css';
 import { GuestWorkspaceContext } from '@/features/guest/GuestWorkspaceContext';
+import { useGuestProjectRecovery } from '@/features/guest/useGuestProjectRecovery';
 import { useGuestSession } from '@/features/guest/useGuestSession';
 import { WorkspaceHelp } from '@/features/guest/WorkspaceHelp';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
+import { BrandMark } from '@/features/visual/BrandMark';
+import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import type { StudioCapabilities, StudioRole } from '@/server/permissions/capabilities';
 import { AccessibleDialog } from './AccessibleDialog';
 import { CommandPalette } from './CommandPalette';
@@ -48,6 +54,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
   const pathname = usePathname();
   const config = useConfig();
   const { theme, setTheme } = useTheme();
+  const { animate, enabled: motionEnabled, toggle: toggleMotion } = useVisualMotion();
   const { locale, t } = useStudioLocale();
   const localizedNavigation = useMemo(() => getLocalizedStudioNavigation(locale), [locale]);
   const { user, isLoading: isLoginLoading, error: loginError } = useLoginQuery();
@@ -70,6 +77,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
     !!user && !user?.isGuest && !config?.cloudMode,
   );
   const guest = useGuestSession(!!user?.isGuest);
+  const recoveringGuest = useGuestProjectRecovery(projectId, user?.isGuest ? guest.data : null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -124,6 +132,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
 
   if (
     !config ||
+    recoveringGuest ||
     isLoginLoading ||
     isProjectLoading ||
     isAccessLoading ||
@@ -171,18 +180,10 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
       <a className={styles.skipLink} href="#studio-main">
         {t('Skip to content', 'Перейти к содержимому')}
       </a>
-      <aside className={styles.desktopSidebar} aria-label="Signal Studio">
+      <aside className={styles.desktopSidebar} aria-label="Яснослед">
         <div className={styles.brandRow}>
           <Link className={styles.brand} href={getStudioPath(projectId, 'home')}>
-            <span className={styles.signalMark} aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className={styles.brandText}>
-              <strong>Signal Studio</strong>
-              <small>{t('Product intelligence', 'Продуктовая аналитика')}</small>
-            </span>
+            <BrandMark wordmark />
           </Link>
           <button
             className={styles.iconButton}
@@ -222,6 +223,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
             <Link
               className={styles.utilityLink}
               href={getStudioPath(projectId, 'sources')}
+              aria-label={t('Sources', 'Источники')}
               title={sidebarCollapsed ? t('Sources', 'Источники') : undefined}
             >
               <SourceIcon aria-hidden="true" size={18} />
@@ -235,6 +237,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
             <Link
               className={styles.utilityLink}
               href={getStudioPath(projectId, 'settings')}
+              aria-label={t('Workspace settings', 'Настройки пространства')}
               title={
                 sidebarCollapsed ? t('Workspace settings', 'Настройки пространства') : undefined
               }
@@ -243,7 +246,12 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
               <span>{t('Workspace settings', 'Настройки пространства')}</span>
             </Link>
           ) : null}
-          <button type="button" className={styles.utilityLink} onClick={() => setHelpOpen(true)}>
+          <button
+            type="button"
+            className={styles.utilityLink}
+            onClick={() => setHelpOpen(true)}
+            aria-label={t('Help & definitions', 'Справка и определения')}
+          >
             <CircleHelp aria-hidden="true" size={18} />
             <span>{t('Help & definitions', 'Справка и определения')}</span>
           </button>
@@ -251,6 +259,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
             type="button"
             className={styles.utilityLink}
             onClick={() => setCommandOpen(true)}
+            aria-label={t('Command palette', 'Палитра команд')}
             title={sidebarCollapsed ? t('Command palette', 'Палитра команд') : undefined}
           >
             <Command aria-hidden="true" size={18} />
@@ -260,7 +269,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
         </div>
         <div className={styles.userSummary}>
           <span className={styles.avatar} aria-hidden="true">
-            {user.username.slice(0, 1).toLocaleUpperCase()}
+            <BrandMark />
           </span>
           <span>
             <strong>{user.isGuest ? t('Guest', 'Гость') : user.username}</strong>
@@ -287,7 +296,9 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
           >
             <Menu aria-hidden="true" size={20} />
           </button>
-          <div className={styles.mobileBrand}>Signal Studio</div>
+          <div className={styles.mobileBrand}>
+            <BrandMark wordmark />
+          </div>
           <div className={styles.topbarProject}>
             <ProjectSelector
               projectId={projectId}
@@ -309,13 +320,31 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
                 </button>
                 <strong>
                   {t('Guest until', 'Гость до')}{' '}
-                  {new Date(guest.data.expiresAt).toLocaleTimeString(locale, {
+                  {new Date(guest.data.expiresAt).toLocaleString(locale, {
+                    day: 'numeric',
+                    month: 'short',
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
                 </strong>
               </div>
             ) : null}
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={toggleMotion}
+              aria-label={
+                motionEnabled
+                  ? t('Pause animation', 'Приостановить анимацию')
+                  : t('Enable animation', 'Включить анимацию')
+              }
+            >
+              {motionEnabled ? (
+                <Pause size={17} aria-hidden="true" />
+              ) : (
+                <Play size={17} aria-hidden="true" />
+              )}
+            </button>
             <button
               className={styles.commandButton}
               type="button"
@@ -358,11 +387,18 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
         </header>
         <GuestWorkspaceContext.Provider value={user.isGuest ? (guest.data ?? null) : null}>
           <main id="studio-main" className={styles.mainContent} tabIndex={-1}>
-            {children}
+            <motion.div
+              key={pathSection}
+              initial={animate ? { y: 12 } : false}
+              animate={{ y: 0 }}
+              transition={{ type: 'tween', duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {children}
+            </motion.div>
           </main>
         </GuestWorkspaceContext.Provider>
         <footer className={styles.footer}>
-          <span>Signal Studio</span>
+          <span>Яснослед</span>
           <Link href={getStudioPath(projectId, 'legal')}>
             {t('Based on Umami · MIT', 'На основе Umami · MIT')}
           </Link>
@@ -395,7 +431,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
 
       <AccessibleDialog
         open={mobileOpen}
-        title="Signal Studio"
+        title="Яснослед"
         description={`${project.name} · ${roleLabel}`}
         side="left"
         onClose={() => setMobileOpen(false)}
@@ -472,32 +508,42 @@ function PrimaryNavigation({
   capabilities: StudioCapabilities;
   navigation: StudioNavItem[];
 }) {
+  const groupId = useId();
   return (
-    <nav
-      className={styles.primaryNav}
-      aria-label={navigation[0]?.label === 'Home' ? 'Primary' : 'Основная'}
-    >
-      {navigation
-        .filter(item => canOpenNavigation(item.id, capabilities))
-        .map(item => {
-          const Icon = item.icon;
-          const selected = selectedSection === item.id;
-          return (
-            <Link
-              key={item.id}
-              href={getStudioPath(projectId, item.id)}
-              className={styles.navLink}
-              data-selected={selected || undefined}
-              aria-current={selected ? 'page' : undefined}
-              title={collapsed ? item.label : undefined}
-              onClick={onNavigate}
-            >
-              <Icon aria-hidden="true" size={19} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-    </nav>
+    <LayoutGroup id={groupId}>
+      <nav
+        className={styles.primaryNav}
+        aria-label={navigation[0]?.label === 'Home' ? 'Primary' : 'Основная'}
+      >
+        {navigation
+          .filter(item => canOpenNavigation(item.id, capabilities))
+          .map(item => {
+            const Icon = item.icon;
+            const selected = selectedSection === item.id;
+            return (
+              <Link
+                key={item.id}
+                href={getStudioPath(projectId, item.id)}
+                className={styles.navLink}
+                data-selected={selected || undefined}
+                aria-current={selected ? 'page' : undefined}
+                title={collapsed ? item.label : undefined}
+                onClick={onNavigate}
+              >
+                {selected ? (
+                  <motion.span
+                    className={styles.navMarker}
+                    layoutId="selected-navigation"
+                    aria-hidden="true"
+                  />
+                ) : null}
+                <Icon aria-hidden="true" size={19} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+      </nav>
+    </LayoutGroup>
   );
 }
 

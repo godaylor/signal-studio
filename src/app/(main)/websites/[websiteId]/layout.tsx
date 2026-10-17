@@ -28,7 +28,7 @@ export default async function ({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Signal Studio',
-    default: 'Источники | Signal Studio',
+    template: '%s | Яснослед',
+    default: 'Источники | Яснослед',
   },
 };

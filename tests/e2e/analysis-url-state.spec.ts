@@ -1,8 +1,17 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import { loginPage } from './helpers';
 
 const projectId = 'd5a950d4-4d31-4c0f-b7a4-41dce9e0a003';
 const explorePath = `/studio/${projectId}/explore`;
+
+async function editQuery(page: Page) {
+  const editor = page.getByRole('dialog', { name: 'Edit query' });
+  if (!(await editor.isVisible())) {
+    await page.getByRole('button', { name: 'Edit query', exact: true }).click();
+  }
+  await expect(editor).toBeVisible();
+  return editor;
+}
 
 function queryUrl({
   mode,
@@ -56,29 +65,33 @@ test('copied URL restores exact Explore state through browser back and forward',
   });
 
   await page.goto(trend);
-  await expect(page.getByLabel('Event or metric')).toHaveValue('signup');
-  await page.getByRole('button', { name: /Context/ }).click();
-  await expect(page.getByLabel('Timezone')).toHaveValue('UTC');
-  await expect(page.getByLabel('Comparison')).toHaveValue('previousPeriod');
-  await page.getByRole('button', { name: /Filters/ }).click();
-  await expect(page.getByLabel('Filter 1 field')).toHaveValue('urlPath');
-  await expect(page.getByLabel('Filter 1 value')).toHaveValue('/app');
+  let editor = await editQuery(page);
+  await expect(editor.getByLabel('Event or metric')).toHaveValue('signup');
+  await editor.getByRole('button', { name: /Context/ }).click();
+  await expect(editor.getByLabel('Timezone')).toHaveValue('UTC');
+  await expect(editor.getByLabel('Comparison')).toHaveValue('previousPeriod');
+  await editor.getByRole('button', { name: /Filters/ }).click();
+  await expect(editor.getByLabel('Filter 1 field')).toHaveValue('urlPath');
+  await expect(editor.getByLabel('Filter 1 value')).toHaveValue('/app');
 
   await page.goto(breakdown);
-  await expect(page.getByLabel('Event or metric')).toHaveValue('purchase');
-  await page.getByRole('button', { name: /Breakdown/ }).click();
-  await expect(page.getByLabel('Analysis mode')).toHaveValue('breakdown');
-  await expect(page.getByLabel('Breakdown dimension')).toHaveValue('urlPath');
+  editor = await editQuery(page);
+  await expect(editor.getByLabel('Event or metric')).toHaveValue('purchase');
+  await editor.getByRole('button', { name: /Breakdown/ }).click();
+  await expect(editor.getByLabel('Analysis mode')).toHaveValue('breakdown');
+  await expect(editor.getByLabel('Breakdown dimension')).toHaveValue('urlPath');
 
   await page.goBack();
-  await expect(page.getByLabel('Event or metric')).toHaveValue('signup');
-  await page.getByRole('button', { name: /Context/ }).click();
-  await expect(page.getByLabel('Comparison')).toHaveValue('previousPeriod');
+  editor = await editQuery(page);
+  await expect(editor.getByLabel('Event or metric')).toHaveValue('signup');
+  await editor.getByRole('button', { name: /Context/ }).click();
+  await expect(editor.getByLabel('Comparison')).toHaveValue('previousPeriod');
 
   await page.goForward();
-  await expect(page.getByLabel('Event or metric')).toHaveValue('purchase');
-  await page.getByRole('button', { name: /Context/ }).click();
-  await expect(page.getByLabel('Result view')).toHaveValue('table');
+  editor = await editQuery(page);
+  await expect(editor.getByLabel('Event or metric')).toHaveValue('purchase');
+  await editor.getByRole('button', { name: /Context/ }).click();
+  await expect(editor.getByLabel('Result view')).toHaveValue('table');
 });
 
 test('unknown URL versions fail safely without hiding the editable Query Spine', async ({
@@ -87,6 +100,6 @@ test('unknown URL versions fail safely without hiding the editable Query Spine',
   await page.goto(`${explorePath}?aqv=99`);
 
   await expect(page.getByRole('heading', { name: 'Question not restored' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Question definition' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Run analysis' })).toBeVisible();
+  const editor = await editQuery(page);
+  await expect(editor.getByRole('button', { name: 'Run analysis' })).toBeVisible();
 });

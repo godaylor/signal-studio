@@ -8,7 +8,7 @@ const TEXT_SIZE = { sm: 'sm', md: 'base', lg: 'lg' } as const;
 export function ShareBranding({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const share = useShare();
   const logoDomain = share?.whiteLabel?.domainName || '/';
-  const logoName = share?.whiteLabel?.displayName || 'Signal Studio';
+  const logoName = share?.whiteLabel?.displayName || 'Яснослед';
   const logoImage = share?.whiteLabel?.logoUrl;
   const height = LOGO_SIZE[size];
 

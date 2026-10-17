@@ -98,7 +98,7 @@ export function SideNav(props: any) {
         >
           {!isCollapsed && (
             <IconLabel icon={<Logo />}>
-              <Text weight="bold">Signal Studio</Text>
+              <Text weight="bold">Яснослед</Text>
             </IconLabel>
           )}
           <PanelButton />

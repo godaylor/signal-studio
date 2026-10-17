@@ -1,10 +1,12 @@
 'use client';
 
 import { Activity, CirclePause, CirclePlay, RefreshCw, UsersRound } from 'lucide-react';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { List, type RowComponentProps } from 'react-window';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
+import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import type { LiveSnapshot } from '@/server/live/contracts';
 import styles from './LiveWorkspace.module.css';
 import { useLiveSnapshot } from './useLiveSnapshot';
@@ -65,6 +67,7 @@ export function LiveWorkspace({
   projectName: string;
 }) {
   const { locale, t } = useStudioLocale();
+  const { animate, ambient } = useVisualMotion();
   const [paused, setPaused] = useState(false);
   const query = useLiveSnapshot(projectId, paused);
   const snapshot = query.data;
@@ -97,8 +100,8 @@ export function LiveWorkspace({
             <h2>{t('Building the first snapshot', 'Формируем первый снимок')}</h2>
             <p>
               {t(
-                'Loading one bounded 30-minute view for all Live instruments.',
-                'Загружаем ограниченное 30-минутное окно для всех инструментов раздела.',
+                'Preparing activity from the last 30 minutes.',
+                'Подготавливаем активность за последние 30 минут.',
               )}
             </p>
           </div>
@@ -164,7 +167,18 @@ export function LiveWorkspace({
             {paused ? t('Resume live view', 'Продолжить') : t('Pause live view', 'Приостановить')}
           </button>
           <button type="button" onClick={() => query.refetch()} disabled={query.isFetching}>
-            <RefreshCw aria-hidden="true" size={16} /> {t('Refresh now', 'Обновить сейчас')}
+            <motion.span
+              className={styles.refreshIcon}
+              animate={query.isFetching && ambient ? { rotate: 360 } : { rotate: 0 }}
+              transition={
+                query.isFetching && ambient
+                  ? { duration: 1, ease: 'linear', repeat: Infinity }
+                  : { duration: 0 }
+              }
+            >
+              <RefreshCw aria-hidden="true" size={16} />
+            </motion.span>{' '}
+            {t('Refresh now', 'Обновить сейчас')}
           </button>
         </div>
       </header>
@@ -174,10 +188,20 @@ export function LiveWorkspace({
         aria-label={t('Live transport state', 'Состояние обновления')}
         tabIndex={0}
       >
-        <span
+        <motion.span
           className={styles.signalDot}
           data-state={query.error ? 'error' : paused ? 'paused' : 'live'}
           aria-hidden="true"
+          animate={
+            ambient && !paused && !query.error && query.visible
+              ? { scale: [1, 1.2, 1] }
+              : { scale: 1 }
+          }
+          transition={
+            ambient && !paused && !query.error && query.visible
+              ? { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }
+              : { duration: 0 }
+          }
         />
         <strong aria-live="polite">{state}</strong>
         <span>
@@ -216,22 +240,50 @@ export function LiveWorkspace({
       >
         <div>
           <span>{t('Active users', 'Активные пользователи')}</span>
-          <strong>{snapshot.totals.activeUsers.toLocaleString(locale)}</strong>
+          <motion.strong
+            key={snapshot.totals.activeUsers}
+            initial={animate ? { y: 6 } : false}
+            animate={{ y: 0 }}
+            transition={{ duration: animate ? 0.24 : 0 }}
+          >
+            {snapshot.totals.activeUsers.toLocaleString(locale)}
+          </motion.strong>
           <small>{t('identified in window', 'определены в окне')}</small>
         </div>
         <div>
           <span>{t('Active accounts', 'Активные аккаунты')}</span>
-          <strong>{snapshot.totals.activeAccounts.toLocaleString(locale)}</strong>
+          <motion.strong
+            key={snapshot.totals.activeAccounts}
+            initial={animate ? { y: 6 } : false}
+            animate={{ y: 0 }}
+            transition={{ duration: animate ? 0.24 : 0 }}
+          >
+            {snapshot.totals.activeAccounts.toLocaleString(locale)}
+          </motion.strong>
           <small>{t('linked in window', 'связаны в окне')}</small>
         </div>
         <div>
           <span>{t('Visitors', 'Посетители')}</span>
-          <strong>{snapshot.totals.visitors.toLocaleString(locale)}</strong>
+          <motion.strong
+            key={snapshot.totals.visitors}
+            initial={animate ? { y: 6 } : false}
+            animate={{ y: 0 }}
+            transition={{ duration: animate ? 0.24 : 0 }}
+          >
+            {snapshot.totals.visitors.toLocaleString(locale)}
+          </motion.strong>
           <small>{t('distinct sessions', 'уникальные сессии')}</small>
         </div>
         <div>
           <span>{t('Events', 'События')}</span>
-          <strong>{snapshot.totals.events.toLocaleString(locale)}</strong>
+          <motion.strong
+            key={snapshot.totals.events}
+            initial={animate ? { y: 6 } : false}
+            animate={{ y: 0 }}
+            transition={{ duration: animate ? 0.24 : 0 }}
+          >
+            {snapshot.totals.events.toLocaleString(locale)}
+          </motion.strong>
           <small>{t('custom events', 'пользовательские события')}</small>
         </div>
       </section>

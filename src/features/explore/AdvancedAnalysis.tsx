@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
+import { FunnelTrace } from '@/features/visual/FunnelTrace';
 import type {
   AnalysisBehavior,
   AnalysisFunnelDurationRow,
@@ -461,37 +462,13 @@ export function AdvancedResults({
     );
     return (
       <>
-        <figure
-          className={styles.chart}
-          aria-label={t(
-            'Ordered funnel conversion chart',
-            'График конверсии упорядоченной воронки',
-          )}
-        >
-          <figcaption>
-            {t(
-              'Ordered funnel · exact actors; bar length is overall conversion',
-              'Упорядоченная воронка · точные участники; длина столбца — общая конверсия',
-            )}
-          </figcaption>
-          <div className={styles.bars} aria-hidden="true">
-            {steps.map(row => (
-              <div key={`${row.segment ?? 'all'}-${row.step}`}>
-                <span>
-                  {row.segment ? `${row.segment} · ` : ''}
-                  {row.step}. {row.label}
-                </span>
-                <div className={styles.barTracks}>
-                  <i style={{ width: `${Math.max(row.overallConversionRate * 100, 1)}%` }} />
-                </div>
-                <b>
-                  {row.converted.toLocaleString(locale)} ·{' '}
-                  {percent(row.overallConversionRate, locale)}
-                </b>
-              </div>
-            ))}
-          </div>
-        </figure>
+        <FunnelTrace
+          key={serializeAnalysisQuery(query)}
+          steps={steps}
+          onInspect={row =>
+            setSelection({ kind: 'funnel-step', step: row.step, outcome: 'dropped' })
+          }
+        />
         <div className={styles.tableWrap}>
           <table>
             <caption>

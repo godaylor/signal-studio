@@ -5,16 +5,16 @@ import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { getStudioPath } from '@/features/studio-shell/navigation';
 import { StudioState } from '@/features/studio-shell/StudioState';
+import { OpticalScene } from '@/features/visual/OpticalScene';
 import type { AnalysisBreakdownRow } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
-import type { HomeMetric } from '@/server/home/contracts';
+import type { HomeMetric, HomeSnapshot } from '@/server/home/contracts';
 import styles from './HomeWorkspace.module.css';
+import { ProductFlow } from './ProductFlow';
 import { useHome } from './useHome';
 
 function href(metric: HomeMetric) {
-  return (
-    getStudioPath(metric.query.projectId, 'explore') + '?' + serializeAnalysisQuery(metric.query)
-  );
+  return `${getStudioPath(metric.query.projectId, 'explore')}?${serializeAnalysisQuery(metric.query)}`;
 }
 
 export function HomeWorkspace({
@@ -41,30 +41,51 @@ export function HomeWorkspace({
   };
   const adoption = data?.metrics.find(item => item.id === 'adoption');
   const activation = data?.metrics.find(item => item.id === 'activation');
+  const activationTotal = activation?.result?.data.total;
   return (
     <section className={styles.page}>
+      <OpticalScene className={styles.opticalArtwork} />
       <header className={styles.heading}>
         <div>
           <p className={styles.eyebrow}>
-            {projectName} / {t('Home', 'Главная')}
+            {projectName} / {t('First value', 'Первая ценность')}
           </p>
-          <h1>
-            {t('From signup to a product habit.', 'От регистрации — к привычке пользоваться.')}
-          </h1>
+          <h1>{t('How do users find value?', 'Как пользователи находят ценность?')}</h1>
           <p>
-            {t(
-              'See who gets value, who returns, and what to investigate next.',
-              'Кто получает пользу, кто возвращается и что стоит исследовать дальше.',
-            )}
+            {activationTotal?.denominator != null
+              ? t(
+                  `${activationTotal.value.toLocaleString(locale)} of ${activationTotal.denominator.toLocaleString(locale)} new users reached activation.`,
+                  `${activationTotal.value.toLocaleString(locale)} из ${activationTotal.denominator.toLocaleString(locale)} новых пользователей получили первую ценность.`,
+                )
+              : t(
+                  'Follow the path from signup to a lasting habit.',
+                  'Проследите путь от регистрации до привычки пользоваться.',
+                )}
           </p>
+          <div className={styles.heroDecision}>
+            <div className={styles.heroValue}>
+              <strong>
+                {activationTotal?.rate == null
+                  ? '—'
+                  : activationTotal.rate.toLocaleString(locale, {
+                      style: 'percent',
+                      maximumFractionDigits: 1,
+                    })}
+              </strong>
+              <span>{t('Activation', 'Активация')}</span>
+            </div>
+            <Link
+              className={styles.primaryAction}
+              href={activation ? href(activation) : getStudioPath(projectId, 'explore')}
+            >
+              {t('Explore the journey', 'Исследовать путь')}
+              <ArrowUpRight size={17} aria-hidden="true" />
+            </Link>
+            <Link className={styles.dashboardLink} href={getStudioPath(projectId, 'dashboards')}>
+              {t('Open dashboard', 'Открыть дашборд')}
+            </Link>
+          </div>
         </div>
-        <Link
-          className={styles.primaryAction}
-          href={activation ? href(activation) : getStudioPath(projectId, 'explore')}
-        >
-          {t('Explore the data', 'Исследовать данные')}
-          <ArrowUpRight size={17} aria-hidden="true" />
-        </Link>
       </header>
       {home.isPending ? (
         <StudioState
@@ -88,88 +109,16 @@ export function HomeWorkspace({
         />
       ) : (
         <>
-          <section className={styles.health} aria-label={t('Data health', 'Состояние данных')}>
-            <span
-              className={styles.healthDot}
-              data-state={guest ? 'synthetic' : data.health.state}
-              aria-hidden="true"
-            />
-            <div>
-              <strong>
-                {guest
-                  ? t('Fixed synthetic dataset', 'Фиксированный синтетический набор')
-                  : data.health.state === 'empty'
-                    ? t('No observed events yet', 'События ещё не поступали')
-                    : data.health.state === 'stale'
-                      ? t('No new events in 24h', 'Нет новых событий за 24 ч')
-                      : t('Events are arriving', 'События поступают')}
-              </strong>
-              <span>
-                {data.health.lastEventAt
-                  ? `${t('Last event', 'Последнее событие')}: ${new Date(data.health.lastEventAt).toLocaleString(locale)}`
-                  : t('Connect a source to begin.', 'Подключите источник, чтобы начать.')}
-              </span>
-            </div>
-            <details>
-              <summary>{t('Details', 'Подробнее')}</summary>
-              <p>
-                {t('Stored events / 24h', 'Сохранено событий / 24 ч')}:{' '}
-                {data.health.observedEvents24h.toLocaleString(locale)}.{' '}
-                {t(
-                  'Delivery loss is unknown; stored events are not client delivery receipts.',
-                  'Потери доставки неизвестны: сохранённые события не подтверждают все отправки клиента.',
-                )}
-              </p>
-            </details>
-            <button
-              type="button"
-              onClick={() => home.refetch()}
-              disabled={home.isFetching}
-              aria-label={t('Refresh', 'Обновить')}
-            >
-              <RefreshCw size={16} aria-hidden="true" />
-            </button>
-          </section>
           <section aria-labelledby="home-lifecycle" className={styles.lifecycle}>
             <header className={styles.sectionHeading}>
               <div>
-                <p className={styles.eyebrow}>{t('The path to value', 'Путь к ценности')}</p>
                 <h2 id="home-lifecycle">
-                  {t('Signup → activated → retained', 'Регистрация → активация → удержание')}
+                  {t('Signup → activation → return', 'Регистрация → активация → возвращение')}
                 </h2>
               </div>
               <span>{range(data.cohortRange)}</span>
             </header>
-            <ol className={styles.spine}>
-              {['signups', 'activation', 'retention'].map((id, index) => {
-                const metric = data.metrics.find(item => item.id === id);
-                if (!metric) return null;
-                return (
-                  <li key={id}>
-                    <Link href={href(metric)}>
-                      <span>
-                        <small>0{index + 1}</small>
-                        {names[id]}
-                      </span>
-                      <strong>
-                        {metric.result?.data.total?.value.toLocaleString(locale) ?? '—'}
-                      </strong>
-                      <span className={styles.spineLink}>
-                        {t('Explore this step', 'Исследовать шаг')}{' '}
-                        <ArrowUpRight size={14} aria-hidden="true" />
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ol>
-            <div className={styles.metrics}>
-              {data.metrics
-                .filter(metric => ['activation', 'retention'].includes(metric.id))
-                .map(metric => (
-                  <Metric key={metric.id} metric={metric} label={names[metric.id]} rate />
-                ))}
-            </div>
+            <ProductFlow metrics={data.metrics} />
             <details className={styles.explanation}>
               <summary>{t('How this journey is measured', 'Как рассчитывается этот путь')}</summary>
               <p>
@@ -180,6 +129,12 @@ export function HomeWorkspace({
               </p>
             </details>
           </section>
+          <ProductHealth
+            data={data}
+            synthetic={!!guest}
+            refreshing={home.isFetching}
+            onRefresh={() => home.refetch()}
+          />
           <section aria-labelledby="home-week" className={styles.section}>
             <header className={styles.sectionHeading}>
               <h2 id="home-week">{t('Last completed week', 'Последняя полная неделя')}</h2>
@@ -383,6 +338,64 @@ export function HomeWorkspace({
           </p>
         </>
       )}
+    </section>
+  );
+}
+
+function ProductHealth({
+  data,
+  synthetic,
+  refreshing,
+  onRefresh,
+}: {
+  data: HomeSnapshot;
+  synthetic: boolean;
+  refreshing: boolean;
+  onRefresh: () => void;
+}) {
+  const { t, locale } = useStudioLocale();
+  return (
+    <section className={styles.health} aria-label={t('Data health', 'Состояние данных')}>
+      <span
+        className={styles.healthDot}
+        data-state={synthetic ? 'synthetic' : data.health.state}
+        aria-hidden="true"
+      />
+      <div>
+        <strong>
+          {synthetic
+            ? t('Fixed synthetic dataset', 'Фиксированный синтетический набор')
+            : data.health.state === 'empty'
+              ? t('No observed events yet', 'События ещё не поступали')
+              : data.health.state === 'stale'
+                ? t('No new events in 24h', 'Нет новых событий за 24 ч')
+                : t('Events are arriving', 'События поступают')}
+        </strong>
+        <span>
+          {data.health.lastEventAt
+            ? `${t('Last event', 'Последнее событие')}: ${new Date(data.health.lastEventAt).toLocaleString(locale)}`
+            : t('Connect a source to begin.', 'Подключите источник, чтобы начать.')}
+        </span>
+      </div>
+      <details>
+        <summary>{t('Details', 'Подробнее')}</summary>
+        <p>
+          {t('Stored events / 24h', 'Сохранено событий / 24 ч')}:{' '}
+          {data.health.observedEvents24h.toLocaleString(locale)}.{' '}
+          {t(
+            'Delivery loss is unknown; stored events are not client delivery receipts.',
+            'Потери доставки неизвестны: сохранённые события не подтверждают все отправки клиента.',
+          )}
+        </p>
+      </details>
+      <button
+        type="button"
+        onClick={onRefresh}
+        disabled={refreshing}
+        aria-label={t('Refresh', 'Обновить')}
+      >
+        <RefreshCw size={16} aria-hidden="true" />
+      </button>
     </section>
   );
 }
