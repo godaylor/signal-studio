@@ -1295,8 +1295,7 @@
     display: none;
   }
   .mobileBottomNav {
-    min-height: 44px;
-    padding-block: 2px;
+    display: none;
   }
   .mobileBottomNav :is(a, button) {
     min-height: 40px;
@@ -1304,7 +1303,10 @@
     gap: 5px;
   }
   .mainContent {
-    padding-bottom: 50px;
+    padding-bottom: 16px;
+  }
+  .workspace {
+    padding-bottom: 0;
   }
 }
 

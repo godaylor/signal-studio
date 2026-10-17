@@ -413,6 +413,9 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
               <button
                 key={block.id}
                 type="button"
+                onFocus={event =>
+                  event.currentTarget.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+                }
                 onClick={() => {
                   setActiveBlock(block.id);
                   setEditorOpen(true);

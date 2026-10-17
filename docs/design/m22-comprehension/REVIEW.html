@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Кинорит M22 — работающий интерфейс</title>
+  <style>
+    :root{font-family:"Segoe UI",system-ui,sans-serif;color:#142d3b;background:#f6f5f0;line-height:1.5;font-synthesis:none;color-scheme:light}
+    *{box-sizing:border-box}body{margin:0}a{color:#1649bf;text-underline-offset:4px}a:hover{text-decoration-thickness:2px}button{font:inherit}button,a,input{touch-action:manipulation}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #183eee;outline-offset:4px}button{min-height:44px;cursor:pointer}img{display:block;max-width:100%;height:auto}h1,h2,h3,p{margin-top:0}h1,h2{letter-spacing:-.045em;line-height:1.12}h1{font-size:clamp(36px,6vw,76px);max-width:1000px;margin-bottom:20px;font-weight:650}h2{font-size:clamp(26px,3vw,40px);font-weight:650}h3{font-size:19px;line-height:1.3}p{max-width:850px}main,header,footer{width:min(1480px,100%);margin-inline:auto;padding-inline:clamp(16px,4vw,64px)}.skip{position:absolute;top:-100px;left:16px;z-index:3;padding:12px;background:#fff}.skip:focus{top:8px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:22px;border-bottom:1px solid #cbd4d4}.brand{font-size:20px;font-weight:750;letter-spacing:-.04em;color:#142d3b;text-decoration:none}.edition{margin-left:10px;color:#536a76;font-size:12px;font-weight:500;letter-spacing:.02em}nav{display:flex;flex-wrap:wrap;gap:6px 20px}nav a{display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:600}.hero{padding-block:64px 44px;border-bottom:1px solid #cbd4d4}.eyebrow{color:#00675e;font-size:12px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}.intro{font-size:clamp(17px,2vw,21px);color:#4a626f;line-height:1.6;margin-bottom:28px}.facts{display:flex;flex-wrap:wrap;gap:12px 28px;font-size:13px;color:#536a76}.facts strong{color:#142d3b}.section{padding-block:44px;border-bottom:1px solid #cbd4d4}.sectionHeader{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px}.sectionHeader h2{margin:0}.sectionHeader p{margin:0;color:#536a76;font-size:14px}.controls{display:flex;flex-direction:column;gap:16px;margin-bottom:22px}fieldset{min-width:0;margin:0;padding:0;border:0}legend{padding:0;margin-bottom:8px;font-size:12px;font-weight:750;letter-spacing:.04em;color:#536a76}.buttonGroup{display:flex;flex-wrap:wrap;gap:7px}.buttonGroup button{min-width:44px;padding:9px 15px;border:1px solid #c6d1d2;border-radius:8px;color:#233e4c;background:#fff;line-height:1.3;overflow-wrap:anywhere}.buttonGroup button:hover{border-color:#00675e}.buttonGroup button[aria-pressed="true"]{color:#fff;background:#0a3948;border-color:#0a3948}.secondaryControls{display:flex;gap:24px;flex-wrap:wrap}.capture{margin:0}.captureTop{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 0;font-size:13px}.captureTop strong{font-size:15px}.imageStage{min-width:0;min-height:160px;padding:18px;background:#e8eeee;border:1px solid #cbd4d4;border-radius:10px}.imageStage img{width:100%;background:#fff;border:1px solid #d1d9dc;box-shadow:0 10px 35px #142d3b0c}.imageStage[data-device="mobile"] img{width:min(100%,420px);margin-inline:auto}.caption{color:#536a76;font-size:13px;margin-top:14px;max-width:940px}.loadStatus{color:#7b3e13;font-size:14px;margin:16px 0 0}.loadStatus[hidden]{display:none}.whatChanged{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}.whatChanged article{min-width:0;border-top:3px solid #007b71;padding-top:18px}.whatChanged article:nth-child(2){border-color:#3258d8}.whatChanged article:nth-child(3){border-color:#bd653d}.whatChanged p{font-size:14px;color:#4a626f;margin-bottom:0}.devices{margin:0}.devices img{width:100%;border:1px solid #cbd4d4;border-radius:8px}.links{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:22px}.links a{display:inline-flex;align-items:center;min-height:44px;font-size:14px}.honesty{font-size:14px;color:#536a76;max-width:1000px}.honesty strong{color:#142d3b}footer{padding-block:24px 36px;font-size:12px;color:#536a76;display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}footer p{margin:0}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:700px){header{align-items:flex-start;flex-direction:column;gap:4px}.hero{padding-block:40px 30px}.section{padding-block:30px}.whatChanged{grid-template-columns:minmax(0,1fr);gap:24px}.imageStage{padding:8px}.secondaryControls{gap:16px}.buttonGroup button{padding-inline:12px}.captureTop{align-items:flex-start}.edition{display:inline-block}}@media(max-width:300px){h1{font-size:32px}.secondaryControls{flex-direction:column}.buttonGroup button{flex:1 1 auto}.imageStage{padding:3px}body{overflow-wrap:anywhere}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}@media print{.controls,nav,.links,.skip{display:none}.hero{padding-block:20px}main,header,footer{padding-inline:0}.imageStage{padding:0;border:0}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#content">Перейти к экранам</a>
+  <header>
+    <a class="brand" href="REVIEW.html">Кинорит <span class="edition">M22 · понятность данных</span></a>
+    <nav aria-label="Материалы проверки">
+      <a href="compare.html">До / после</a>
+      <a href="https://signal-studio-smoky.vercel.app/login" target="_blank" rel="noreferrer">Открыть приложение ↗</a>
+    </nav>
+  </header>
+  <main id="content">
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">Работающий интерфейс · синтетические события</p>
+      <h1 id="hero-title">Понятно, что случилось.<br>Видно, что исследовать.</h1>
+      <p class="intro">Финальные снимки приложения: от первого вопроса до сохранённого анализа, дашборда и действий конкретного пользователя. Здесь можно сопоставить все основные разделы, темы и мобильные экраны.</p>
+      <div class="facts" aria-label="Состав галереи">
+        <span><strong>7</strong> разделов</span><span><strong>2</strong> темы</span><span><strong>2</strong> формата</span><span><strong>28</strong> рабочих состояний</span>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="screens-title">
+      <div class="sectionHeader"><h2 id="screens-title">Исследуйте экраны</h2><p>Выберите раздел, тему и устройство.</p></div>
+      <div class="controls">
+        <fieldset><legend>Раздел</legend><div class="buttonGroup" id="routes">
+          <button type="button" data-route="login" aria-pressed="false">Первый экран</button>
+          <button type="button" data-route="home" aria-pressed="false">Главная</button>
+          <button type="button" data-route="explore" aria-pressed="true">Анализ</button>
+          <button type="button" data-route="dashboards" aria-pressed="false">Дашборды</button>
+          <button type="button" data-route="audiences" aria-pressed="false">Аудитории</button>
+          <button type="button" data-route="experience" aria-pressed="false">Опыт</button>
+          <button type="button" data-route="live" aria-pressed="false">Сейчас</button>
+        </div></fieldset>
+        <div class="secondaryControls">
+          <fieldset><legend>Тема</legend><div class="buttonGroup" id="themes"><button type="button" data-theme="light" aria-pressed="true">Светлая</button><button type="button" data-theme="dark" aria-pressed="false">Тёмная</button></div></fieldset>
+          <fieldset><legend>Формат</legend><div class="buttonGroup" id="devices"><button type="button" data-device="desktop" aria-pressed="true">Компьютер</button><button type="button" data-device="mobile" aria-pressed="false">Телефон</button></div></fieldset>
+        </div>
+      </div>
+      <figure class="capture">
+        <figcaption class="captureTop"><strong id="captureTitle">Анализ · светлая тема · компьютер</strong><a id="fullImage" href="final-explore-light-desktop.png" target="_blank" rel="noreferrer">Открыть снимок целиком ↗</a></figcaption>
+        <div class="imageStage" id="imageStage" data-device="desktop"><img id="captureImage" src="final-explore-light-desktop.png" alt="Рабочий раздел «Анализ», светлая тема, компьютер" loading="eager"></div>
+        <p class="loadStatus" id="loadStatus" role="status" hidden>Снимок пока недоступен. Финальные файлы должны находиться рядом с этой галереей.</p>
+        <p class="caption" id="captureDescription">События, условия и период определяют вопрос. Воронка, подписи и объяснение результата используют один реальный расчёт.</p>
+      </figure>
+      <p id="screenAnnouncement" class="sr" aria-live="polite"></p>
+    </section>
+    <section class="section" aria-labelledby="meaning-title">
+      <div class="sectionHeader"><h2 id="meaning-title">Что должно стать понятнее</h2></div>
+      <div class="whatChanged">
+        <article><h3>Вопрос перед цифрой</h3><p>У результата есть период, участники и определение. Подписи объясняют, сколько людей прошло путь и на каком переходе их стало меньше.</p></article>
+        <article><h3>Действие после ответа</h3><p>Можно изменить условия, изучить участников, сохранить анализ, добавить его на дашборд и выгрузить данные. Ошибки сохраняют рабочий контекст.</p></article>
+        <article><h3>Честные состояния</h3><p>Синтетический набор обозначен. Исторические события не притворяются живым потоком, а неполный период удержания не выдаётся за окончательные 0%.</p></article>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="devices-title">
+      <div class="sectionHeader"><h2 id="devices-title">Данные на разных экранах</h2><p>Снимки работающего приложения.</p></div>
+      <figure class="devices"><a href="device-comparison.png" target="_blank" rel="noreferrer"><img src="device-comparison.png" alt="Сопоставление рабочего интерфейса Кинорита на нескольких размерах экранов" loading="lazy"></a><figcaption class="caption">Сравнение помогает увидеть композицию и читаемость. Полный список проверенных размеров и результаты сценариев находятся в отчёте M22.</figcaption></figure>
+      <div class="links"><a href="compare.html">Сравнить прежнюю и новую подачу →</a><a href="JOURNEYS.md">Аудит сценариев</a><a href="../../M22_FINAL_REPORT.md">Итоговый отчёт M22</a></div>
+    </section>
+    <section class="section" aria-labelledby="proof-title">
+      <h2 id="proof-title">Что именно вы видите</h2>
+      <p class="honesty"><strong>Эта галерея показывает приложение, снятое в браузере.</strong> Все имена и события демонстрационного набора синтетические. Снимки отдельных разделов могут отражать разную сохранённую работу внутри этого набора; это не доказательство равенства любых двух аналитических запросов.</p>
+      <p class="honesty">Ранние imagegen-макеты M21 служили поиском направления и не являются точной копией опубликованного интерфейса. Финальная визуальная проверка опирается на рабочие снимки этой галереи и сравнение до/после.</p>
+      <div class="links"><a href="../m21-kinorit/concept-data-observatory.png">Исторический концепт M21</a><a href="../m21-kinorit/selected-workspace-board.png">Историческая доска основных экранов</a></div>
+    </section>
+  </main>
+  <footer><p>Кинорит · M22</p><p>На основе Umami · MIT. Лицензия и атрибуция сохранены в проекте.</p></footer>
+  <script>
+    const labels={login:'Первый экран',home:'Главная',explore:'Анализ',dashboards:'Дашборды',audiences:'Аудитории',experience:'Опыт',live:'Сейчас'};
+    const descriptions={login:'Первый экран объясняет задачу продукта и предлагает сразу открыть отдельное гостевое пространство.',home:'Обзор связывает регистрацию, активацию и возвращение. Метрики ведут к воспроизводимому анализу.',explore:'События, условия и период определяют вопрос. Воронка, подписи и объяснение результата используют один реальный расчёт.',dashboards:'Сохранённые анализы и заметки собраны в общий обзор; определение каждого результата остаётся доступно.',audiences:'Компания, человек и группа по условиям — разные сущности. Профиль открывает путь к событиям и сессиям.',experience:'Хронология показывает, что произошло в выбранной сессии. Доступность записи и других данных обозначается отдельно.',live:'Активность относится к текущему временному окну. Пустой исторический гостевой поток объясняется явно.'};
+    const state={route:'explore',theme:'light',device:'desktop'};
+    const captureImage=document.getElementById('captureImage');
+    const loadStatus=document.getElementById('loadStatus');
+    function render(updateHash=true){
+      const title=`${labels[state.route]} · ${state.theme==='light'?'светлая':'тёмная'} тема · ${state.device==='desktop'?'компьютер':'телефон'}`;
+      const file=`final-${state.route}-${state.theme}-${state.device}.png`;
+      document.querySelectorAll('[data-route]').forEach(button=>{button.setAttribute('aria-pressed',String(button.dataset.route===state.route));});
+      document.querySelectorAll('[data-theme]').forEach(button=>{button.setAttribute('aria-pressed',String(button.dataset.theme===state.theme));});
+      document.querySelectorAll('button[data-device]').forEach(button=>{button.setAttribute('aria-pressed',String(button.dataset.device===state.device));});
+      document.getElementById('captureTitle').textContent=title;
+      document.getElementById('captureDescription').textContent=descriptions[state.route];
+      document.getElementById('fullImage').href=file;
+      document.getElementById('imageStage').dataset.device=state.device;
+      captureImage.alt=`Рабочий интерфейс: ${title}`;
+      loadStatus.hidden=true;
+      if(captureImage.getAttribute('src')!==file)captureImage.src=file;
+      document.getElementById('screenAnnouncement').textContent=title;
+      if(updateHash)history.replaceState(null,'',`#${state.route}-${state.theme}-${state.device}`);
+    }
+    function restore(){const match=location.hash.match(/^#([a-z]+)-(light|dark)-(desktop|mobile)$/);if(match&&labels[match[1]]){state.route=match[1];state.theme=match[2];state.device=match[3];}render(false);}
+    document.querySelectorAll('button[data-route],button[data-theme],button[data-device]').forEach(button=>{button.addEventListener('click',()=>{if(button.dataset.route)state.route=button.dataset.route;if(button.dataset.theme)state.theme=button.dataset.theme;if(button.dataset.device)state.device=button.dataset.device;render();});});
+    captureImage.addEventListener('error',()=>{loadStatus.hidden=false;});
+    captureImage.addEventListener('load',()=>{loadStatus.hidden=true;});
+    window.addEventListener('hashchange',restore);
+    restore();
+  </script>
+</body>
+</html>

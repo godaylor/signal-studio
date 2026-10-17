@@ -332,4 +332,41 @@ describe('ExploreWorkspace', () => {
     await user.keyboard('{Escape}');
     expect(cell).toHaveFocus();
   });
+  test('segmented evidence explicitly discloses that member selection spans all groups', async () => {
+    const query = {
+      ...createDefaultAnalysisQuery(projectId),
+      mode: 'funnel' as const,
+      breakdown: { field: 'device' as const, limit: 5 },
+      funnel: {
+        conversionWindowMinutes: 1440,
+        steps: [
+          { type: 'event' as const, value: 'signup', filters: [] },
+          { type: 'event' as const, value: 'active', filters: [] },
+        ],
+      },
+    };
+    const response = {
+      ...result,
+      data: {
+        mode: 'funnel',
+        rows: [100, 75].map((converted, index) => ({
+          kind: 'funnel-step',
+          step: index + 1,
+          label: ['signup', 'active'][index],
+          segment: 'desktop',
+          converted,
+          overallConversionRate: converted / 100,
+          stepConversionRate: converted / 100,
+          dropped: index ? 25 : 0,
+        })),
+      },
+    } as AnalysisResult;
+    render(<AdvancedResults query={query} result={response} />);
+    await userEvent
+      .setup()
+      .click(screen.getAllByRole('button', { name: 'Dropped actors · all groups' })[1]);
+    expect(screen.getByRole('dialog', { name: 'Members across all groups' })).toHaveTextContent(
+      'Apply a filter in the question',
+    );
+  });
 });

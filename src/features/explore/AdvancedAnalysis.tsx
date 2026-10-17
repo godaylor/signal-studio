@@ -517,7 +517,10 @@ export function AdvancedResults({
                           setSelection({ kind: 'funnel-step', step: row.step, outcome: 'dropped' })
                         }
                       >
-                        <Search aria-hidden="true" /> {t('Dropped actors', 'Выбывшие участники')}
+                        <Search aria-hidden="true" />{' '}
+                        {query.breakdown
+                          ? t('Dropped actors · all groups', 'Выбывшие участники · все группы')
+                          : t('Dropped actors', 'Выбывшие участники')}
                       </button>
                     </td>
                   </tr>
@@ -733,11 +736,22 @@ function MemberDialog({
   return (
     <AccessibleDialog
       open={!!selection}
-      title={t('Exact members', 'Точные участники')}
-      description={t(
-        'Up to 20 exact actors with linked product user, account and sessions. Aggregate membership remains authoritative.',
-        'До 20 точных участников со связанными пользователем, аккаунтом и сессиями. Состав агрегата остаётся источником истины.',
-      )}
+      title={
+        query.mode === 'funnel' && query.breakdown
+          ? t('Members across all groups', 'Участники всех групп')
+          : t('Exact members', 'Точные участники')
+      }
+      description={
+        query.mode === 'funnel' && query.breakdown
+          ? t(
+              'This list combines the selected step across every group. Apply a filter in the question to inspect one group separately.',
+              'Здесь выбранный шаг по всем группам вместе. Чтобы изучить одну группу отдельно, добавьте фильтр в вопрос.',
+            )
+          : t(
+              'Up to 20 exact actors with linked product user, account and sessions. Aggregate membership remains authoritative.',
+              'До 20 точных участников со связанными пользователем, аккаунтом и сессиями. Состав агрегата остаётся источником истины.',
+            )
+      }
       onClose={onClose}
     >
       <div className={styles.drawerBody}>
