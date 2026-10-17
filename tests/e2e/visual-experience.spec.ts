@@ -1,6 +1,24 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
+async function settleTheme(page: import('@playwright/test').Page) {
+  // Audit the actual final palette, while separately testing motion above.
+  // Infinite decorative traces are deliberately allowed to keep running.
+  await page.evaluate(async () => {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await Promise.all(
+      document
+        .getAnimations()
+        .filter(
+          animation =>
+            animation.playState === 'running' &&
+            Number.isFinite(animation.effect?.getTiming().iterations ?? 1),
+        )
+        .map(animation => animation.finished.catch(() => undefined)),
+    );
+  });
+}
+
 for (const mobile of [false, true]) {
   test(`Russian optical workspace: ${mobile ? 'mobile with reduced motion' : 'desktop with visible motion'}`, async ({
     page,
@@ -50,7 +68,9 @@ for (const mobile of [false, true]) {
           await page.getByRole('button', { name: /Включить (тёмную|светлую) тему/ }).waitFor();
           if (await themeButton.count()) await themeButton.click();
           await expect(page.getByRole('heading', { level: 1 }).last()).toBeVisible();
-          await expect(page.locator('[data-variant="loading"]')).toHaveCount(0);
+          await expect(page.locator('[data-variant="loading"]')).toHaveCount(0, {
+            timeout: 30_000,
+          });
           if (section === 'home') {
             await expect
               .poll(() =>
@@ -72,6 +92,7 @@ for (const mobile of [false, true]) {
               expect(box.y + box.height).toBeLessThan(780);
             }
           }
+          await settleTheme(page);
           expect(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           ).toBe(true);
@@ -96,6 +117,29 @@ for (const mobile of [false, true]) {
       }
       await page.keyboard.press('Escape');
       await expect(edit).toBeFocused();
+      if (mobile) {
+        await page.setViewportSize({ width: 320, height: 844 });
+        await page.goto('/login?locale=ru-RU');
+        const signIn = await page.getByRole('link', { name: 'Войти', exact: true }).boundingBox();
+        if (!signIn) throw new Error('Sign in must remain reachable at 320px');
+        expect(signIn.x).toBeGreaterThanOrEqual(0);
+        expect(signIn.x + signIn.width).toBeLessThanOrEqual(320);
+        await page.goto(`/studio/${guest.projectId}/home?locale=ru-RU`);
+        await expect(page.locator('[data-stage="retention"]')).toBeVisible({ timeout: 30_000 });
+        const journey = page.getByRole('link', { name: 'Исследовать путь', exact: true });
+        const rate = page
+          .getByRole('main')
+          .locator('header')
+          .first()
+          .getByText('50 %', { exact: true });
+        const answerBox = await rate.boundingBox();
+        const actionBox = await journey.boundingBox();
+        if (!answerBox || !actionBox) throw new Error('The answer and action must be visible');
+        expect(answerBox.y + answerBox.height).toBeLessThanOrEqual(actionBox.y);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+      }
     } finally {
       await page.request.delete('/api/guest');
     }

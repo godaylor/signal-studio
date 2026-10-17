@@ -703,6 +703,18 @@
     align-items: start;
   }
 }
+@media (max-width: 360px) {
+  .heroDecision {
+    grid-template-columns: 1fr;
+  }
+  .heroValue {
+    grid-row: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .page .primaryAction,
   .flowStageLink svg {

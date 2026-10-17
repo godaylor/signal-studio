@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { checkAuth } from '@/lib/auth';
 import { parseRequest } from '@/lib/request';
 import { POST as logout } from '@/app/api/auth/logout/route';
@@ -26,7 +26,16 @@ import { disconnectLifecycleLocks, withLifecycleIngestion } from '@/server/lifec
 let first: Awaited<ReturnType<typeof startGuestSession>>;
 let second: Awaited<ReturnType<typeof startGuestSession>>;
 const runAt = new Date();
-const baseRequest = new Request('https://guest.test/api/guest', { method: 'POST' });
+// This isolated process simulates a distinct trusted-proxy client, so its
+// fixtures do not consume the later browser suite's real direct-client budget.
+const integrationClientIp = `2001:db8:${randomUUID()
+  .replaceAll('-', '')
+  .slice(0, 24)
+  .replace(/(.{4})(?=.)/g, '$1:')}`;
+const baseRequest = new Request('https://guest.test/api/guest', {
+  method: 'POST',
+  headers: { 'x-guest-integration-client': integrationClientIp },
+});
 const guestRequest = (session: typeof first, path: string, method = 'GET', body?: unknown) =>
   new Request(`https://guest.test${path}`, {
     method,
@@ -40,19 +49,24 @@ const queryInput = (session: typeof first) => session.guest.defaultQuery;
 
 describe('server-persistent isolated guest workspaces', () => {
   beforeAll(async () => {
+    vi.stubEnv('CLIENT_IP_HEADER', 'x-guest-integration-client');
     first = await startGuestSession(baseRequest, runAt);
     second = await startGuestSession(baseRequest, runAt);
   });
   afterAll(async () => {
-    for (const session of [first, second].filter(Boolean)) {
-      await prisma.client.guestSession.updateMany({
-        where: { id: session.guest.id },
-        data: { expiresAt: new Date() },
-      });
+    try {
+      for (const session of [first, second].filter(Boolean)) {
+        await prisma.client.guestSession.updateMany({
+          where: { id: session.guest.id },
+          data: { expiresAt: new Date() },
+        });
+      }
+      await cleanupExpiredGuests(new Date(), 50);
+    } finally {
+      vi.unstubAllEnvs();
+      await disconnectLifecycleLocks();
+      await prisma.client.$disconnect();
     }
-    await cleanupExpiredGuests(new Date(), 50);
-    await disconnectLifecycleLocks();
-    await prisma.client.$disconnect();
   });
 
   test('stores only the digest, resumes the same server workspace, uses real private principals', async () => {
