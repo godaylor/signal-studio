@@ -50,8 +50,8 @@ export function ExportControls({
         onClose={() => setOpen(false)}
         title={t('Export data', 'Экспорт данных')}
         description={t(
-          'Exports keep the applied filters and definitions. Downloads require your current permissions.',
-          'Экспорт сохраняет применённые фильтры и определения. При скачивании права проверяются заново.',
+          'Download the results with your current filters.',
+          'Скачайте результаты с выбранными фильтрами.',
         )}
       >
         <div className={styles.content}>
@@ -75,18 +75,28 @@ export function ExportControls({
               {t('All matching rows', 'Все строки по фильтрам')}
             </label>
           ) : null}
-          <p>
-            {t(
-              'Up to 1,000 rows / 1 MiB download immediately. Larger exports are queued (100,000 rows / 64 MiB maximum) and expire one hour after the request.',
-              'До 1 000 строк / 1 МиБ скачиваются сразу. Большие экспорты попадают в очередь (максимум 100 000 строк / 64 МиБ) и доступны в течение часа после запроса.',
-            )}
-          </p>
+          <details className={styles.definition}>
+            <summary>{t('File limits and availability', 'Ограничения и срок хранения')}</summary>
+            <p>
+              {t(
+                'Small exports download immediately. Larger exports run in the background and expire one hour after the request. File size and row limits depend on this deployment. Narrow the period or filters if a limit is reached.',
+                'Небольшие файлы скачиваются сразу. Большие экспорты готовятся в фоне и доступны в течение часа после запроса. Ограничения объёма и числа строк зависят от размещения. Если достигнут лимит, сократите период или уточните фильтры.',
+              )}
+            </p>
+            <p>
+              {t(
+                'The applied filters and metric definitions are preserved. Download access follows your current permissions.',
+                'Применённые фильтры и определения метрик сохраняются. Для скачивания нужны текущие права доступа.',
+              )}
+            </p>
+          </details>
           <button
             type="button"
-            className={styles.button}
+            className={styles.primaryButton}
             aria-disabled={exports.create.isPending}
             onClick={() =>
-              !exports.create.isPending && exports.create.mutate({
+              !exports.create.isPending &&
+              exports.create.mutate({
                 version: 1,
                 source,
                 format,
@@ -144,10 +154,22 @@ export function ExportControls({
                   </span>
                   {job.errorCode ? <code>{job.errorCode}</code> : null}
                   {job.errorCode === 'export-storage-capacity' ? (
-                    <p>{t('Export storage is temporarily full. Existing downloads remain available until expiry. Try again after they expire.', 'Хранилище экспортов временно заполнено. Готовые файлы доступны до истечения срока. Повторите после их удаления по сроку.')}</p>
+                    <p>
+                      {t(
+                        'Export storage is temporarily full. Existing downloads remain available until expiry. Try again after they expire.',
+                        'Хранилище экспортов временно заполнено. Готовые файлы доступны до истечения срока. Повторите после их удаления по сроку.',
+                      )}
+                    </p>
                   ) : null}
-                  {['export-size-limit', 'export-row-limit', 'export-time-limit'].includes(job.errorCode ?? '') ? (
-                    <p>{t('This export is too large. Narrow the date range or audience filters and export each part separately.', 'Экспорт слишком большой. Сократите период или уточните фильтры аудитории и выгрузите данные частями.')}</p>
+                  {['export-size-limit', 'export-row-limit', 'export-time-limit'].includes(
+                    job.errorCode ?? '',
+                  ) ? (
+                    <p>
+                      {t(
+                        'This export is too large. Narrow the date range or audience filters and export each part separately.',
+                        'Экспорт слишком большой. Сократите период или уточните фильтры аудитории и выгрузите данные частями.',
+                      )}
+                    </p>
                   ) : null}
                   {job.status === 'completed' ? (
                     <button

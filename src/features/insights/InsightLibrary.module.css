@@ -1,8 +1,8 @@
 .saveForm,
 .library {
   display: grid;
-  gap: 16px;
-  padding: 8px 22px 24px;
+  gap: 20px;
+  padding: 12px 24px 28px;
   color: var(--studio-ink);
 }
 .saveForm label,
@@ -18,7 +18,8 @@
 .filters input,
 .filters select,
 .insightList input {
-  min-height: 38px;
+  min-height: 42px;
+  min-width: 0;
   padding: 8px 10px;
   color: var(--studio-ink);
   background: var(--studio-surface);
@@ -40,7 +41,7 @@
 .dialogActions button,
 .itemActions button,
 .library > button {
-  min-height: 36px;
+  min-height: 40px;
   padding: 7px 11px;
   color: var(--studio-ink);
   background: var(--studio-surface);
@@ -50,13 +51,13 @@
   cursor: pointer;
 }
 .dialogActions button[type="submit"] {
-  color: white;
+  color: var(--studio-on-accent, #fff);
   background: var(--studio-cobalt);
   border-color: var(--studio-cobalt);
 }
 .filters {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto auto;
+  grid-template-columns: minmax(160px, 1fr) auto auto;
   gap: 12px;
   align-items: end;
 }
@@ -83,18 +84,18 @@
 }
 .insightList {
   display: grid;
-  gap: 10px;
+  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--studio-grid);
 }
 .insightList > li {
   display: grid;
-  gap: 12px;
-  padding: 14px;
+  gap: 14px;
+  padding: 20px 0;
   background: var(--studio-surface);
-  border: 1px solid var(--studio-grid);
-  border-radius: 8px;
+  border-bottom: 1px solid var(--studio-grid);
 }
 .insightList header {
   display: flex;
@@ -103,7 +104,9 @@
 }
 .insightList h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 17px;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
 }
 .insightList header p {
   margin: 4px 0 0;
@@ -111,8 +114,9 @@
   font-size: 12px;
 }
 .insightList header > button {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   color: var(--studio-cobalt-text, var(--studio-cobalt));
   background: transparent;
   border: 0;
@@ -131,7 +135,7 @@
 .insightList dl div {
   display: flex;
   gap: 5px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .insightList dt {
   color: var(--studio-ink-muted);
@@ -143,8 +147,29 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-size: 12px;
+}
+.itemActions button:hover,
+.dialogActions button:hover {
+  border-color: var(--studio-cobalt);
+}
+.library :is(button, input, select, textarea):focus-visible,
+.saveForm :is(button, input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--studio-focus, var(--studio-cobalt)) 55%, transparent);
+  outline-offset: 2px;
 }
 @media (max-width: 680px) {
+  .saveForm,
+  .library {
+    padding-inline: 16px;
+  }
+  .filters input,
+  .filters select,
+  .saveForm input,
+  .dialogActions button,
+  .itemActions button {
+    min-height: 44px;
+  }
   .filters {
     grid-template-columns: 1fr;
   }

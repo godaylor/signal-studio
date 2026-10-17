@@ -3,6 +3,7 @@ import { setTimeout } from 'node:timers/promises';
 import prisma from '@/lib/prisma';
 import { cleanupExports, runExportOnce } from '@/server/exports/worker';
 import { runLifecycleOnce } from '@/server/lifecycle/worker';
+import { cleanupExpiredGuests } from '@/server/guest/service';
 
 let stopping = false;
 process.on('SIGINT', () => {
@@ -16,6 +17,7 @@ async function main() {
   let lastCleanup = 0;
   do {
     if (Date.now() - lastCleanup > 60_000) {
+      await cleanupExpiredGuests(new Date(), 10);
       await cleanupExports();
       lastCleanup = Date.now();
     }

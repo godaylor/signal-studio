@@ -7,7 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { getApiUrl } from '@/lib/api-url';
-import { getClientAuthToken } from '@/lib/client';
+import { getClientAuthHeaders } from '@/lib/client';
 import type { AnalysisQueryV1 } from '@/server/analytics/contracts';
 import type { InsightDto, InsightStatus } from '@/server/insights/insight-service';
 
@@ -24,7 +24,7 @@ async function requestJson<T>(url: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     ...init,
     headers: {
-      authorization: `Bearer ${getClientAuthToken()}`,
+      ...getClientAuthHeaders(),
       'content-type': 'application/json',
       ...init.headers,
     },

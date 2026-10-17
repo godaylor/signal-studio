@@ -54,8 +54,8 @@ export function SaveInsightDialog({
       open={open}
       title={t('Save insight', 'Сохранить инсайт')}
       description={t(
-        'Persist the normalized question and visualization without storing result rows.',
-        'Сохраните нормализованный вопрос и визуализацию без строк результата.',
+        'Name this analysis to return to it or add it to a dashboard.',
+        'Дайте анализу название, чтобы вернуться к нему или добавить на дашборд.',
       )}
       onClose={onClose}
     >
@@ -125,8 +125,8 @@ export function InsightLibrary({
       open={open}
       title={t('Insight library', 'Библиотека инсайтов')}
       description={t(
-        'Search reusable, versioned analytical questions for this project.',
-        'Поиск повторно используемых версионированных аналитических вопросов проекта.',
+        'Find and reopen your saved analyses.',
+        'Найдите и откройте сохранённые анализы.',
       )}
       onClose={onClose}
     >

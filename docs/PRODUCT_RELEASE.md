@@ -1,5 +1,9 @@
 # M17 — Working product and hosting handoff
 
+M19 (2026-10-17) supersedes the page-local walkthrough as the primary trial:
+[real guest workspace and redesign evidence](M19_GUEST_WORKSPACE_REPORT.md).
+The September acceptance below is historical.
+
 **Current production (2026-09-23):** existing Vercel Hobby + Neon Free, Frankfurt.
 [Public demo](https://signal-studio-smoky.vercel.app/demo) requires no login and uses
 fictional data. Real workspace source → ingestion → analysis → saved Insight →

@@ -5,6 +5,7 @@ import { getUser } from '@/queries/prisma/user';
 import { AUTH_SETUP_TOKEN_TYPE } from '@/server/auth/constants';
 import { parseAuthSessionToken, tokenMatchesUser } from '@/server/auth/tokens';
 import { getTwoFactorPolicy } from '@/server/auth/two-factor-policy';
+import { resolveGuestSession } from '@/server/guest/session';
 
 const log = debug('umami:auth');
 
@@ -16,6 +17,13 @@ export function getBearerToken(request: Request) {
 
 export async function checkAuth(request: Request) {
   const token = getBearerToken(request);
+  if (!token) {
+    const current = await resolveGuestSession(request);
+    if (current) return { token: null, sessionId: current.session.id, assuranceLevel: 1,
+      assuranceRequired: false, shareToken: null, user: current.user,
+      guest: { id: current.session.id, projectId: current.session.projectId, workspaceId: current.session.workspaceId,
+        expiresAt: current.session.expiresAt.toISOString() } };
+  }
   const payload = parseAuthSessionToken(token);
   // Shares never authenticate management/legacy analytics endpoints. Studio
   // shares have a dedicated resolver which validates the live share record.
@@ -28,7 +36,7 @@ export async function checkAuth(request: Request) {
   if (userId) {
     user = await getUser(userId, { includePassword: true, includeSessionVersion: true });
 
-    if (!user || !tokenMatchesUser(payload, user)) {
+    if (!user || user.role === 'guest' || !tokenMatchesUser(payload, user)) {
       user = null;
     } else {
       const policy = await getTwoFactorPolicy(userId, user.twoFactorRequired);

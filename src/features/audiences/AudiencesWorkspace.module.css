@@ -1,7 +1,7 @@
 .workspace {
-  width: min(100%, 1440px);
+  width: min(100%, 1480px);
   margin-inline: auto;
-  padding: clamp(28px, 4vw, 58px) clamp(16px, 4vw, 56px) 72px;
+  padding: clamp(24px, 3.2vw, 42px) clamp(16px, 3.2vw, 42px) 76px;
   color: var(--studio-ink);
 }
 .heading {
@@ -11,7 +11,7 @@
 .heading p,
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--studio-cobalt);
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.11em;
@@ -19,15 +19,16 @@
 }
 .heading h1 {
   margin: 0;
-  font-size: clamp(29px, 4vw, 42px);
+  font-size: clamp(28px, 3.3vw, 40px);
   letter-spacing: -0.045em;
   line-height: 1.08;
 }
 .heading span {
   display: block;
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--studio-ink-muted);
   line-height: 1.55;
+  font-size: 14px;
 }
 .tabs {
   display: flex;
@@ -36,6 +37,7 @@
   border-bottom: 1px solid var(--studio-grid);
 }
 .tabs button {
+  min-height: 44px;
   padding: 11px 14px;
   color: var(--studio-ink-muted);
   background: transparent;
@@ -44,16 +46,16 @@
   cursor: pointer;
 }
 .tabs button[aria-current="page"] {
-  color: var(--studio-cobalt);
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
   border-color: var(--studio-cobalt);
   font-weight: 750;
 }
 .panel {
   min-width: 0;
-  padding: clamp(18px, 3vw, 28px);
+  padding: clamp(16px, 2.5vw, 26px);
   background: var(--studio-surface);
   border: 1px solid var(--studio-grid);
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .panel h2 {
   margin: 0 0 18px;
@@ -62,7 +64,7 @@
 }
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(210px, 1.2fr) auto auto auto;
+  grid-template-columns: minmax(130px, 0.7fr) minmax(190px, 1.3fr) auto auto auto;
   gap: 12px;
   align-items: end;
   margin-bottom: 18px;
@@ -87,10 +89,10 @@
 .builderControls select,
 .condition input,
 .condition select {
-  min-height: 38px;
+  min-height: 42px;
   padding: 7px 9px;
   color: var(--studio-ink);
-  background: var(--studio-canvas);
+  background: var(--studio-surface);
   border: 1px solid var(--studio-grid-strong);
   border-radius: 6px;
 }
@@ -116,11 +118,14 @@
 .tableWrap {
   overflow: auto;
   margin-bottom: 16px;
+  scrollbar-width: thin;
+  border-top: 1px solid var(--studio-grid);
 }
 .tableWrap table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
 }
 .tableWrap caption {
   padding: 0;
@@ -132,16 +137,19 @@
 }
 .tableWrap th,
 .tableWrap td {
-  padding: 13px 12px;
+  padding: 16px 12px;
   text-align: left;
   border-bottom: 1px solid var(--studio-grid);
   font-size: 13px;
 }
 .tableWrap thead th {
   color: var(--studio-ink-muted);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  background: var(--studio-canvas);
+  font-size: 11px;
+  font-weight: 500;
+}
+.tableWrap tbody tr:hover {
+  background: color-mix(in srgb, var(--studio-cobalt-soft) 40%, var(--studio-surface));
 }
 .stage {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -151,8 +159,9 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-height: 36px;
   padding: 0;
-  color: var(--studio-cobalt);
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
   background: transparent;
   border: 0;
   font-weight: 700;
@@ -160,14 +169,14 @@
 }
 .primaryButton,
 .secondaryButton {
-  min-height: 38px;
+  min-height: 42px;
   padding: 8px 13px;
   border-radius: 6px;
   font-weight: 700;
   cursor: pointer;
 }
 .primaryButton {
-  color: white;
+  color: var(--studio-on-accent, #fff);
   background: var(--studio-cobalt);
   border: 1px solid var(--studio-cobalt);
 }
@@ -197,6 +206,8 @@
   grid-template-columns: 1fr 1.5fr;
   border: 1px solid var(--studio-grid-strong);
   border-left: 4px solid var(--studio-cobalt);
+  border-radius: 6px;
+  background: var(--studio-cobalt-soft);
 }
 .definitionBand div {
   display: grid;
@@ -219,6 +230,7 @@
 .traits div {
   padding: 9px;
   background: var(--studio-canvas);
+  border-radius: 4px;
 }
 .traits dt {
   color: var(--studio-ink-muted);
@@ -282,7 +294,7 @@
   gap: 8px;
   margin: 8px 0;
   padding: 10px;
-  background: var(--studio-canvas);
+  background: color-mix(in srgb, var(--studio-cobalt-soft) 50%, var(--studio-surface));
   border: 1px solid var(--studio-grid);
   border-radius: 7px;
 }
@@ -318,8 +330,10 @@
   list-style: none;
 }
 .preview button {
-  color: var(--studio-cobalt);
-  background: white;
+  min-height: 36px;
+  padding: 6px 10px;
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
+  background: var(--studio-surface);
   border: 1px solid var(--studio-grid);
   border-radius: 5px;
   cursor: pointer;
@@ -336,6 +350,24 @@
   }
 }
 @media (max-width: 620px) {
+  .tabs {
+    overflow-x: auto;
+  }
+  .tabs button {
+    flex: 0 0 auto;
+  }
+  .toolbar input,
+  .toolbar select,
+  .builderControls input,
+  .builderControls select,
+  .condition input,
+  .condition select,
+  .primaryButton,
+  .secondaryButton {
+    min-width: 0;
+    width: 100%;
+    min-height: 44px;
+  }
   .toolbar,
   .builderControls,
   .definitionBand {

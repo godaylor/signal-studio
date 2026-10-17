@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiUrl } from '@/lib/api-url';
-import { getClientAuthToken } from '@/lib/client';
+import { getClientAuthHeaders } from '@/lib/client';
 import type { AnalysisQueryV1, AnalysisResult } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import type { DisplayRow } from './model';
@@ -14,7 +14,7 @@ export async function requestJson<T>(url: string, init: RequestInit): Promise<T>
   const response = await fetch(url, {
     ...init,
     headers: {
-      authorization: `Bearer ${getClientAuthToken()}`,
+      ...getClientAuthHeaders(),
       'content-type': 'application/json',
       ...init.headers,
     },

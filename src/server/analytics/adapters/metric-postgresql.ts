@@ -61,7 +61,10 @@ function lifecycleCte(query: AnalysisQueryV1, params: Record<string, unknown>) {
       and (a.created_at, a.event_id) > (o.created_at, o.event_id)
       and a.created_at < o.signup_at + interval '7 days'
     group by a.user_id
-  ), retained_users as (
+  -- Evaluate the correlated return lookup once per activated actor. Without a
+  -- fence PostgreSQL can inline it below the entrant join and repeat it for
+  -- entrant x activation combinations when a newly seeded tenant has no stats.
+  ), retained_users as materialized (
     select a.user_id from activation a
     join tracked_user tu on tu.tracked_user_id = a.user_id and tu.project_id = {{projectId::uuid}}
     join lateral (

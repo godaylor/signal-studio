@@ -133,8 +133,8 @@ export function AudiencesWorkspace({
         <h1>{t('Accounts, users and segments', 'Аккаунты, пользователи и сегменты')}</h1>
         <span>
           {t(
-            'Find the product identities behind an aggregate, inspect definition-backed adoption and carry exact session evidence forward.',
-            'Находите продуктовые идентичности за агрегатом, проверяйте активацию по определениям и переходите к точным данным сессий.',
+            'Find the people behind your metrics and see how they use your product.',
+            'Посмотрите, кто стоит за метриками и как эти люди используют продукт.',
           )}
         </span>
       </header>
@@ -227,7 +227,7 @@ function IdentityView({
       />
       <div className={styles.toolbar}>
         <div>
-          <p className={styles.eyebrow}>{t('Identity ledger', 'Реестр идентичностей')}</p>
+          <p className={styles.eyebrow}>{t('Product activity', 'Активность в продукте')}</p>
           <h2 id="audience-ledger-title">
             {entity === 'account' ? t('Accounts', 'Аккаунты') : t('Tracked users', 'Пользователи')}
           </h2>
@@ -304,8 +304,8 @@ function IdentityView({
       {!list.isPending && !list.error && rows.length === 0 ? (
         <p className={styles.state}>
           {t(
-            'No identities match these reproducible filters.',
-            'Нет идентичностей, соответствующих этим воспроизводимым фильтрам.',
+            'No people or accounts match these filters. Try a different search or stage.',
+            'По этим фильтрам никого нет. Измените поиск или этап.',
           )}
         </p>
       ) : null}

@@ -71,6 +71,8 @@ export async function createExport(
   requestId: string,
 ) {
   const definition = normalizeExport(input, projectId);
+  if (auth.guest && (definition.allRows || definition.source.kind !== 'analysis'))
+    throw new ExportError('guest-export-analysis-only', 400);
   const access = await requireExportAccess(auth, projectId, definition);
   const project = await exportDb.website.findUniqueOrThrow({
     where: { id: projectId },
@@ -108,6 +110,7 @@ export async function createExport(
       };
     } catch (error) {
       if (!(error instanceof ExportError) || error.status !== 413) throw error;
+      if (auth.guest) throw new ExportError('guest-export-too-large', 413);
     }
   }
   const definitionHash = createHash('sha256').update(JSON.stringify(definition)).digest('hex');

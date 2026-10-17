@@ -2,14 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiUrl } from '@/lib/api-url';
-import { getClientAuthToken } from '@/lib/client';
+import { getClientAuthHeaders } from '@/lib/client';
 import type { CreateExport, ExportJobDto } from '@/server/exports/contracts';
 
 async function request(projectId: string, suffix = '', init: RequestInit = {}) {
   const response = await fetch(getApiUrl(`/projects/${projectId}/exports${suffix}`), {
     ...init,
     headers: {
-      authorization: `Bearer ${getClientAuthToken()}`,
+      ...getClientAuthHeaders(),
       'content-type': 'application/json',
     },
   });

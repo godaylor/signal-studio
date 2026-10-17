@@ -2,10 +2,12 @@ import { after } from 'next/server';
 import { cleanupExports, runExportOnce } from '@/server/exports/worker';
 import { runLifecycleOnce } from '@/server/lifecycle/worker';
 import { cleanupPostgresArtifacts } from '@/server/exports/postgres-storage';
+import { cleanupExpiredGuests } from '@/server/guest/service';
 
 export async function runServerlessJobs(mode: 'export' | 'lifecycle' | 'cron', jobId?: string) {
   const started = Date.now();
   if (mode === 'cron') {
+    await cleanupExpiredGuests(new Date(), 10);
     if (process.env.EXPORT_STORAGE_BACKEND === 'postgres') await cleanupPostgresArtifacts();
     await cleanupExports(new Date(), 100);
   }

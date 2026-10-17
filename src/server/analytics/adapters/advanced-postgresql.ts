@@ -295,7 +295,8 @@ function funnelRows(events: EventRow[], query: AnalysisQueryV1) {
     if (journey.reached.length === funnel.steps.length) value.converted += 1;
     trendMap.set(bucket, value);
   }
-  const trend: AnalysisFunnelTrendRow[] = [...trendMap.entries()].map(([bucket, value]) => ({
+  const trend: AnalysisFunnelTrendRow[] = [...trendMap.entries()]
+    .toSorted(([left], [right]) => left.localeCompare(right)).map(([bucket, value]) => ({
     kind: 'funnel-trend',
     value: value.converted,
     bucket,

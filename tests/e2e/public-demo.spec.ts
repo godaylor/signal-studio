@@ -1,13 +1,12 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('public demo completes without authentication or project API access', async ({ page }) => {
+test('archived guided example remains available without project API access', async ({ page }) => {
   const projectRequests: string[] = [];
   page.on('request', request => {
     if (request.url().includes('/api/projects/')) projectRequests.push(request.url());
   });
-  await page.goto('/login?locale=ru-RU');
-  await page.getByRole('link', { name: 'Попробовать демо' }).click();
+  await page.goto('/demo/tour?locale=ru-RU');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByText(/Данные рабочих проектов не читаются/)).toBeVisible();
   await page.getByRole('button', { name: 'События', exact: true }).click();
@@ -43,7 +42,7 @@ test('public demo completes without authentication or project API access', async
 for (const width of [1280, 390]) {
   test(`public demo accessibility and layout at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto('/demo?locale=ru-RU');
+    await page.goto('/demo/tour?locale=ru-RU');
     await page.getByRole('button', { name: 'Анализ', exact: true }).click();
     expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

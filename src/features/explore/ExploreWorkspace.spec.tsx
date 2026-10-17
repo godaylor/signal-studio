@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import type { AnalysisResult } from '@/server/analytics/contracts';
@@ -190,7 +190,11 @@ describe('ExploreWorkspace', () => {
   test('edits two-to-eight ordered funnel steps from the Query Spine', async () => {
     const user = userEvent.setup();
     render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
-    await user.click(screen.getByRole('button', { name: /Breakdown/ }));
+    await user.click(
+      within(screen.getByRole('complementary', { name: 'Query Spine' })).getByRole('button', {
+        name: /Breakdown/,
+      }),
+    );
     await user.selectOptions(screen.getByRole('combobox', { name: 'Analysis mode' }), 'funnel');
     await user.click(screen.getByRole('button', { name: /Signal/ }));
     expect(screen.getByRole('group', { name: 'Ordered funnel steps' })).toBeVisible();

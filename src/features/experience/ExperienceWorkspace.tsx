@@ -80,8 +80,8 @@ export function ExperienceWorkspace({
         <h1>{t('Session evidence', 'Данные сессии')}</h1>
         <span>
           {t(
-            'Identity, behavior, performance and replay availability stay linked to the selected aggregate member.',
-            'Идентичность, поведение, производительность и доступность записи связаны с выбранным участником агрегата.',
+            'Follow a session to understand what happened behind the numbers.',
+            'Посмотрите ход сессии, чтобы понять поведение за цифрами.',
           )}
         </span>
       </header>
@@ -90,8 +90,8 @@ export function ExperienceWorkspace({
           <h2>{t('Choose a session from evidence', 'Выберите сессию из данных')}</h2>
           <p>
             {t(
-              'Open a member from Explore, a retention cell, or an Audience profile to preserve matching context here.',
-              'Откройте участника из анализа, ячейки удержания или профиля аудитории, чтобы сохранить здесь совпадающий контекст.',
+              'Choose a user in Explore or Audiences, then open one of their sessions.',
+              'Выберите пользователя в анализе или аудиториях и откройте его сессию.',
             )}
           </p>
           <Link href={`/studio/${projectId}/audiences`}>
@@ -99,7 +99,7 @@ export function ExperienceWorkspace({
           </Link>
         </section>
       ) : null}
-      {evidence.isPending ? (
+      {sessionId && evidence.isPending ? (
         <section className={styles.state} role="status">
           <h2>{t('Loading session evidence', 'Загрузка данных сессии')}</h2>
           <p>
@@ -110,7 +110,7 @@ export function ExperienceWorkspace({
           </p>
         </section>
       ) : null}
-      {evidence.error ? (
+      {sessionId && evidence.error ? (
         <section className={styles.state} role="alert">
           <h2>{t('Session evidence could not be loaded', 'Не удалось загрузить данные сессии')}</h2>
           <p>
@@ -238,10 +238,7 @@ export function ExperienceWorkspace({
                     : 'Метрики отражают наблюдаемые значения выбранной сессии.'}
                 </p>
                 <Link href={`/websites/${projectId}/performance?${compatible}`}>
-                  {t(
-                    'Open compatible performance context',
-                    'Открыть совместимый контекст производительности',
-                  )}
+                  {t('Explore performance', 'Посмотреть производительность')}
                 </Link>
               </section>
               <section className={styles.panel}>
@@ -286,19 +283,19 @@ export function ExperienceWorkspace({
                 ) : null}
               </section>
               <section className={styles.panel}>
-                <p className={styles.eyebrow}>{t('Compatible handoff', 'Совместимый переход')}</p>
+                <p className={styles.eyebrow}>{t('Page behavior', 'Поведение на странице')}</p>
                 <h2>{t('Heatmap context', 'Контекст тепловой карты')}</h2>
-                <p>
-                  {t(
-                    'Only date range and URL path are inherited. Identity-only filters are deliberately excluded.',
-                    'Наследуются только диапазон дат и путь URL. Фильтры идентичности намеренно исключены.',
-                  )}
-                </p>
+                <details className={styles.definition}>
+                  <summary>{t('Which filters carry over?', 'Какие фильтры сохраняются?')}</summary>
+                  <p>
+                    {t(
+                      'Only date range and URL path are inherited. Identity-only filters are deliberately excluded.',
+                      'Наследуются только диапазон дат и путь URL. Фильтры идентичности намеренно исключены.',
+                    )}
+                  </p>
+                </details>
                 <Link href={`/websites/${projectId}/heatmaps?${compatible}`}>
-                  {t(
-                    'Open compatible heatmap context',
-                    'Открыть совместимый контекст тепловой карты',
-                  )}
+                  {t('Open heatmap', 'Открыть тепловую карту')}
                 </Link>
               </section>
             </aside>

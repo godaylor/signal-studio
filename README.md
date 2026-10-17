@@ -14,13 +14,19 @@ quotas)**, with encrypted PostgreSQL exports, request-triggered jobs and schedul
 **[Try the public demo — no login](https://signal-studio-smoky.vercel.app/demo)** ·
 [Sign in to a real workspace](https://signal-studio-smoky.vercel.app/login)
 
-The public demo is an interactive walkthrough on clearly labeled fictional data;
-its saved state resets on reload. Real sources, ingestion, analyses and exports
-use authenticated workspaces. No shared administrator credentials are provided.
+Choose **Try without signing up** to open a private guest workspace with 1,281
+clearly labeled synthetic events. Calculations use the real PostgreSQL analytics
+services. Edit a question, save an Insight, assemble a Dashboard and export CSV or
+JSON; server-saved work survives reloads for the 24-hour guest session. Each guest
+has a separate user, workspace and source, with bounded resource use. No shared
+administrator credentials are provided. The older guided example remains at `/demo/tour`.
 See [free deployment](docs/FREE_DEPLOYMENT.md) and
-[production acceptance evidence](docs/PRODUCTION_ACCEPTANCE_2026-09-23.md).
+[guest workspace/redesign evidence](docs/M19_GUEST_WORKSPACE_REPORT.md).
 
-![Signal Studio Explore](docs/screenshots/explore-desktop.png)
+![Signal Studio Explore](docs/design/guest-redesign/after-explore-desktop.png)
+
+[Design alternatives, selected mockups and real screens](docs/design/guest-redesign/REVIEW.html)
+· [Before/after comparison](docs/design/guest-redesign/comparison-board.png)
 
 Screenshots show the actual application running against explicitly synthetic
 portfolio data. They are not mock interfaces or production traffic.
@@ -65,7 +71,7 @@ Browser → Next.js UI → authenticated services → analytics / saved entities
 | UI/visualization | Chart.js, Lucide, Motion, react-window, @umami/react-zen |
 | Server | Next.js route handlers, Zod 4, reusable permission/domain services |
 | Data | PostgreSQL 15+, Prisma 7 with the PostgreSQL adapter, parameterized analytical SQL |
-| Authentication | bcryptjs, signed typed JWTs, session versions, encrypted TOTP secrets |
+| Authentication | bcryptjs, signed typed JWTs, session versions, encrypted TOTP secrets; opaque HttpOnly temporary guest sessions |
 | Collection/experience | Compatible Umami tracker/ingestion, rrweb recording/player, Web Vitals |
 | Jobs/storage | PostgreSQL leases and bounded encrypted artifacts; request-triggered Node jobs and GitHub Actions recovery, or local worker/files for self-hosting |
 | Delivery | Node 22.22.2, pnpm 10.15.1, Docker multi-stage images, GitHub Actions |

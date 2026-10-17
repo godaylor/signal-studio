@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { normalizeAnalysisQuery } from '../normalize';
 import { validAnalysisQuery } from '../test-fixtures';
 import { buildEventStatement } from './event-postgresql';
+import { buildMetricStatement } from './metric-postgresql';
 import { postgresqlAnalysisAdapter } from './postgresql';
 
 const { read } = vi.hoisted(() => ({ read: vi.fn() }));
@@ -15,6 +16,16 @@ vi.mock('@/lib/prisma', () => ({
 }));
 
 describe('independent PostgreSQL event analytics', () => {
+  test('plans lifecycle returns once rather than under every entrant join', () => {
+    const query = normalizeAnalysisQuery(validAnalysisQuery({
+      measure: { source: 'lifecycle', key: 'retained', aggregation: 'count' },
+    }));
+    const statement = buildMetricStatement(query);
+    expect(statement.sql).toContain('retained_users as materialized (');
+    expect(statement.sql).toContain("r.created_at >= a.created_at + interval '7 days'");
+    expect(statement.sql).toContain("r.created_at < a.created_at + interval '14 days'");
+    expect(statement.values).toContainEqual(new Date(query.range.endAt));
+  });
   test('binds event names, literal filters, timezone and half-open bounds', () => {
     const query = normalizeAnalysisQuery(
       validAnalysisQuery({

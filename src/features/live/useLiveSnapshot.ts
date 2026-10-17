@@ -3,13 +3,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { getApiUrl } from '@/lib/api-url';
-import { getClientAuthToken } from '@/lib/client';
+import { getClientAuthHeaders } from '@/lib/client';
 import type { LiveSnapshot } from '@/server/live/contracts';
 
 async function requestSnapshot(projectId: string, signal?: AbortSignal) {
   const response = await fetch(getApiUrl(`/projects/${projectId}/live`), {
     signal,
-    headers: { authorization: `Bearer ${getClientAuthToken()}` },
+    headers: getClientAuthHeaders(),
   });
   const payload = await response.json();
   if (!response.ok) {

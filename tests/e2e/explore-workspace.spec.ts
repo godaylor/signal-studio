@@ -85,7 +85,9 @@ test('funnel analysis survives URL and Insight round-trip with exact drill-down'
   await page.goto(advancedUrl('funnel'));
   await expect(page.getByRole('heading', { name: 'Ordered funnel' })).toBeVisible();
   await expect(page.getByRole('table', { name: 'Equivalent funnel data table' })).toBeVisible();
+  await page.locator('summary').filter({ hasText: /^Conversion trend$/ }).click();
   await expect(page.getByRole('table', { name: 'Conversion trend' })).toBeVisible();
+  await page.locator('summary').filter({ hasText: /^Time-to-convert distribution$/ }).click();
   await expect(page.getByRole('table', { name: 'Time-to-convert distribution' })).toBeVisible();
   await page.getByRole('button', { name: 'Dropped actors' }).last().click();
   await expect(page.getByRole('dialog', { name: 'Exact members' })).toBeVisible();

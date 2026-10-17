@@ -81,7 +81,8 @@ function BehaviorEditor({
           <X aria-hidden="true" />
         </button>
       ) : null}
-      <div>
+      <details className={styles.stepProperties} open={behavior.filters.length > 0 || undefined}>
+        <summary>{t('Step filters', 'Фильтры шага')}</summary>
         {behavior.filters.map((filter, index) => (
           <div key={`${filter.property}-${index}`} className={styles.filterRow}>
             <input
@@ -156,7 +157,7 @@ function BehaviorEditor({
         >
           {t('Add step property filter', 'Добавить фильтр свойства шага')}
         </button>
-      </div>
+      </details>
     </div>
   );
 }
@@ -544,50 +545,58 @@ export function AdvancedResults({
             </tbody>
           </table>
         </div>
-        <div className={styles.tableWrap}>
-          <table>
-            <caption>{t('Conversion trend', 'Тренд конверсии')}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t('Entry bucket', 'Интервал входа')}</th>
-                <th scope="col">{t('Entrants', 'Вошли')}</th>
-                <th scope="col">{t('Converted', 'Конвертировались')}</th>
-                <th scope="col">{t('Rate', 'Доля')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trend.map(row => (
-                <tr key={row.bucket}>
-                  <th scope="row">{row.bucket}</th>
-                  <td>{row.entrants.toLocaleString(locale)}</td>
-                  <td>{row.converted.toLocaleString(locale)}</td>
-                  <td>{percent(row.conversionRate, locale)}</td>
+        <details className={styles.secondaryData}>
+          <summary>{t('Conversion trend', 'Тренд конверсии')}</summary>
+          <div className={styles.tableWrap}>
+            <table>
+              <caption>{t('Conversion trend', 'Тренд конверсии')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t('Entry bucket', 'Интервал входа')}</th>
+                  <th scope="col">{t('Entrants', 'Вошли')}</th>
+                  <th scope="col">{t('Converted', 'Конвертировались')}</th>
+                  <th scope="col">{t('Rate', 'Доля')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className={styles.tableWrap}>
-          <table>
-            <caption>
-              {t('Time-to-convert distribution', 'Распределение времени до конверсии')}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">{t('Duration', 'Длительность')}</th>
-                <th scope="col">{t('Converted actors', 'Конвертированные участники')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {duration.map(row => (
-                <tr key={row.bucket}>
-                  <th scope="row">{row.bucket}</th>
-                  <td>{row.converted.toLocaleString(locale)}</td>
+              </thead>
+              <tbody>
+                {trend.map(row => (
+                  <tr key={row.bucket}>
+                    <th scope="row">{row.bucket}</th>
+                    <td>{row.entrants.toLocaleString(locale)}</td>
+                    <td>{row.converted.toLocaleString(locale)}</td>
+                    <td>{percent(row.conversionRate, locale)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details className={styles.secondaryData}>
+          <summary>
+            {t('Time-to-convert distribution', 'Распределение времени до конверсии')}
+          </summary>
+          <div className={styles.tableWrap}>
+            <table>
+              <caption>
+                {t('Time-to-convert distribution', 'Распределение времени до конверсии')}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t('Duration', 'Длительность')}</th>
+                  <th scope="col">{t('Converted actors', 'Конвертированные участники')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {duration.map(row => (
+                  <tr key={row.bucket}>
+                    <th scope="row">{row.bucket}</th>
+                    <td>{row.converted.toLocaleString(locale)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
         <MemberDialog
           query={query}
           selection={selection}

@@ -1,7 +1,17 @@
 'use client';
 
 import { useTheme } from '@umami/react-zen';
-import { Command, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun } from 'lucide-react';
+import {
+  CircleHelp,
+  Command,
+  LogOut,
+  Menu,
+  Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  Sun,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -15,6 +25,10 @@ import {
 } from '@/components/hooks';
 import { TwoFactorSetupModal } from '@/components/modals/TwoFactorSetupModal';
 import { useProjectAccess } from '@/features/access/useProjectAccess';
+import guestStyles from '@/features/guest/GuestWorkspace.module.css';
+import { GuestWorkspaceContext } from '@/features/guest/GuestWorkspaceContext';
+import { useGuestSession } from '@/features/guest/useGuestSession';
+import { WorkspaceHelp } from '@/features/guest/WorkspaceHelp';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import type { StudioCapabilities, StudioRole } from '@/server/permissions/capabilities';
 import { AccessibleDialog } from './AccessibleDialog';
@@ -52,7 +66,11 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
     { pageSize: 100, includeTeams: true },
     { enabled: !!user },
   );
-  const { data: twoFactorStatus } = useTwoFactorStatusQuery(!!user && !config?.cloudMode);
+  const { data: twoFactorStatus } = useTwoFactorStatusQuery(
+    !!user && !user?.isGuest && !config?.cloudMode,
+  );
+  const guest = useGuestSession(!!user?.isGuest);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -62,6 +80,16 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
     ? roleLabels[access.studioRole][locale === 'en-US' ? 'en-US' : 'ru-RU']
     : '—';
   const needsTwoFactorSetup = !!(twoFactorStatus?.isRequired && !twoFactorStatus?.isEnabled);
+
+  useEffect(() => {
+    if (!guest.data?.expiresAt) return;
+    const remaining = new Date(guest.data.expiresAt).getTime() - Date.now();
+    const timer = window.setTimeout(
+      () => window.location.assign(`${process.env.basePath || ''}/login?guest=expired`),
+      Math.max(0, remaining),
+    );
+    return () => window.clearTimeout(timer);
+  }, [guest.data?.expiresAt]);
 
   useEffect(() => {
     if (loginError && config) {
@@ -94,7 +122,13 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
     [access?.capabilities, localizedNavigation, projectId],
   );
 
-  if (!config || isLoginLoading || isProjectLoading || isAccessLoading) {
+  if (
+    !config ||
+    isLoginLoading ||
+    isProjectLoading ||
+    isAccessLoading ||
+    (user?.isGuest && guest.isPending)
+  ) {
     return <StudioLoadingScreen />;
   }
 
@@ -194,9 +228,10 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
               <span>{t('Sources', 'Источники')}</span>
             </Link>
           ) : null}
-          {access.capabilities.manageMembers ||
-          access.capabilities.editInsights ||
-          access.capabilities.editDashboards ? (
+          {!user.isGuest &&
+          (access.capabilities.manageMembers ||
+            access.capabilities.editInsights ||
+            access.capabilities.editDashboards) ? (
             <Link
               className={styles.utilityLink}
               href={getStudioPath(projectId, 'settings')}
@@ -208,6 +243,10 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
               <span>{t('Workspace settings', 'Настройки пространства')}</span>
             </Link>
           ) : null}
+          <button type="button" className={styles.utilityLink} onClick={() => setHelpOpen(true)}>
+            <CircleHelp aria-hidden="true" size={18} />
+            <span>{t('Help & definitions', 'Справка и определения')}</span>
+          </button>
           <button
             type="button"
             className={styles.utilityLink}
@@ -224,14 +263,21 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
             {user.username.slice(0, 1).toLocaleUpperCase()}
           </span>
           <span>
-            <strong>{user.username}</strong>
-            <small>{roleLabel}</small>
+            <strong>{user.isGuest ? t('Guest', 'Гость') : user.username}</strong>
+            <small>
+              {user.isGuest ? t('Your private workspace', 'Ваше личное пространство') : roleLabel}
+            </small>
           </span>
         </div>
       </aside>
 
       <div className={styles.workspace}>
         <header className={styles.topbar}>
+          <div className={styles.breadcrumb}>
+            <strong>{project.name}</strong>
+            <span>/</span>
+            {localizedNavigation.find(item => item.id === pathSection)?.label ?? pathSection}
+          </div>
           <button
             className={`${styles.iconButton} ${styles.mobileMenuButton}`}
             type="button"
@@ -252,6 +298,24 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
             />
           </div>
           <div className={styles.topbarActions}>
+            {guest.data ? (
+              <div className={`${guestStyles.session} ${styles.guestMeta}`}>
+                <button
+                  type="button"
+                  className={guestStyles.synthetic}
+                  onClick={() => setHelpOpen(true)}
+                >
+                  {t('Synthetic data', 'Синтетические данные')}
+                </button>
+                <strong>
+                  {t('Guest until', 'Гость до')}{' '}
+                  {new Date(guest.data.expiresAt).toLocaleTimeString(locale, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </strong>
+              </div>
+            ) : null}
             <button
               className={styles.commandButton}
               type="button"
@@ -278,21 +342,25 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
                 <Moon aria-hidden="true" size={18} />
               )}
             </button>
-            <Link
-              className={styles.avatarButton}
-              href="/settings/profile"
-              aria-label={t('Profile settings', 'Настройки профиля')}
-            >
-              {user.username.slice(0, 1).toLocaleUpperCase()}
-            </Link>
+            {!user.isGuest ? (
+              <Link
+                className={styles.avatarButton}
+                href="/settings/profile"
+                aria-label={t('Profile settings', 'Настройки профиля')}
+              >
+                {user.username.slice(0, 1).toLocaleUpperCase()}
+              </Link>
+            ) : null}
             <Link className={styles.iconButton} href="/logout" aria-label={t('Log out', 'Выйти')}>
               <LogOut aria-hidden="true" size={18} />
             </Link>
           </div>
         </header>
-        <main id="studio-main" className={styles.mainContent} tabIndex={-1}>
-          {children}
-        </main>
+        <GuestWorkspaceContext.Provider value={user.isGuest ? (guest.data ?? null) : null}>
+          <main id="studio-main" className={styles.mainContent} tabIndex={-1}>
+            {children}
+          </main>
+        </GuestWorkspaceContext.Provider>
         <footer className={styles.footer}>
           <span>Signal Studio</span>
           <Link href={getStudioPath(projectId, 'legal')}>
@@ -300,6 +368,30 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
           </Link>
         </footer>
       </div>
+
+      <nav
+        className={styles.mobileBottomNav}
+        aria-label={t('Quick navigation', 'Быстрая навигация')}
+      >
+        {localizedNavigation.slice(0, 3).map(item => (
+          <Link
+            key={item.id}
+            href={getStudioPath(projectId, item.id)}
+            aria-current={pathSection === item.id ? 'page' : undefined}
+          >
+            <item.icon size={20} aria-hidden="true" />
+            {item.label}
+          </Link>
+        ))}
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          aria-label={t('Open navigation', 'Открыть навигацию')}
+        >
+          <Menu size={20} aria-hidden="true" />
+          {t('More', 'Ещё')}
+        </button>
+      </nav>
 
       <AccessibleDialog
         open={mobileOpen}
@@ -322,9 +414,10 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
                 {t('Sources', 'Источники')}
               </Link>
             ) : null}
-            {access.capabilities.manageMembers ||
-            access.capabilities.editInsights ||
-            access.capabilities.editDashboards ? (
+            {!user.isGuest &&
+            (access.capabilities.manageMembers ||
+              access.capabilities.editInsights ||
+              access.capabilities.editDashboards) ? (
               <Link
                 href={getStudioPath(projectId, 'settings')}
                 onClick={() => setMobileOpen(false)}
@@ -332,6 +425,17 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
                 {t('Workspace settings', 'Настройки пространства')}
               </Link>
             ) : null}
+            <button
+              type="button"
+              className={styles.utilityLink}
+              onClick={() => {
+                setMobileOpen(false);
+                setHelpOpen(true);
+              }}
+            >
+              <CircleHelp aria-hidden="true" size={18} />
+              {t('Help & definitions', 'Справка и определения')}
+            </button>
             <Link href={getStudioPath(projectId, 'legal')} onClick={() => setMobileOpen(false)}>
               {t('Legal & notices', 'Лицензии и уведомления')}
             </Link>
@@ -348,6 +452,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
       />
 
       {needsTwoFactorSetup ? <TwoFactorSetupModal required={true} /> : null}
+      <WorkspaceHelp open={helpOpen} onClose={() => setHelpOpen(false)} guest={guest.data} />
     </div>
   );
 }

@@ -738,3 +738,30 @@ model DataLifecycleJob {
   @@index([projectId, createdAt], map: "data_lifecycle_project")
   @@map("data_lifecycle_job")
 }
+
+// Temporary application principals reuse the normal tenant and permission model.
+// Only a SHA-256 digest of the random HttpOnly cookie is stored.
+model GuestSession {
+  id String @id @db.Uuid
+  tokenHash String @unique @map("token_hash") @db.VarChar(64)
+  userId String @unique @map("user_id") @db.Uuid
+  workspaceId String @unique @map("workspace_id") @db.Uuid
+  projectId String @unique @map("project_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  datasetStartAt DateTime @map("dataset_start_at") @db.Timestamptz(6)
+  datasetEndAt DateTime @map("dataset_end_at") @db.Timestamptz(6)
+  windowStartedAt DateTime @default(now()) @map("window_started_at") @db.Timestamptz(6)
+  windowRequests Int @default(0) @map("window_requests")
+  lifetimeRequests Int @default(0) @map("lifetime_requests")
+  operations Json @default("{}")
+  @@index([expiresAt])
+  @@map("guest_session")
+}
+
+model GuestEntryLimit {
+  key String @id @db.VarChar(80)
+  windowStartedAt DateTime @map("window_started_at") @db.Timestamptz(6)
+  attempts Int @default(0)
+  @@map("guest_entry_limit")
+}

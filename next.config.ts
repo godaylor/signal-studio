@@ -88,6 +88,12 @@ const headers = [
   },
 ];
 
+// Guest cookies, project identifiers and session expiry must never be stored by caches.
+headers.push({
+  source: '/api/guest',
+  headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+});
+
 for (const source of [
   '/api/send',
   '/api/batch',
@@ -223,7 +229,15 @@ export default withNextIntl({
   basePath,
   output: isVercel ? undefined : 'standalone',
   outputFileTracingExcludes: {
-    '/*': ['.env', '.env.*', '.local/**/*', '.git/**/*', 'tests/**/*', 'playwright-report/**/*', 'test-results/**/*'],
+    '/*': [
+      '.env',
+      '.env.*',
+      '.local/**/*',
+      '.git/**/*',
+      'tests/**/*',
+      'playwright-report/**/*',
+      'test-results/**/*',
+    ],
   },
   typescript: {
     ignoreBuildErrors: false,

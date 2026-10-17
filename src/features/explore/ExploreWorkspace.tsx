@@ -9,12 +9,14 @@ import {
   LoaderCircle,
   Save,
   Search,
+  SlidersHorizontal,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { ExportControls } from '@/features/exports/ExportControls';
+import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { InsightLibrary, SaveInsightDialog } from '@/features/insights/InsightLibrary';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
@@ -43,6 +45,7 @@ import {
   type DisplayRow,
   dateInputToUtc,
   mergeAnalysisRows,
+  withAnalysisMode,
 } from './model';
 import { useAffectedSessions, useAnalysisResult } from './useAnalysisQuery';
 
@@ -75,9 +78,9 @@ function drilldownEvidenceHref(query: AnalysisQueryV1, sessionId: string, select
   return `/studio/${query.projectId}/experience?${params}`;
 }
 
-function safeQuery(params: URLSearchParams, projectId: string) {
+function safeQuery(params: URLSearchParams, projectId: string, defaultQuery?: AnalysisQueryV1) {
   if (!params.has('aqv')) {
-    return { query: createDefaultAnalysisQuery(projectId) };
+    return { query: defaultQuery ?? createDefaultAnalysisQuery(projectId) };
   }
 
   try {
@@ -119,13 +122,14 @@ export function ExploreWorkspace({
   projectName: string;
 }) {
   const { t } = useStudioLocale();
+  const guest = useGuestWorkspace();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const paramsKey = searchParams.toString();
   const restored = useMemo(
-    () => safeQuery(new URLSearchParams(paramsKey), projectId),
-    [paramsKey, projectId],
+    () => safeQuery(new URLSearchParams(paramsKey), projectId, guest?.defaultQuery),
+    [paramsKey, projectId, guest?.defaultQuery],
   );
   const [draft, setDraft] = useState<AnalysisQueryV1>(
     () => restored.query ?? createDefaultAnalysisQuery(projectId),
@@ -134,15 +138,17 @@ export function ExploreWorkspace({
   const [selectedRow, setSelectedRow] = useState<DisplayRow>();
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
   const [saveOpen, setSaveOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [queryError, setQueryError] = useState('');
   const [libraryOpen, setLibraryOpen] = useState(false);
   const result = useAnalysisResult(restored.error ? undefined : restored.query);
 
   useEffect(() => {
     if (!searchParams.has('aqv')) {
-      const query = createDefaultAnalysisQuery(projectId);
+      const query = guest?.defaultQuery ?? createDefaultAnalysisQuery(projectId);
       router.replace(`${pathname}?${serializeAnalysisQuery(query)}`, { scroll: false });
     }
-  }, [pathname, projectId, router, searchParams]);
+  }, [pathname, projectId, router, searchParams, guest?.defaultQuery]);
 
   useEffect(() => {
     if (restored.query) setDraft(restored.query);
@@ -151,8 +157,16 @@ export function ExploreWorkspace({
   const apply = () => {
     try {
       const serialized = serializeAnalysisQuery(draft);
+      setQueryError('');
+      setEditorOpen(false);
       router.push(`${pathname}?${serialized}`, { scroll: false });
     } catch {
+      setQueryError(
+        t(
+          'Check the event, filters and dates before running.',
+          'Проверьте событие, фильтры и даты перед запуском.',
+        ),
+      );
       setActiveBlock('context');
     }
   };
@@ -168,6 +182,71 @@ export function ExploreWorkspace({
     window.setTimeout(() => setCopyState('idle'), 1400);
   };
 
+  const composer = (
+    <>
+      <div className={styles.spineHeading}>
+        <p className={styles.eyebrow}>{t('Query Spine', 'Цепочка анализа')}</p>
+        <h2>{t('Question definition', 'Определение вопроса')}</h2>
+      </div>
+      <ol className={styles.blockList}>
+        {blocks.map((block, index) => (
+          <li key={block.id} data-active={activeBlock === block.id || undefined}>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <button
+              type="button"
+              aria-pressed={activeBlock === block.id}
+              onClick={() => setActiveBlock(block.id)}
+            >
+              <strong>
+                {t(
+                  block.label,
+                  {
+                    signal: 'События',
+                    measure: 'Метрика',
+                    breakdown: 'Представление',
+                    filters: 'Фильтры',
+                    context: 'Период',
+                  }[block.id],
+                )}
+              </strong>
+              <small>{blockValue(block.id, draft, t)}</small>
+            </button>
+          </li>
+        ))}
+      </ol>
+
+      <form
+        className={styles.editor}
+        onSubmit={event => {
+          event.preventDefault();
+          apply();
+        }}
+      >
+        {queryError ? (
+          <p role="alert" className={styles.help}>
+            {queryError}
+          </p>
+        ) : null}
+        <QueryBlockEditor block={activeBlock} query={draft} onChange={setDraft} />
+        <div className={styles.editorActions}>
+          <button type="submit" className={styles.primaryButton}>
+            {t('Run analysis', 'Выполнить анализ')}
+          </button>
+          <button
+            type="button"
+            className={styles.textButton}
+            onClick={() => {
+              setDraft({ ...draft, filters: [], match: 'all' });
+              resetFilters();
+            }}
+          >
+            {t('Reset filters only', 'Сбросить только фильтры')}
+          </button>
+        </div>
+      </form>
+    </>
+  );
+
   return (
     <section
       className={styles.workspace}
@@ -176,15 +255,19 @@ export function ExploreWorkspace({
       <header className={styles.heading}>
         <div>
           <p className={styles.eyebrow}>
-            {t('Reproducible analysis', 'Воспроизводимая аналитика')} · AnalysisQuery v1
+            {projectName} / {t('Explore', 'Анализ')}
           </p>
-          <h1>{t('Explore', 'Анализ')}</h1>
+          <h1>
+            {restored.query.mode === 'funnel'
+              ? t('Where do new users drop off?', 'Где теряются новые пользователи?')
+              : restored.query.mode === 'retention'
+                ? t('What brings people back?', 'Что возвращает пользователей?')
+                : t('How is product use changing?', 'Как меняется использование продукта?')}
+          </h1>
           <p>
-            {t('Ask a product-behavior question for', 'Задайте вопрос о поведении продукта для')}{' '}
-            {projectName},{' '}
             {t(
-              'compare context, and keep the exact definition in the URL.',
-              'сравните контекст и сохраните точное определение в URL.',
+              'Follow the behavior. Compare the result. Save your answer.',
+              'Исследуйте поведение. Сравнивайте результаты. Сохраняйте выводы.',
             )}
           </p>
         </div>
@@ -245,53 +328,50 @@ export function ExploreWorkspace({
         />
       ) : null}
 
-      {restored.query ? (
-        <div className={styles.instrument}>
-          <aside className={styles.spine} aria-labelledby="query-spine-heading">
-            <div className={styles.spineHeading}>
-              <p className={styles.eyebrow}>{t('Query Spine', 'Цепочка анализа')}</p>
-              <h2 id="query-spine-heading">{t('Question definition', 'Определение вопроса')}</h2>
-            </div>
-            <ol className={styles.blockList}>
-              {blocks.map((block, index) => (
-                <li key={block.id} data-active={activeBlock === block.id || undefined}>
-                  <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-                  <button
-                    type="button"
-                    aria-pressed={activeBlock === block.id}
-                    onClick={() => setActiveBlock(block.id)}
-                  >
-                    <strong>{block.label}</strong>
-                    <small>{blockValue(block.id, draft, t)}</small>
-                  </button>
-                </li>
-              ))}
-            </ol>
-
-            <form
-              className={styles.editor}
-              onSubmit={event => {
-                event.preventDefault();
-                apply();
+      <div className={styles.analysisToolbar}>
+        <div
+          className={styles.modeTabs}
+          role="group"
+          aria-label={t('Analysis type', 'Вид анализа')}
+        >
+          {(['trend', 'breakdown', 'funnel', 'retention'] as const).map(mode => (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={restored.query.mode === mode}
+              onClick={() => {
+                const next = withAnalysisMode(restored.query, mode);
+                setDraft(next);
+                setActiveBlock('signal');
+                router.push(pathname + '?' + serializeAnalysisQuery(next), { scroll: false });
               }}
             >
-              <QueryBlockEditor block={activeBlock} query={draft} onChange={setDraft} />
-              <div className={styles.editorActions}>
-                <button type="submit" className={styles.primaryButton}>
-                  {t('Run analysis', 'Выполнить анализ')}
-                </button>
-                <button
-                  type="button"
-                  className={styles.textButton}
-                  onClick={() => {
-                    setDraft({ ...draft, filters: [], match: 'all' });
-                    resetFilters();
-                  }}
-                >
-                  {t('Reset filters only', 'Сбросить только фильтры')}
-                </button>
-              </div>
-            </form>
+              {t(
+                {
+                  trend: 'Trend',
+                  breakdown: 'Breakdown',
+                  funnel: 'Funnel',
+                  retention: 'Retention',
+                }[mode],
+                {
+                  trend: 'Динамика',
+                  breakdown: 'Разбивка',
+                  funnel: 'Воронка',
+                  retention: 'Удержание',
+                }[mode],
+              )}
+            </button>
+          ))}
+        </div>
+        <button className={styles.mobileEdit} type="button" onClick={() => setEditorOpen(true)}>
+          <SlidersHorizontal size={16} aria-hidden="true" />
+          {t('Edit query', 'Изменить запрос')}
+        </button>
+      </div>
+      {restored.query ? (
+        <div className={styles.instrument}>
+          <aside className={styles.spine} aria-label={t('Query Spine', 'Цепочка анализа')}>
+            {composer}
           </aside>
 
           <main className={styles.canvas}>
@@ -327,6 +407,14 @@ export function ExploreWorkspace({
           />
         </>
       ) : null}
+      <AccessibleDialog
+        open={editorOpen}
+        onClose={() => setEditorOpen(false)}
+        title={t('Edit query', 'Изменить запрос')}
+        fullScreenOnMobile
+      >
+        <div className={styles.mobileEditorBody}>{composer}</div>
+      </AccessibleDialog>
       <InsightLibrary
         open={libraryOpen}
         projectId={projectId}
@@ -343,9 +431,13 @@ export function ExploreWorkspace({
 function blockValue(block: BlockId, query: AnalysisQueryV1, t: (en: string, ru: string) => string) {
   switch (block) {
     case 'signal':
-      if (query.mode === 'funnel') return `${query.funnel?.steps.length ?? 0} ${t('ordered steps', 'последовательных шагов')}`;
-      if (query.mode === 'retention') return t('Entry → return behavior', 'Первое действие → возвращение');
-      return query.measure.key === '*' ? t('All custom events', 'Все пользовательские события') : query.measure.key;
+      if (query.mode === 'funnel')
+        return `${query.funnel?.steps.length ?? 0} ${t('ordered steps', 'последовательных шагов')}`;
+      if (query.mode === 'retention')
+        return t('Entry → return behavior', 'Первое действие → возвращение');
+      return query.measure.key === '*'
+        ? t('All custom events', 'Все пользовательские события')
+        : query.measure.key;
     case 'measure':
       if (query.mode === 'funnel')
         return `${query.funnel?.conversionWindowMinutes ?? 0} ${t('minute window', 'минут на прохождение')}`;
@@ -363,9 +455,11 @@ function blockValue(block: BlockId, query: AnalysisQueryV1, t: (en: string, ru: 
             ? t('Retention matrix', 'Таблица удержания')
             : (query.breakdown?.field ?? t('Choose dimension', 'Выберите группировку'));
     case 'filters':
-      return query.filters.length ? `${query.filters.length} · ${query.match === 'all' ? t('match all', 'все условия') : t('match any', 'любое условие')}` : t('No filters', 'Без фильтров');
+      return query.filters.length
+        ? `${query.filters.length} · ${query.match === 'all' ? t('match all', 'все условия') : t('match any', 'любое условие')}`
+        : t('No filters', 'Без фильтров');
     case 'context':
-      return `${query.range.timezone} · ${comparisonLabel(query)}`;
+      return `${query.range.timezone} · ${t(comparisonLabel(query), comparisonLabel(query, 'ru-RU'))}`;
   }
 }
 
@@ -531,56 +625,9 @@ function QueryBlockEditor({
           <select
             aria-label={t('Analysis mode', 'Режим анализа')}
             value={query.mode}
-            onChange={event => {
-              const mode = event.target.value as AnalysisQueryV1['mode'];
-              if (mode === 'funnel') {
-                onChange({
-                  ...query,
-                  mode,
-                  comparison: query.comparison === 'previousPeriod' ? 'none' : query.comparison,
-                  breakdown: undefined,
-                  retention: undefined,
-                  funnel: query.funnel ?? {
-                    steps: [
-                      { type: 'event', value: 'signup', filters: [] },
-                      { type: 'event', value: 'onboarding_completed', filters: [] },
-                    ],
-                    conversionWindowMinutes: 1440,
-                  },
-                  measure: { source: 'event', key: 'signup', aggregation: 'count' },
-                  visualization: 'bar',
-                });
-                return;
-              }
-              if (mode === 'retention') {
-                onChange({
-                  ...query,
-                  mode,
-                  comparison: query.comparison === 'previousPeriod' ? 'none' : query.comparison,
-                  breakdown: undefined,
-                  funnel: undefined,
-                  retention: query.retention ?? {
-                    entry: { type: 'event', value: 'signup', filters: [] },
-                    returning: { type: 'event', value: 'core_feature_used', filters: [] },
-                    granularity: 'week',
-                    periods: 8,
-                  },
-                  range: { ...query.range, unit: 'week' },
-                  measure: { source: 'event', key: 'signup', aggregation: 'count' },
-                  visualization: 'matrix',
-                });
-                return;
-              }
-              onChange({
-                ...query,
-                mode,
-                funnel: undefined,
-                retention: undefined,
-                ...(mode === 'breakdown'
-                  ? { breakdown: { field: 'urlPath', limit: 10 }, visualization: 'bar' }
-                  : { breakdown: undefined, visualization: 'line' }),
-              });
-            }}
+            onChange={event =>
+              onChange(withAnalysisMode(query, event.target.value as AnalysisQueryV1['mode']))
+            }
           >
             <option value="trend">{t('Trend', 'Тренд')}</option>
             <option value="breakdown">{t('Breakdown', 'Разбивка')}</option>
@@ -966,11 +1013,11 @@ function ResultCanvas({
     return (
       <div className={styles.resultState} role="status" aria-live="polite">
         <LoaderCircle className={styles.spin} aria-hidden="true" />
-        <h2>{t('Running exact PostgreSQL analysis', 'Выполняется точный анализ PostgreSQL')}</h2>
+        <h2>{t('Calculating your answer', 'Рассчитываем результат')}</h2>
         <p>
           {t(
-            'Keeping the chart and table layout stable while the query runs.',
-            'Сохраняем стабильную разметку графика и таблицы во время выполнения запроса.',
+            'Checking the events that match your question.',
+            'Считаем события, соответствующие вашему вопросу.',
           )}
         </p>
       </div>
@@ -1025,12 +1072,34 @@ function ResultCanvas({
   }
 
   const stale = Date.now() - result.dataUpdatedAt > 120_000;
+  const funnelSteps =
+    query.mode === 'funnel' && !query.breakdown
+      ? data.data.rows.filter(
+          (row): row is import('@/server/analytics/contracts').AnalysisFunnelStepRow =>
+            'kind' in row && row.kind === 'funnel-step',
+        )
+      : [];
+  const firstStep = funnelSteps[0];
+  const lastStep = funnelSteps.at(-1);
+  const answer =
+    data.data.total ??
+    (firstStep && lastStep
+      ? {
+          value: lastStep.converted,
+          denominator: firstStep.converted,
+          rate: lastStep.overallConversionRate,
+        }
+      : query.mode === 'trend' &&
+          query.measure.source === 'event' &&
+          query.measure.aggregation === 'count'
+        ? { value: rows.reduce((sum, row) => sum + row.value, 0) }
+        : undefined);
 
   return (
     <div className={styles.result}>
       <header className={styles.resultHeader}>
         <div>
-          <p className={styles.eyebrow}>{t('Result canvas', 'Область результата')}</p>
+          <p className={styles.eyebrow}>{t('Your answer', 'Результат')}</p>
           <h2>
             {query.mode === 'funnel'
               ? t('Ordered funnel', 'Упорядоченная воронка')
@@ -1041,8 +1110,11 @@ function ResultCanvas({
                   : query.measure.key}
           </h2>
           <p>
-            {comparisonLabel(query)} · {data.exactness === 'exact' ? t('Exact count', 'Точный подсчёт') : t('Estimate', 'Оценка')} · {t('generated', 'сформировано')}{' '}
-            {new Date(data.generatedAt).toLocaleString(locale)}
+            {comparisonLabel(query, locale)} ·{' '}
+            {data.exactness === 'exact'
+              ? t('Exact count', 'Точный подсчёт')
+              : t('Estimate', 'Оценка')}{' '}
+            · {t('generated', 'сформировано')} {new Date(data.generatedAt).toLocaleString(locale)}
           </p>
         </div>
         <span className={styles.freshness} data-stale={stale || undefined}>
@@ -1060,27 +1132,54 @@ function ResultCanvas({
           )}
         </p>
       ) : null}
-      {data.data.total ? (
-        <section aria-label={t('Range total', 'Итог диапазона')} className={styles.notice}>
-          <p>
-            {t('Exact range total', 'Точный итог диапазона')}:{' '}
-            {data.data.total.value.toLocaleString(locale)}
+      {answer ? (
+        <section aria-label={t('Range total', 'Итог диапазона')} className={styles.answer}>
+          <div>
+            <span>
+              {query.mode === 'funnel'
+                ? t('Completed every step', 'Прошли все шаги')
+                : t('Exact range total', 'Точный итог диапазона')}
+            </span>
+            <strong>{answer.value.toLocaleString(locale)}</strong>
             {query.measure.source === 'revenue' ? ` ${query.measure.property}` : ''}
-            {data.data.total.denominator !== undefined
-              ? ` / ${data.data.total.denominator.toLocaleString(locale)}`
-              : ''}
-            {data.data.total.rate !== undefined
-              ? ` · ${data.data.total.rate === null ? t('No eligible denominator', 'Нет подходящего знаменателя') : new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(data.data.total.rate)}`
-              : ''}
-          </p>
+            {answer.denominator !== undefined ? (
+              <small>
+                {t('of', 'из')} {answer.denominator.toLocaleString(locale)}{' '}
+                {t('eligible users', 'подходящих участников')}
+              </small>
+            ) : (
+              <small>
+                {query.measure.aggregation === 'count'
+                  ? t('events in the selected range', 'событий за выбранный период')
+                  : t('in the selected range', 'за выбранный период')}
+              </small>
+            )}
+          </div>
+          {answer.rate != null ? (
+            <div>
+              <span>{t('Conversion', 'Конверсия')}</span>
+              <strong>
+                {new Intl.NumberFormat(locale, {
+                  style: 'percent',
+                  maximumFractionDigits: 1,
+                }).format(answer.rate)}
+              </strong>
+              <small>{t('with the current definition', 'по текущему определению')}</small>
+            </div>
+          ) : null}
           {data.data.comparisonTotal ? (
-            <p>
-              {t('Previous period total', 'Итог предыдущего периода')}:{' '}
-              {data.data.comparisonTotal.value.toLocaleString(locale)}
-              {data.data.comparisonTotal.rate != null
-                ? ` · ${new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(data.data.comparisonTotal.rate)}`
-                : ''}
-            </p>
+            <div>
+              <span>{t('Previous period total', 'Итог предыдущего периода')}: </span>
+              <strong>{data.data.comparisonTotal.value.toLocaleString(locale)}</strong>
+              <small>
+                {data.data.comparisonTotal.rate != null
+                  ? new Intl.NumberFormat(locale, {
+                      style: 'percent',
+                      maximumFractionDigits: 1,
+                    }).format(data.data.comparisonTotal.rate)
+                  : t('in the previous period', 'за предыдущий период')}
+              </small>
+            </div>
           ) : null}
         </section>
       ) : null}
@@ -1132,7 +1231,7 @@ function ResultCanvas({
 }
 
 function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow[] }) {
-  const { locale } = useStudioLocale();
+  const { locale, t } = useStudioLocale();
   const max = Math.max(...rows.flatMap(row => [row.value, row.comparison ?? 0]), 1);
   const label = analysisSummary(query, rows);
 
@@ -1184,21 +1283,41 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
   return (
     <figure className={styles.chart} role="img" aria-label={label}>
       <figcaption>{label}</figcaption>
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <g className={styles.gridLines}>
-          <line x1="0" y1="25" x2="100" y2="25" />
-          <line x1="0" y1="50" x2="100" y2="50" />
-          <line x1="0" y1="75" x2="100" y2="75" />
-        </g>
-        <polyline points={points} />
+      <div className={styles.linePlot}>
+        <div className={styles.yAxis} aria-hidden="true">
+          {[max, max / 2, 0].map(value => (
+            <span key={value}>{value.toLocaleString(locale, { maximumFractionDigits: 1 })}</span>
+          ))}
+        </div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <g className={styles.gridLines}>
+            <line x1="0" y1="25" x2="100" y2="25" />
+            <line x1="0" y1="50" x2="100" y2="50" />
+            <line x1="0" y1="75" x2="100" y2="75" />
+          </g>
+          <polyline points={points} />
+          {comparisonPoints ? (
+            <polyline className={styles.comparisonLine} points={comparisonPoints} />
+          ) : null}
+        </svg>
+      </div>
+      <div className={styles.xAxis} aria-hidden="true">
+        <span>{rows[0]?.key.slice(0, 10)}</span>
+        <span>{rows[Math.floor(rows.length / 2)]?.key.slice(0, 10)}</span>
+        <span>{rows.at(-1)?.key.slice(0, 10)}</span>
+      </div>
+      <div className={styles.legend}>
+        <span>
+          <i aria-hidden="true" />
+          {query.measure.key === '*' ? t('All events', 'Все события') : query.measure.key}
+        </span>
         {comparisonPoints ? (
-          <polyline className={styles.comparisonLine} points={comparisonPoints} />
+          <span>
+            <i aria-hidden="true" />
+            {t('Previous period', 'Предыдущий период')}
+          </span>
         ) : null}
-        {points.split(' ').map(point => {
-          const [cx, cy] = point.split(',');
-          return <circle key={point} cx={cx} cy={cy} r="1.7" />;
-        })}
-      </svg>
+      </div>
     </figure>
   );
 }
@@ -1225,7 +1344,9 @@ function ResultTable({
               {query.mode === 'trend' ? t('Bucket', 'Интервал') : query.breakdown?.field}
             </th>
             <th scope="col">{t('Exact count', 'Точное количество')}</th>
-            {query.comparison !== 'none' ? <th scope="col">{comparisonLabel(query)}</th> : null}
+            {query.comparison !== 'none' ? (
+              <th scope="col">{comparisonLabel(query, locale)}</th>
+            ) : null}
             {query.comparison !== 'none' ? <th scope="col">{t('Change', 'Изменение')}</th> : null}
             <th scope="col">{t('Evidence', 'Данные')}</th>
           </tr>

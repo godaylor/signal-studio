@@ -1,5 +1,24 @@
 # Signal Studio transformation plan
 
+## M19 — Real guest workspace and visual redesign (2026-10-17)
+
+Explicit current user scope: replace the page-local public walkthrough as the
+primary trial with an isolated, server-persistent, expiring guest workspace.
+Reuse application authentication/authorization, PostgreSQL analytics, Insights,
+Dashboards and bounded exports. Preserve accounts, permissions, data, legal
+attribution and other projects' processes/containers. Use a free local port.
+
+Design scope: compare multiple imagegen concepts, select one coherent visual
+language, implement the Studio shell and primary desktop/mobile surfaces, move
+technical explanations into help, and compare real screenshots with mockups.
+
+Definition of done: real synthetic-event calculations; editable analyses;
+save/reopen after reload; dashboard composition; working bounded export;
+cross-guest denial, expiry, resource bounds and error states; desktop/mobile
+workflow and accessibility checks; typecheck/lint/production build and relevant
+regressions; before/after artifacts and truthful limitations. No claim of hosted
+deployment until that exact revision has been deployed and verified.
+
 ## Current authorized deployment continuation — 2026-09-18
 
 Use existing Neon Free `signal-studio` and Vercel Hobby, preserving all product

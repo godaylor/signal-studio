@@ -27,7 +27,7 @@ export async function getExportWorkerAuth(
     where: { id: requesterId, deletedAt: null },
     select: { id: true, username: true, role: true, sessionVersion: true },
   });
-  if (!user || user.sessionVersion !== sessionVersion)
+  if (!user || user.role === 'guest' || user.sessionVersion !== sessionVersion)
     throw new ExportError('export-access-revoked', 403);
   return {
     user: { id: user.id, username: user.username, role: user.role, isAdmin: user.role === 'admin' },

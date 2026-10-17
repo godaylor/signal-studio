@@ -1,7 +1,7 @@
 .workspace {
-  width: min(100%, 1440px);
+  width: min(100%, 1480px);
   margin-inline: auto;
-  padding: clamp(28px, 4vw, 58px) clamp(16px, 4vw, 56px) 72px;
+  padding: clamp(24px, 3.2vw, 42px) clamp(16px, 3.2vw, 42px) 76px;
   color: var(--studio-ink);
 }
 .heading {
@@ -13,14 +13,14 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 18px;
-  color: var(--studio-cobalt);
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
   font-weight: 700;
   text-decoration: none;
 }
 .heading p,
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--studio-cobalt);
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.11em;
@@ -28,22 +28,23 @@
 }
 .heading h1 {
   margin: 0;
-  font-size: clamp(29px, 4vw, 42px);
+  font-size: clamp(28px, 3.3vw, 40px);
   letter-spacing: -0.045em;
   line-height: 1.08;
 }
 .heading span {
   display: block;
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--studio-ink-muted);
   line-height: 1.55;
+  font-size: 14px;
 }
 .state,
 .panel,
 .contextStrip {
   background: var(--studio-surface);
   border: 1px solid var(--studio-grid);
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .state {
   padding: clamp(24px, 5vw, 48px);
@@ -59,6 +60,7 @@
   grid-template-columns: repeat(3, 1fr);
   margin-bottom: 16px;
   border-left: 4px solid var(--studio-cobalt);
+  background: var(--studio-cobalt-soft);
 }
 .contextStrip div {
   display: grid;
@@ -85,7 +87,7 @@
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
-  gap: 18px;
+  gap: 20px;
   align-items: start;
 }
 .panel {
@@ -103,7 +105,7 @@
   line-height: 1.55;
 }
 .panel a {
-  color: var(--studio-cobalt);
+  color: var(--studio-cobalt-text, var(--studio-cobalt));
   font-weight: 700;
 }
 .rail {
@@ -115,13 +117,26 @@
   gap: 0;
   padding: 0;
   list-style: none;
+  position: relative;
 }
 .timeline li {
+  position: relative;
   display: grid;
   grid-template-columns: 155px minmax(0, 1fr);
   gap: 18px;
-  padding: 15px 0;
+  padding: 18px 0 18px 20px;
   border-bottom: 1px solid var(--studio-grid);
+  border-left: 1px solid color-mix(in srgb, var(--studio-cobalt) 35%, var(--studio-grid));
+}
+.timeline li::before {
+  content: "";
+  position: absolute;
+  top: 23px;
+  left: -4px;
+  width: 7px;
+  height: 7px;
+  background: var(--studio-cobalt);
+  border-radius: 50%;
 }
 .timeline time {
   color: var(--studio-ink-muted);
@@ -143,17 +158,16 @@
 .timeline dl {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 6px 12px;
   margin: 5px 0 0;
 }
 .timeline dl div {
   display: inline-flex;
   gap: 4px;
-  padding: 4px 7px;
-  background: var(--studio-canvas);
-  border: 1px solid var(--studio-grid);
-  border-radius: 4px;
-  font-size: 10px;
+  padding: 2px 0;
+  font-size: 11px;
+  color: var(--studio-ink-muted);
+  overflow-wrap: anywhere;
 }
 .timeline dt::after {
   content: ":";
@@ -169,6 +183,7 @@
 .metrics div {
   padding: 10px;
   background: var(--studio-canvas);
+  border-radius: 5px;
 }
 .metrics dt {
   color: var(--studio-ink-muted);
@@ -177,6 +192,7 @@
 .metrics dd {
   margin: 3px 0 0;
   font-weight: 750;
+  font-variant-numeric: tabular-nums;
 }
 .replayState {
   padding: 11px;
@@ -191,14 +207,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 38px;
+  min-height: 42px;
   padding: 8px 13px;
   border-radius: 6px;
   font-weight: 700;
   cursor: pointer;
 }
 .primaryButton {
-  color: white;
+  color: var(--studio-on-accent, #fff);
   background: var(--studio-cobalt);
   border: 1px solid var(--studio-cobalt);
 }
@@ -207,12 +223,26 @@
   background: var(--studio-surface);
   border: 1px solid var(--studio-grid-strong);
 }
+.definition {
+  margin-block: 12px;
+  color: var(--studio-ink-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.definition summary {
+  cursor: pointer;
+  padding-block: 6px;
+}
 @media (max-width: 960px) {
   .grid {
     grid-template-columns: 1fr;
   }
 }
 @media (max-width: 620px) {
+  .primaryButton,
+  .secondaryButton {
+    min-height: 44px;
+  }
   .contextStrip {
     grid-template-columns: 1fr;
   }

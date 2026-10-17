@@ -30,6 +30,12 @@ export async function withLifecycleIngestion(
   return lockDatabase().$transaction(
     async tx => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock_shared(hashtext(${`lifecycle:${projectId}`}))::text`;
+      // The fictional guest fixture is fixed. Public tracker/recorder requests
+      // must never grow it or introduce real personal data, even after expiry.
+      const guest = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT id FROM guest_session WHERE project_id=${projectId}::uuid LIMIT 1`;
+      if (guest.length) return Response.json({ error: { code: 'guest-synthetic-source' } },
+        { status: 403, headers: { 'access-control-allow-origin': '*' } });
       const jobs = await tx.$queryRaw<
         Array<{ id: string }>
       >`SELECT id FROM data_lifecycle_job WHERE project_id=${projectId}::uuid AND status IN ('queued','running') LIMIT 1`;

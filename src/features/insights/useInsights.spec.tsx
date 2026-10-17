@@ -5,7 +5,9 @@ import { afterEach, expect, test, vi } from 'vitest';
 import type { InsightDto } from '@/server/insights/insight-service';
 import { useUpdateInsight } from './useInsights';
 
-vi.mock('@/lib/client', () => ({ getClientAuthToken: () => 'test-token' }));
+vi.mock('@/lib/client', () => ({
+  getClientAuthHeaders: () => ({ authorization: 'Bearer test-token' }),
+}));
 
 const projectId = 'd5a950d4-4d31-4c0f-b7a4-41dce9e0a003';
 const insight = {

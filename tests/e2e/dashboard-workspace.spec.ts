@@ -181,6 +181,6 @@ test('Insight is assembled into a responsive accessible Dashboard with deduplica
   await expect(page.locator('main').last()).toHaveScreenshot('dashboard-mobile.png', {
     animations: 'disabled',
     maxDiffPixelRatio: 0.02,
-    mask: [page.getByText(/updated /), page.getByText(/exact ·/)],
+    mask: [page.getByText(/updated /), page.getByText(/exact count ·/i)],
   });
 });

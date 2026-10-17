@@ -1,54 +1,113 @@
 .content {
   display: grid;
-  gap: 14px;
-  padding: 20px;
+  gap: 20px;
+  padding: 12px 24px 28px;
   max-height: 70dvh;
   overflow: auto;
+  color: var(--studio-ink);
 }
 .content p {
   margin: 0;
+  line-height: 1.55;
+}
+.content h3 {
+  margin: 8px 0 0;
+  font-size: 17px;
+  letter-spacing: -0.025em;
 }
 .content label {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+  color: var(--studio-ink-muted);
+  font-size: 13px;
 }
 .content select,
 .button,
+.primaryButton,
 .jobs button {
+  min-height: 42px;
+  padding: 9px 14px;
   font: inherit;
-  color: inherit;
-  background: transparent;
-  border: 1px solid currentColor;
+  font-weight: 650;
+  color: var(--studio-ink);
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-grid-strong);
   border-radius: 6px;
-  padding: 8px 12px;
-  min-height: 40px;
 }
-.button {
+.button,
+.primaryButton,
+.jobs button {
   cursor: pointer;
+}
+.button:hover,
+.jobs button:hover {
+  border-color: var(--studio-cobalt);
+}
+.primaryButton {
+  color: var(--studio-on-accent, #fff);
+  background: var(--studio-cobalt);
+  border-color: var(--studio-cobalt);
 }
 .content button:focus-visible,
 .button:focus-visible,
-.content select:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 3px;
+.content select:focus-visible,
+.definition summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--studio-focus, var(--studio-cobalt)) 55%, transparent);
+  outline-offset: 2px;
+}
+.definition {
+  padding: 12px 14px;
+  color: var(--studio-ink-muted);
+  background: var(--studio-canvas);
+  border: 1px solid var(--studio-grid);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.definition summary {
+  cursor: pointer;
+  line-height: 1.5;
+}
+.definition p {
+  margin-top: 10px;
 }
 .jobs {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 16px;
 }
 .jobs li {
   display: grid;
-  gap: 6px;
+  gap: 8px;
+  padding: 18px 0;
   overflow-wrap: anywhere;
-  border-top: 1px solid currentColor;
-  padding-top: 12px;
+  border-top: 1px solid var(--studio-grid);
 }
-.content button:disabled {
+.jobs li > span {
+  color: var(--studio-ink-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.content button:disabled,
+.content button[aria-disabled="true"],
+.button:disabled {
   opacity: 0.55;
   cursor: wait;
+}
+.content code {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .content {
+    padding-inline: 16px;
+  }
+  .content select,
+  .button,
+  .primaryButton,
+  .jobs button {
+    min-height: 44px;
+  }
 }

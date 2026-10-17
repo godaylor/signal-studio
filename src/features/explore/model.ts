@@ -60,6 +60,55 @@ export function createDefaultAnalysisQuery(projectId: string, now = new Date()):
   };
 }
 
+export function withAnalysisMode(
+  query: AnalysisQueryV1,
+  mode: AnalysisQueryV1['mode'],
+): AnalysisQueryV1 {
+  if (mode === 'funnel')
+    return {
+      ...query,
+      mode,
+      comparison: query.comparison === 'previousPeriod' ? 'none' : query.comparison,
+      breakdown: undefined,
+      retention: undefined,
+      funnel: query.funnel ?? {
+        steps: [
+          { type: 'event', value: 'signup', filters: [] },
+          { type: 'event', value: 'onboarding_completed', filters: [] },
+        ],
+        conversionWindowMinutes: 1440,
+      },
+      measure: { source: 'event', key: 'signup', aggregation: 'count' },
+      visualization: 'bar',
+    };
+  if (mode === 'retention')
+    return {
+      ...query,
+      mode,
+      comparison: query.comparison === 'previousPeriod' ? 'none' : query.comparison,
+      breakdown: undefined,
+      funnel: undefined,
+      retention: query.retention ?? {
+        entry: { type: 'event', value: 'signup', filters: [] },
+        returning: { type: 'event', value: 'core_feature_used', filters: [] },
+        granularity: 'week',
+        periods: 8,
+      },
+      range: { ...query.range, unit: 'week' },
+      measure: { source: 'event', key: 'signup', aggregation: 'count' },
+      visualization: 'matrix',
+    };
+  return {
+    ...query,
+    mode,
+    funnel: undefined,
+    retention: undefined,
+    ...(mode === 'breakdown'
+      ? { breakdown: { field: 'urlPath' as const, limit: 10 }, visualization: 'bar' as const }
+      : { breakdown: undefined, visualization: 'line' as const }),
+  };
+}
+
 function rowKey(row: AnalysisTrendRow | AnalysisBreakdownRow) {
   return 'bucket' in row ? row.bucket : row.key;
 }
@@ -99,13 +148,14 @@ export function mergeAnalysisRows(
   });
 }
 
-export function comparisonLabel(query: AnalysisQueryV1) {
-  if (query.comparison === 'previousPeriod') return 'Previous period';
+export function comparisonLabel(query: AnalysisQueryV1, locale = 'en-US') {
+  if (query.comparison === 'previousPeriod')
+    return locale === 'en-US' ? 'Previous period' : 'Предыдущий период';
   if (query.comparison === 'segment' && query.comparisonFilter) {
     const filter = query.comparisonFilter;
     return `${filter.field} ${filter.operator} ${filter.value}`;
   }
-  return 'No comparison';
+  return locale === 'en-US' ? 'No comparison' : 'Без сравнения';
 }
 
 export function analysisSummary(query: AnalysisQueryV1, rows: DisplayRow[]) {

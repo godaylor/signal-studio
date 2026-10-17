@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getApiUrl } from '@/lib/api-url';
-import { getClientAuthToken } from '@/lib/client';
+import { getClientAuthHeaders } from '@/lib/client';
 
 export type EvidenceEvent = {
   id: string;
@@ -54,7 +54,7 @@ export type SessionEvidence = {
 async function requestJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(url, {
     signal,
-    headers: { authorization: `Bearer ${getClientAuthToken()}` },
+    headers: getClientAuthHeaders(),
   });
   const payload = await response.json();
   if (!response.ok) {

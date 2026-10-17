@@ -21,6 +21,7 @@ export function AccessibleDialog({
   description,
   onClose,
   side = 'center',
+  fullScreenOnMobile = false,
   children,
 }: {
   open: boolean;
@@ -28,6 +29,7 @@ export function AccessibleDialog({
   description?: string;
   onClose: () => void;
   side?: 'center' | 'left';
+  fullScreenOnMobile?: boolean;
   children: ReactNode;
 }) {
   const { t } = useStudioLocale();
@@ -105,6 +107,7 @@ export function AccessibleDialog({
       <div
         ref={dialogRef}
         className={side === 'left' ? styles.dialogLeft : styles.dialogCenter}
+        data-fullscreen-mobile={fullScreenOnMobile || undefined}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

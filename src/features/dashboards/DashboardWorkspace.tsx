@@ -16,10 +16,11 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { dateInputToUtc } from '@/features/explore/model';
 import { useAnalysisResult } from '@/features/explore/useAnalysisQuery';
-import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { ExportControls } from '@/features/exports/ExportControls';
+import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { useInsights } from '@/features/insights/useInsights';
 import { StudioState } from '@/features/studio-shell/StudioState';
+import type { AnalysisFunnelStepRow } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import { applyDashboardContext, type DashboardGlobalContext } from '@/server/dashboards/context';
 import type { DashboardWidgetDto } from '@/server/dashboards/dashboard-service';
@@ -78,10 +79,7 @@ export function DashboardWorkspace({
       <StudioState
         variant="loading"
         title={t('Loading dashboards', 'Загрузка дашбордов')}
-        message={t(
-          'Preparing reusable Insight references.',
-          'Подготавливаем ссылки на повторно используемые инсайты.',
-        )}
+        message={t('Loading your saved views.', 'Загружаем сохранённые представления.')}
       />
     );
   if (dashboards.error)
@@ -113,16 +111,13 @@ export function DashboardWorkspace({
     >
       <header className={styles.heading}>
         <div>
-          <p>
-            {t(
-              'Reusable Insights · shared context · isolated failures',
-              'Повторно используемые инсайты · общий контекст · изолированные ошибки',
-            )}
-          </p>
+          <p>{projectName}</p>
           <h1>{t('Dashboards', 'Дашборды')}</h1>
           <span>
-            {t('Curate decision surfaces for', 'Собирайте панели решений для')} {projectName}{' '}
-            {t('without copying analytical queries.', 'без копирования аналитических запросов.')}
+            {t(
+              'Keep the answers that matter in one view.',
+              'Соберите важные ответы в одном представлении.',
+            )}
           </span>
         </div>
         <form
@@ -187,13 +182,11 @@ export function DashboardWorkspace({
             <div className={styles.dashboardHeader}>
               <div>
                 <p>
-                  {selected.owner.username} · {t('updated', 'обновлено')}{' '}
-                  {new Date(selected.updatedAt).toLocaleString(locale)}
+                  <span className="sr-only">{selected.owner.username} · </span>
+                  {t('updated', 'обновлено')} {new Date(selected.updatedAt).toLocaleString(locale)}
                 </p>
                 <h2>{selected.title}</h2>
-                <span>
-                  {selected.description || t('No dashboard description', 'Без описания дашборда')}
-                </span>
+                {selected.description ? <span>{selected.description}</span> : null}
               </div>
               <div className={styles.modeSwitch} aria-label={t('Dashboard mode', 'Режим дашборда')}>
                 <button
@@ -526,6 +519,34 @@ export function DashboardWidget({
   const result = useAnalysisResult(
     applied && applied.state !== 'incompatible' ? applied.query : undefined,
   );
+  const funnelSteps =
+    result.data?.data.mode === 'funnel'
+      ? result.data.data.rows.filter(
+          (row): row is AnalysisFunnelStepRow => 'kind' in row && row.kind === 'funnel-step',
+        )
+      : [];
+  const hasFunnelSegments = funnelSteps.some(row => row.segment !== undefined);
+  const rows = result.data?.data.mode === 'funnel' ? funnelSteps : (result.data?.data.rows ?? []);
+  const visibleRows = rows.slice(
+    0,
+    result.data?.data.mode === 'funnel' && !hasFunnelSegments ? 8 : 6,
+  );
+  const rowLabel = (row: (typeof rows)[number]) => {
+    if ('label' in row)
+      return 'segment' in row && row.segment ? `${row.segment} · ${row.label}` : row.label;
+    if ('key' in row) return row.key;
+    if ('bucket' in row) {
+      const date = new Date(row.bucket);
+      return Number.isNaN(date.getTime())
+        ? row.bucket
+        : date.toLocaleDateString(locale, {
+            timeZone: applied?.query.range.timezone ?? 'UTC',
+            day: 'numeric',
+            month: 'short',
+          });
+    }
+    return `${new Date(row.cohortStart).toLocaleDateString(locale, { timeZone: 'UTC' })} · P${row.period}`;
+  };
 
   if (widget.kind === 'header')
     return (
@@ -557,9 +578,7 @@ export function DashboardWidget({
     <div className={styles.widget}>
       <header>
         <div>
-          <p>
-            {t('Insight', 'Инсайт')} · {widget.insight.owner.username}
-          </p>
+          <p>{t('Insight', 'Инсайт')}</p>
           <h3>{widget.insight.title}</h3>
         </div>
         <span data-context={applied.state}>
@@ -585,20 +604,58 @@ export function DashboardWidget({
       ) : result.data ? (
         <>
           <div className={styles.widgetMeta}>
-            <ExportControls projectId={applied.query.projectId} source={{ kind: 'analysis', query: applied.query }} disabled={result.isFetching} />
-            <strong>
-              {result.data.data.rows
-                .reduce(
-                  (sum, row: any) => sum + Number(row.value ?? row.converted ?? row.retained ?? 0),
-                  0,
-                )
-                .toLocaleString(locale)}
-            </strong>
-            <span>
-              {result.data.exactness === 'exact' ? t('Exact count', 'Точный подсчёт') : t('Estimate', 'Оценка')} ·{' '}
-              {new Date(result.data.freshnessAt).toLocaleTimeString(locale)}
-            </span>
+            <div>
+              {result.data.data.total ? (
+                <>
+                  <strong>{result.data.data.total.value.toLocaleString(locale)}</strong>
+                  {result.data.data.total.denominator != null ? (
+                    <span>
+                      {' '}
+                      {t('of', 'из')} {result.data.data.total.denominator.toLocaleString(locale)}
+                      {result.data.data.total.rate != null
+                        ? ` · ${result.data.data.total.rate.toLocaleString(locale, { style: 'percent', maximumFractionDigits: 1 })}`
+                        : ''}
+                    </span>
+                  ) : null}
+                </>
+              ) : null}
+              <small>
+                {result.data.exactness === 'exact'
+                  ? t('Exact count', 'Точный подсчёт')
+                  : t('Estimate', 'Оценка')}{' '}
+                · {new Date(result.data.freshnessAt).toLocaleTimeString(locale)}
+              </small>
+            </div>
+            <ExportControls
+              projectId={applied.query.projectId}
+              source={{ kind: 'analysis', query: applied.query }}
+              disabled={result.isFetching}
+            />
           </div>
+          {funnelSteps.length && !hasFunnelSegments ? (
+            <ol
+              className={styles.funnelBars}
+              aria-label={t('Funnel conversion by step', 'Конверсия воронки по шагам')}
+            >
+              {funnelSteps.map(row => (
+                <li key={row.step}>
+                  <span>{row.label}</span>
+                  <div aria-hidden="true">
+                    <i style={{ width: `${row.overallConversionRate * 100}%` }} />
+                  </div>
+                  <strong>
+                    {row.converted.toLocaleString(locale)}{' '}
+                    <small>
+                      {row.overallConversionRate.toLocaleString(locale, {
+                        style: 'percent',
+                        maximumFractionDigits: 1,
+                      })}
+                    </small>
+                  </strong>
+                </li>
+              ))}
+            </ol>
+          ) : null}
           <table>
             <caption>
               {t('Data for', 'Данные для')} {widget.insight.title}
@@ -607,25 +664,39 @@ export function DashboardWidget({
               <tr>
                 <th scope="col">{t('Value', 'Значение')}</th>
                 <th scope="col">{t('Count', 'Количество')}</th>
+                {funnelSteps.length ? <th scope="col">{t('Conversion', 'Конверсия')}</th> : null}
               </tr>
             </thead>
             <tbody>
-              {result.data.data.rows.slice(0, 6).map((row: any, index) => (
-                <tr
-                  key={`${row.kind ?? 'metric'}-${row.bucket ?? row.key ?? row.cohortStart ?? row.step}-${index}`}
-                >
-                  <th scope="row">
-                    {row.label ?? row.bucket ?? row.key ?? `${row.cohortStart} · P${row.period}`}
-                  </th>
-                  <td>
-                    {Number(row.value ?? row.converted ?? row.retained ?? 0).toLocaleString(locale)}
-                  </td>
+              {visibleRows.map((row, index) => (
+                <tr key={`${rowLabel(row)}-${index}`}>
+                  <th scope="row">{rowLabel(row)}</th>
+                  <td>{row.value.toLocaleString(locale)}</td>
+                  {'overallConversionRate' in row ? (
+                    <td>
+                      {row.overallConversionRate.toLocaleString(locale, {
+                        style: 'percent',
+                        maximumFractionDigits: 1,
+                      })}
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>
           </table>
           <details>
             <summary>{t('Definition and freshness', 'Определение и свежесть')}</summary>
+            <p>
+              {t('Owner', 'Владелец')}: {widget.insight.owner.username}
+            </p>
+            {rows.length > visibleRows.length ? (
+              <p>
+                {t(
+                  `Showing ${visibleRows.length} of ${rows.length} rows. Open the insight to see every result.`,
+                  `Показано ${visibleRows.length} из ${rows.length} строк. Откройте инсайт, чтобы увидеть все результаты.`,
+                )}
+              </p>
+            ) : null}
             {result.data.definitions.map(definition => (
               <p key={definition.key}>
                 <strong>{definition.label}</strong> — {definition.description}

@@ -149,8 +149,8 @@ export function LiveWorkspace({
           <h1>{t('Current activity', 'Текущая активность')}</h1>
           <span>
             {t(
-              'One timestamped snapshot powers every instrument below. Window: trailing 30 minutes, UTC.',
-              'Все инструменты ниже используют один снимок с отметкой времени. Окно: последние 30 минут, UTC.',
+              'See who is active and what is changing over the last 30 minutes.',
+              'Кто активен сейчас и что меняется за последние 30 минут.',
             )}
           </span>
         </div>
@@ -240,7 +240,7 @@ export function LiveWorkspace({
         <section className={styles.panel}>
           <header className={styles.panelHeading}>
             <div>
-              <p>{t('Velocity table', 'Таблица интенсивности')}</p>
+              <p>{t('Last 30 minutes', 'Последние 30 минут')}</p>
               <h2>{t('Minute-by-minute signal', 'Сигнал по минутам')}</h2>
             </div>
             <Activity aria-hidden="true" size={20} />
@@ -331,7 +331,7 @@ export function LiveWorkspace({
       <section className={styles.panel}>
         <header className={styles.panelHeading}>
           <div>
-            <p>{t('Bounded activity stream', 'Ограниченный поток активности')}</p>
+            <p>{t('Activity stream', 'Поток активности')}</p>
             <h2>{t('Recent observations', 'Недавние наблюдения')}</h2>
           </div>
           <span>
@@ -359,11 +359,20 @@ export function LiveWorkspace({
         )}
       </section>
 
-      <p className={styles.definition}>
-        {locale === 'en-US'
-          ? snapshot.definitions.lateArrivals
-          : 'События, поступившие с задержкой, появятся в следующем снимке соответствующего окна.'}
-      </p>
+      <details className={styles.definition}>
+        <summary>{t('About these live results', 'О результатах в реальном времени')}</summary>
+        <p>
+          {t(
+            'Every view uses the same timestamped snapshot. Window: trailing 30 minutes, UTC.',
+            'Все представления используют один снимок с отметкой времени. Окно: последние 30 минут, UTC.',
+          )}
+        </p>
+        <p>
+          {locale === 'en-US'
+            ? snapshot.definitions.lateArrivals
+            : 'События, поступившие с задержкой, появятся в следующем снимке соответствующего окна.'}
+        </p>
+      </details>
     </main>
   );
 }

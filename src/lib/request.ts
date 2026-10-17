@@ -1,6 +1,6 @@
 import { startOfMonth, subMonths } from 'date-fns';
 import { z } from 'zod';
-import { checkAuth } from '@/lib/auth';
+import { checkAuth, getBearerToken } from '@/lib/auth';
 import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS } from '@/lib/constants';
 import {
   DATE_BOUNDARY_OFFSET_MESSAGE,
@@ -19,6 +19,9 @@ import {
 import { badRequest, forbidden, unauthorized } from '@/lib/response';
 import type { QueryFilters } from '@/lib/types';
 import { getWebsiteSegment } from '@/queries/prisma';
+import { enforceGuestRequest } from '@/server/guest/guard';
+import { GuestError, guestErrorResponse } from '@/server/guest/contracts';
+import { guestCookieToken } from '@/server/guest/session';
 
 export async function parseRequest(
   request: Request,
@@ -27,7 +30,13 @@ export async function parseRequest(
 ): Promise<any> {
   const url = new URL(request.url);
   let query = Object.fromEntries(url.searchParams);
-  let body = await getJsonBody(request);
+  let body: any;
+  try {
+    body = await getJsonBody(request);
+  } catch (bodyError) {
+    return { url, query, body: undefined, auth: null,
+      error: () => guestErrorResponse(bodyError, crypto.randomUUID()) };
+  }
   let error: () => undefined | undefined | Response;
   let auth = null;
 
@@ -66,6 +75,9 @@ export async function parseRequest(
           code: 'two-factor-assurance-required',
           message: 'Two-factor authentication is required before this action.',
         });
+    } else if (auth.guest) {
+      const response = await enforceGuestRequest(request, auth);
+      if (response) error = () => response;
     }
   }
 
@@ -84,8 +96,28 @@ function isAssuranceRoute(pathname: string) {
 
 export async function getJsonBody(request: Request) {
   try {
+    if (!getBearerToken(request) && guestCookieToken(request)) {
+      const reader = request.clone().body?.getReader();
+      if (!reader) return undefined;
+      const chunks: Uint8Array[] = [];
+      let bytes = 0;
+      try {
+        while (true) {
+          const item = await reader.read();
+          if (item.done) break;
+          bytes += item.value.byteLength;
+          if (bytes > 65_536) {
+            void reader.cancel();
+            throw new GuestError('guest-request-too-large', 413);
+          }
+          chunks.push(item.value);
+        }
+      } finally { reader.releaseLock(); }
+      return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    }
     return await request.clone().json();
-  } catch {
+  } catch (error) {
+    if (error instanceof GuestError) throw error;
     return undefined;
   }
 }

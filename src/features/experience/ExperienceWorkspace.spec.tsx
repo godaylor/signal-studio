@@ -80,12 +80,20 @@ describe('Experience workspace', () => {
   });
 
   test('shows an explicit empty state when no aggregate session was selected', () => {
+    vi.mocked(useSessionEvidence).mockReturnValue({
+      isPending: true,
+      data: undefined,
+      error: null,
+    } as unknown as ReturnType<typeof useSessionEvidence>);
     render(<ExperienceWorkspace projectId={projectId} projectName="Demo" />);
     expect(screen.getByRole('heading', { name: 'Choose a session from evidence' })).toBeVisible();
     expect(screen.getByRole('link', { name: 'Browse Audiences' })).toHaveAttribute(
       'href',
       `/studio/${projectId}/audiences`,
     );
+    expect(
+      screen.queryByRole('heading', { name: 'Loading session evidence' }),
+    ).not.toBeInTheDocument();
   });
 
   test('renders masked evidence and restores a same-project aggregate URL', () => {

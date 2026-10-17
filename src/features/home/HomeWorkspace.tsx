@@ -1,5 +1,7 @@
 'use client';
+import { ArrowUpRight, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { getStudioPath } from '@/features/studio-shell/navigation';
 import { StudioState } from '@/features/studio-shell/StudioState';
@@ -14,6 +16,7 @@ function href(metric: HomeMetric) {
     getStudioPath(metric.query.projectId, 'explore') + '?' + serializeAnalysisQuery(metric.query)
   );
 }
+
 export function HomeWorkspace({
   projectId,
   projectName,
@@ -22,11 +25,13 @@ export function HomeWorkspace({
   projectName: string;
 }) {
   const { t, locale } = useStudioLocale();
+  const guest = useGuestWorkspace();
   const home = useHome(projectId);
   const data = home.data;
-  const date = (value: string) => new Date(value).toLocaleDateString(locale, { timeZone: 'UTC' });
+  const date = (value: string) =>
+    new Date(value).toLocaleDateString(locale, { timeZone: 'UTC', day: 'numeric', month: 'short' });
   const range = (value: { startAt: string; endAt: string }) =>
-    `[${date(value.startAt)}, ${date(value.endAt)}) · UTC`;
+    `${date(value.startAt)} — ${date(new Date(new Date(value.endAt).getTime() - 1).toISOString())} · UTC`;
   const names: Record<string, string> = {
     activation: t('Activation', 'Активация'),
     retention: t('Retention', 'Удержание'),
@@ -34,25 +39,40 @@ export function HomeWorkspace({
     users: t('Weekly active users', 'Активные пользователи за неделю'),
     accounts: t('Weekly active accounts', 'Активные аккаунты за неделю'),
   };
+  const adoption = data?.metrics.find(item => item.id === 'adoption');
+  const activation = data?.metrics.find(item => item.id === 'activation');
   return (
     <section className={styles.page}>
       <header className={styles.heading}>
-        <p>{projectName}</p>
-        <h1>{t('Home', 'Главная')}</h1>
-        <p>
-          {t(
-            'From signup to lasting product use.',
-            'От регистрации к регулярному использованию продукта.',
-          )}
-        </p>
+        <div>
+          <p className={styles.eyebrow}>
+            {projectName} / {t('Home', 'Главная')}
+          </p>
+          <h1>
+            {t('From signup to a product habit.', 'От регистрации — к привычке пользоваться.')}
+          </h1>
+          <p>
+            {t(
+              'See who gets value, who returns, and what to investigate next.',
+              'Кто получает пользу, кто возвращается и что стоит исследовать дальше.',
+            )}
+          </p>
+        </div>
+        <Link
+          className={styles.primaryAction}
+          href={activation ? href(activation) : getStudioPath(projectId, 'explore')}
+        >
+          {t('Explore the data', 'Исследовать данные')}
+          <ArrowUpRight size={17} aria-hidden="true" />
+        </Link>
       </header>
       {home.isPending ? (
         <StudioState
           variant="loading"
           title={t('Loading product health', 'Загружаем обзор продукта')}
           message={t(
-            'Calculating defined metrics and recent work.',
-            'Вычисляем метрики и загружаем недавнюю работу.',
+            'Calculating metrics and recent work.',
+            'Считаем метрики и загружаем недавнюю работу.',
           )}
         />
       ) : home.isError || !data ? (
@@ -68,70 +88,76 @@ export function HomeWorkspace({
         />
       ) : (
         <>
-          <section className={styles.health} aria-labelledby="home-health">
+          <section className={styles.health} aria-label={t('Data health', 'Состояние данных')}>
+            <span
+              className={styles.healthDot}
+              data-state={guest ? 'synthetic' : data.health.state}
+              aria-hidden="true"
+            />
             <div>
-              <h2 id="home-health">{t('Data health', 'Состояние данных')}</h2>
-              {data.health.state === 'empty' ? <Link href={getStudioPath(projectId, 'sources')}>{t('Connect your website to get started', 'Подключите сайт, чтобы начать')}</Link> : null}
-              <p>
-                {data.health.state === 'empty'
-                  ? t('No observed events yet', 'События ещё не поступали')
-                  : data.health.state === 'stale'
-                    ? t(
-                        'No events observed in the last 24 hours',
-                        'За последние 24 часа событий не было',
-                      )
-                    : t(
-                        'Events observed in the last 24 hours',
-                        'За последние 24 часа поступали события',
-                      )}
-              </p>
-              <p>
-                {t('Observed events / 24h', 'События / 24 ч')}:{' '}
-                {data.health.observedEvents24h.toLocaleString(locale)} ·{' '}
-                {t('Last event', 'Последнее событие')}:{' '}
+              <strong>
+                {guest
+                  ? t('Fixed synthetic dataset', 'Фиксированный синтетический набор')
+                  : data.health.state === 'empty'
+                    ? t('No observed events yet', 'События ещё не поступали')
+                    : data.health.state === 'stale'
+                      ? t('No new events in 24h', 'Нет новых событий за 24 ч')
+                      : t('Events are arriving', 'События поступают')}
+              </strong>
+              <span>
                 {data.health.lastEventAt
-                  ? new Date(data.health.lastEventAt).toLocaleString(locale)
-                  : '—'}
-              </p>
+                  ? `${t('Last event', 'Последнее событие')}: ${new Date(data.health.lastEventAt).toLocaleString(locale)}`
+                  : t('Connect a source to begin.', 'Подключите источник, чтобы начать.')}
+              </span>
+            </div>
+            <details>
+              <summary>{t('Details', 'Подробнее')}</summary>
               <p>
+                {t('Stored events / 24h', 'Сохранено событий / 24 ч')}:{' '}
+                {data.health.observedEvents24h.toLocaleString(locale)}.{' '}
                 {t(
-                  'Delivery loss is unknown: this counts stored events, not client delivery receipts.',
-                  'Потери доставки неизвестны: здесь подсчитаны сохранённые события, а не подтверждения отправки клиента.',
+                  'Delivery loss is unknown; stored events are not client delivery receipts.',
+                  'Потери доставки неизвестны: сохранённые события не подтверждают все отправки клиента.',
                 )}
               </p>
-            </div>
+            </details>
             <button
               type="button"
               onClick={() => home.refetch()}
-              aria-disabled={home.isFetching}
               disabled={home.isFetching}
+              aria-label={t('Refresh', 'Обновить')}
             >
-              {t('Refresh', 'Обновить')}
+              <RefreshCw size={16} aria-hidden="true" />
             </button>
           </section>
-          <section aria-labelledby="home-lifecycle" className={styles.section}>
-            <h2 id="home-lifecycle">
-              {t('Signup → activated → retained', 'Регистрация → активация → удержание')}
-            </h2>
-            <p>
-              {t('Mature signup cohort', 'Зрелая когорта регистраций')}: {range(data.cohortRange)}
-            </p>
-            <p>
-              {t(
-                'A complete 21-day horizon: seven days to activate, then repeat core feature use 7–14 days after activation. This is observed behavior, not a stored lifecycle label.',
-                'Полное окно 21 день: семь дней на активацию, затем повторное использование основной функции через 7–14 дней. Это наблюдаемое поведение, а не сохранённая метка стадии.',
-              )}
-            </p>
+          <section aria-labelledby="home-lifecycle" className={styles.lifecycle}>
+            <header className={styles.sectionHeading}>
+              <div>
+                <p className={styles.eyebrow}>{t('The path to value', 'Путь к ценности')}</p>
+                <h2 id="home-lifecycle">
+                  {t('Signup → activated → retained', 'Регистрация → активация → удержание')}
+                </h2>
+              </div>
+              <span>{range(data.cohortRange)}</span>
+            </header>
             <ol className={styles.spine}>
-              {['signups', 'activation', 'retention'].map(id => {
+              {['signups', 'activation', 'retention'].map((id, index) => {
                 const metric = data.metrics.find(item => item.id === id);
                 if (!metric) return null;
-                const total = metric.result?.data.total;
                 return (
                   <li key={id}>
                     <Link href={href(metric)}>
-                      <span>{names[id]}</span>
-                      <strong>{total ? total.value.toLocaleString(locale) : '—'}</strong>
+                      <span>
+                        <small>0{index + 1}</small>
+                        {names[id]}
+                      </span>
+                      <strong>
+                        {metric.result?.data.total?.value.toLocaleString(locale) ?? '—'}
+                      </strong>
+                      <span className={styles.spineLink}>
+                        {t('Explore this step', 'Исследовать шаг')}{' '}
+                        <ArrowUpRight size={14} aria-hidden="true" />
+                      </span>
                     </Link>
                   </li>
                 );
@@ -144,10 +170,21 @@ export function HomeWorkspace({
                   <Metric key={metric.id} metric={metric} label={names[metric.id]} rate />
                 ))}
             </div>
+            <details className={styles.explanation}>
+              <summary>{t('How this journey is measured', 'Как рассчитывается этот путь')}</summary>
+              <p>
+                {t(
+                  'Mature signup cohort: a complete 21-day horizon. Seven days to activate, then repeat core feature use 7–14 days after activation. This is observed behavior, not a stored lifecycle label.',
+                  'Зрелая когорта регистраций: полное окно 21 день. Семь дней на активацию, затем повторное использование основной функции через 7–14 дней. Это наблюдаемое поведение, а не сохранённая метка стадии.',
+                )}
+              </p>
+            </details>
           </section>
           <section aria-labelledby="home-week" className={styles.section}>
-            <h2 id="home-week">{t('Last completed week', 'Последняя полная неделя')}</h2>
-            <p>{range(data.activeRange)}</p>
+            <header className={styles.sectionHeading}>
+              <h2 id="home-week">{t('Last completed week', 'Последняя полная неделя')}</h2>
+              <span>{range(data.activeRange)}</span>
+            </header>
             <div className={styles.metrics}>
               {data.metrics
                 .filter(
@@ -160,9 +197,7 @@ export function HomeWorkspace({
                     metric={metric}
                     label={
                       names[metric.id] ??
-                      t('Tracked revenue', 'Отслеживаемая выручка') +
-                        ' · ' +
-                        metric.query.measure.property
+                      `${t('Tracked revenue', 'Отслеживаемая выручка')} · ${metric.query.measure.property}`
                     }
                   />
                 ))}
@@ -170,80 +205,79 @@ export function HomeWorkspace({
             {!data.metrics.some(metric => metric.id.startsWith('revenue:')) ? (
               <p>
                 {t(
-                  'No tracked currency in this week or its comparison. Configure revenue events to see a defined currency total.',
-                  'За эту и предыдущую неделю нет выручки с известной валютой. Настройте события выручки, чтобы увидеть итог по валюте.',
+                  'No tracked revenue in this period.',
+                  'За этот период нет отслеживаемой выручки.',
                 )}
               </p>
             ) : null}
             {data.currenciesTruncated ? (
               <p role="status">
                 {t(
-                  'Partial: the first five currencies are shown. Use Explore for another currency.',
-                  'Частично: показаны первые пять валют. Другую валюту можно открыть в анализе.',
+                  'Partial: first five currencies. Explore another currency in Explore.',
+                  'Частично: первые пять валют. Другие валюты доступны в анализе.',
                 )}
               </p>
             ) : null}
           </section>
           <div className={styles.columns}>
             <section className={styles.section} aria-labelledby="home-adoption">
-              <h2 id="home-adoption">{t('Feature adoption', 'Использование функций')}</h2>
-              <p>
-                {t(
-                  'Top 10 event names by distinct tracked users. Users can use more than one feature.',
-                  '10 событий с наибольшим числом отслеживаемых пользователей. Один пользователь может использовать несколько функций.',
-                )}
-              </p>
-              {(() => {
-                const metric = data.metrics.find(item => item.id === 'adoption');
-                return metric?.result ? (
-                  <>
-                    <table>
-                      <caption>
-                        {t('Observed feature use', 'Наблюдаемое использование функций')}
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">{t('Event', 'Событие')}</th>
-                          <th scope="col">{t('Users', 'Пользователи')}</th>
+              <header className={styles.sectionHeading}>
+                <h2 id="home-adoption">{t('Feature adoption', 'Использование функций')}</h2>
+              </header>
+              {adoption?.result ? (
+                <>
+                  <table>
+                    <caption>
+                      {t(
+                        'Top events by distinct users',
+                        'Популярные события по уникальным пользователям',
+                      )}
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t('Event', 'Событие')}</th>
+                        <th scope="col">{t('Users', 'Пользователи')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(adoption.result.data.rows as AnalysisBreakdownRow[]).map(row => (
+                        <tr key={row.key}>
+                          <th scope="row">{row.key}</th>
+                          <td>{row.value.toLocaleString(locale)}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {(metric.result.data.rows as AnalysisBreakdownRow[]).map(row => (
-                          <tr key={row.key}>
-                            <th scope="row">{row.key}</th>
-                            <td>{row.value.toLocaleString(locale)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {!metric.result.data.rows.length ? (
-                      <p>
-                        {t(
-                          'No identified feature use in this week.',
-                          'За эту неделю нет использования функций с известными пользователями.',
-                        )}
-                      </p>
-                    ) : null}
-                    <Link href={href(metric)}>
-                      {t('Explore feature adoption', 'Анализировать использование функций')}
-                    </Link>
-                  </>
-                ) : (
-                  <p>
-                    {t(
-                      'Feature adoption is unavailable. Refresh to retry.',
-                      'Использование функций недоступно. Обновите страницу для повтора.',
-                    )}
-                  </p>
-                );
-              })()}
+                      ))}
+                    </tbody>
+                  </table>
+                  {!adoption.result.data.rows.length ? (
+                    <p>
+                      {t(
+                        'No identified feature use in this week.',
+                        'За эту неделю нет использования функций с известными пользователями.',
+                      )}
+                    </p>
+                  ) : null}
+                  <Link className={styles.open} href={href(adoption)}>
+                    {t('Explore feature adoption', 'Анализировать использование функций')}{' '}
+                    <ArrowUpRight size={14} aria-hidden="true" />
+                  </Link>
+                </>
+              ) : (
+                <p>
+                  {t(
+                    'Feature use is unavailable. Refresh to retry.',
+                    'Использование функций недоступно. Обновите страницу.',
+                  )}
+                </p>
+              )}
             </section>
             <section className={styles.section} aria-labelledby="home-risk">
-              <h2 id="home-risk">{t('At-risk accounts', 'Аккаунты с риском оттока')}</h2>
+              <header className={styles.sectionHeading}>
+                <h2 id="home-risk">{t('At-risk accounts', 'Аккаунты с риском оттока')}</h2>
+              </header>
               <p>
                 {t(
-                  'Up to 10 previously observed accounts inactive for seven elapsed days. An inactivity signal, not a churn prediction.',
-                  'До 10 ранее наблюдавшихся аккаунтов без активности семь дней. Признак неактивности, не прогноз оттока.',
+                  'Previously active, now quiet for seven days.',
+                  'Раньше были активны, теперь не заходят семь дней.',
                 )}
               </p>
               {!data.atRisk.permitted ? (
@@ -272,6 +306,7 @@ export function HomeWorkspace({
                         }
                       >
                         {account.label}
+                        <ArrowUpRight size={14} aria-hidden="true" />
                       </Link>
                       <span>
                         {t('Last activity', 'Последняя активность')}: {date(account.lastSeenAt)}
@@ -280,12 +315,26 @@ export function HomeWorkspace({
                   ))}
                 </ul>
               )}
+              <details className={styles.explanation}>
+                <summary>{t('Definition', 'Определение')}</summary>
+                <p>
+                  {t(
+                    'Up to ten observed accounts inactive for seven elapsed days. An inactivity signal, not a churn prediction.',
+                    'До десяти наблюдаемых аккаунтов без активности семь полных дней. Признак неактивности, а не прогноз оттока.',
+                  )}
+                </p>
+              </details>
             </section>
           </div>
           <section className={styles.section} aria-labelledby="home-recent">
-            <h2 id="home-recent">
-              {t('Recent Insights and notes', 'Недавние анализы и заметки')}
-            </h2>
+            <header className={styles.sectionHeading}>
+              <h2 id="home-recent">
+                {t('Recent Insights and notes', 'Недавние анализы и заметки')}
+              </h2>
+              <Link href={getStudioPath(projectId, 'explore')}>
+                {t('Open Explore', 'Открыть анализ')} →
+              </Link>
+            </header>
             {!data.recent.length ? (
               <p>
                 {t(
@@ -294,28 +343,31 @@ export function HomeWorkspace({
                 )}
               </p>
             ) : (
-              <ul className={styles.list}>
+              <ul className={styles.recent}>
                 {data.recent.map(insight => (
                   <li key={insight.id}>
-                    {insight.query ? (
-                      <Link
-                        href={
-                          getStudioPath(projectId, 'explore') +
-                          '?' +
-                          serializeAnalysisQuery(insight.query) +
-                          '&insight=' +
-                          insight.id
-                        }
-                      >
-                        {insight.title}
-                      </Link>
-                    ) : (
-                      <span>
-                        {insight.title} ·{' '}
-                        {t('Unsupported saved definition', 'Неподдерживаемое определение')}
-                      </span>
-                    )}
-                    {insight.description ? <p>{insight.description}</p> : null}
+                    <div>
+                      {insight.query ? (
+                        <Link
+                          href={
+                            getStudioPath(projectId, 'explore') +
+                            '?' +
+                            serializeAnalysisQuery(insight.query) +
+                            '&insight=' +
+                            insight.id
+                          }
+                        >
+                          {insight.title}
+                          <ArrowUpRight size={14} aria-hidden="true" />
+                        </Link>
+                      ) : (
+                        <span>
+                          {insight.title} ·{' '}
+                          {t('Unsupported saved definition', 'Неподдерживаемое определение')}
+                        </span>
+                      )}
+                      {insight.description ? <p>{insight.description}</p> : null}
+                    </div>
                     <span>{date(insight.updatedAt)}</span>
                   </li>
                 ))}
@@ -323,10 +375,10 @@ export function HomeWorkspace({
             )}
           </section>
           <p className={styles.timestamp}>
-            {t('Computed', 'Вычислено')}: {new Date(data.generatedAt).toLocaleString(locale)}.{' '}
+            {t('Computed', 'Вычислено')}: {new Date(data.generatedAt).toLocaleString(locale)} ·{' '}
             {t(
-              'Historical values can change after late arrivals or deletion.',
-              'Исторические значения могут измениться после поздней доставки или удаления данных.',
+              'Exact metrics · definitions available for each result',
+              'Точные метрики · определения доступны для каждого результата',
             )}
           </p>
         </>
@@ -357,7 +409,10 @@ function Metric({
   return (
     <article className={styles.metric}>
       <h3>
-        <Link href={href(metric)}>{label}</Link>
+        <Link href={href(metric)}>
+          {label}
+          <ArrowUpRight size={14} aria-hidden="true" />
+        </Link>
       </h3>
       <strong>{value == null ? '—' : number(value)}</strong>
       <p>

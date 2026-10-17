@@ -13,6 +13,7 @@ export type DynamicDataType = ObjectValues<typeof DATA_TYPE>;
 export type Operator = (typeof OPERATORS)[keyof typeof OPERATORS];
 
 export interface Auth {
+  guest?: { id: string; projectId: string; workspaceId: string; expiresAt: string };
   user?: {
     id: string;
     username: string;

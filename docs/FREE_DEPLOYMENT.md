@@ -19,7 +19,7 @@ migrations; `sslmode=verify-full` keeps certificate verification enabled. Keep
 Neon Data API disabled/unprovisioned: existing server auth owns permissions.
 The new artifact table also enables RLS and revokes PUBLIC privileges.
 
-Run the existing `pnpm db:migrate` (36 migrations) explicitly, then bootstrap one
+Run the existing `pnpm db:migrate` (37 migrations) explicitly, then bootstrap one
 non-demo administrator with `pnpm admin:bootstrap`. Do not run seeds on production.
 Production variables: `DATABASE_URL`, independent `APP_SECRET`,
 `TWO_FACTOR_ENCRYPTION_KEY`, `JOBS_CRON_SECRET`, `SIGNAL_STUDIO_SERVERLESS=1`,
@@ -62,6 +62,39 @@ is not required, so Frankfurt and the supplied project are preserved.
 Production acceptance on 2026-09-23 verified readiness, ingestion, analytics,
 saved state, audiences, queued download, permissions and controlled artifact expiry.
 See [evidence, public demo and remaining limits](PRODUCTION_ACCEPTANCE_2026-09-23.md).
+
+## Guest workspace profile — M19, 2026-10-17
+
+Migration 37 adds `guest_session` and `guest_entry_limit`, with RLS enabled and
+PUBLIC privileges revoked. It does not change existing accounts, events or tokens.
+Apply it with the existing Prisma migration command before deploying M19; never
+seed production manually. Guest entry seeds only its newly allocated private source.
+
+The guest uses a random opaque HttpOnly SameSite cookie; only its SHA-256 digest
+is stored. The common server guard checks the live primary database record, fixed
+24-hour expiry, permitted routes, tenant and atomic quotas. Existing account bearer
+authentication keeps precedence. Guest exports are synchronous analysis CSV/JSON
+only, capped at 1,000 rows / 1 MiB and 12 attempts per session; no export artifacts
+or background jobs are created for guests. Sharing, membership/security changes,
+source administration and public ingestion into guest sources are denied.
+
+Defaults: at most 50 active spaces; five new spaces/minute globally and ten per
+client/hour; 120 requests/minute, 5,000 lifetime requests, 500 analyses, 30 Insight
+creates, eight dashboards, 40 widgets, 15 segments/cohorts and 150 other mutations.
+Operations count attempted authorized routes, including unsuccessful mutations.
+Without a platform-controlled `CLIENT_IP_HEADER`, direct clients share the entry
+key. Only configure that header behind a trusted proxy which overwrites it.
+
+`GUEST_ACCESS_DISABLED=1` stops new/resumed entry; existing valid sessions continue
+until expiry/revocation. No new secret is required. Existing cron/worker maintenance
+and new guest entry purge expired guest data in bounded transactions. Authorization
+ends immediately at expiry; physical purge follows maintenance. An unusable ID-only
+tombstone remains for up to another day to prevent cached ingestion metadata from
+reopening the deleted source. Do not promise an exact physical deletion schedule.
+
+The fixture is a fixed 42-day synthetic snapshot. Live may therefore show no recent
+events, and replay is unavailable unless recording exists. This does not change
+Live/recording behavior for normal workspaces. See [M19 evidence](M19_GUEST_WORKSPACE_REPORT.md).
 
 ## Historical Supabase profile (not the current deployment)
 

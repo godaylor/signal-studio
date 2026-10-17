@@ -5,7 +5,9 @@ import type { AnalysisQueryV1 } from '@/server/analytics/contracts';
 import type { DashboardWidgetDto } from '@/server/dashboards/dashboard-service';
 import { DashboardWidget } from './DashboardWorkspace';
 
-vi.mock('@/lib/client', () => ({ getClientAuthToken: () => 'token' }));
+vi.mock('@/lib/client', () => ({
+  getClientAuthHeaders: () => ({ authorization: 'Bearer token' }),
+}));
 vi.mock('@/features/exports/ExportControls', () => ({ ExportControls: () => null }));
 const projectId = 'd5a950d4-4d31-4c0f-b7a4-41dce9e0a003';
 const query: AnalysisQueryV1 = {
@@ -102,6 +104,51 @@ test('one widget error does not remove a successful sibling', async () => {
       />
     </>,
   );
-  await waitFor(() => expect(screen.getByText(/This widget could not be loaded/)).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText(/This widget could not be loaded/)).toBeInTheDocument(),
+  );
   expect(screen.getByRole('table', { name: /Data for signup/ })).toBeInTheDocument();
+});
+
+test('widget headline uses the server total instead of adding analytical rows', async () => {
+  const response = success('signup');
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    Response.json({
+      ...response,
+      data: {
+        ...response.data,
+        rows: [
+          { bucket: '2026-03-01', value: 7 },
+          { bucket: '2026-03-02', value: 8 },
+        ],
+        total: { value: 11, denominator: 20, rate: 0.55 },
+      },
+    }),
+  );
+  wrapper(<DashboardWidget widget={widget('10000000-0000-4000-8000-000000000005')} context={{}} />);
+  await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
+  expect(screen.getByText('11', { selector: 'strong' })).toBeInTheDocument();
+  expect(screen.getByText(/of 20 · 55%/)).toBeInTheDocument();
+  expect(screen.queryByText('15', { selector: 'strong' })).not.toBeInTheDocument();
+});
+
+test('widget does not invent a headline total when the response has none', async () => {
+  const response = success('signup');
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    Response.json({
+      ...response,
+      data: {
+        ...response.data,
+        rows: [
+          { bucket: '2026-03-01', value: 7 },
+          { bucket: '2026-03-02', value: 8 },
+        ],
+      },
+    }),
+  );
+  wrapper(<DashboardWidget widget={widget('10000000-0000-4000-8000-000000000006')} context={{}} />);
+  await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument());
+  expect(screen.queryByText('15', { selector: 'strong' })).not.toBeInTheDocument();
+  expect(screen.getByRole('cell', { name: '7' })).toBeInTheDocument();
+  expect(screen.getByRole('cell', { name: '8' })).toBeInTheDocument();
 });
