@@ -29,6 +29,12 @@ for (const mobile of [false, true]) {
     await page.goto('/login?locale=ru-RU');
     await expect(page).toHaveTitle(/Кинорит/);
     await expect(page.locator('html')).toHaveAttribute('data-visual-motion', mobile ? 'off' : 'on');
+    const entryAudit = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    expect(
+      entryAudit.violations.filter(v => ['serious', 'critical'].includes(v.impact ?? '')),
+    ).toEqual([]);
     const shape = page.locator('[data-flow-body]').last();
     const beforeShape = await shape.getAttribute('d');
     if (!beforeShape) throw new Error('The example must render an aggregate flow');
