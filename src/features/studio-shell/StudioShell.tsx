@@ -180,6 +180,13 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
       className={styles.studioFrame}
       data-studio-shell
       data-sidebar-collapsed={sidebarCollapsed || undefined}
+      onClickCapture={event => {
+        // WebKit does not focus buttons on pointer activation. Keep modal return focus explicit.
+        const button = event.target instanceof Element ? event.target.closest('button') : null;
+        if (button instanceof HTMLButtonElement && !button.disabled) {
+          button.focus({ preventScroll: true });
+        }
+      }}
     >
       <a className={styles.skipLink} href="#studio-main">
         {t('Skip to content', 'Перейти к содержимому')}
