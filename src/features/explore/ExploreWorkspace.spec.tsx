@@ -369,4 +369,49 @@ describe('ExploreWorkspace', () => {
       'Apply a filter in the question',
     );
   });
+
+  test('table-only funnel view hides the flow while retaining its exact data, explanation and evidence action', async () => {
+    const query = {
+      ...createDefaultAnalysisQuery(projectId),
+      mode: 'funnel' as const,
+      visualization: 'bar' as const,
+      funnel: {
+        conversionWindowMinutes: 1440,
+        steps: ['signup', 'onboarding_completed', 'subscription_started'].map(value => ({
+          type: 'event' as const,
+          value,
+          filters: [],
+        })),
+      },
+    };
+    const response = {
+      ...result,
+      data: {
+        mode: 'funnel',
+        rows: [336, 252, 84].map((converted, index) => ({
+          kind: 'funnel-step',
+          step: index + 1,
+          label: query.funnel.steps[index].value,
+          converted,
+          entrants: 336,
+          value: converted,
+          overallConversionRate: converted / 336,
+          stepConversionRate: converted / [336, 336, 252][index],
+          dropped: [0, 84, 168][index],
+        })),
+      },
+    } as AnalysisResult;
+    const { rerender } = render(<AdvancedResults query={query} result={response} />);
+    expect(screen.getByRole('figure', { name: 'Ordered funnel conversion chart' })).toBeVisible();
+    rerender(<AdvancedResults query={{ ...query, visualization: 'table' }} result={response} />);
+    expect(
+      screen.queryByRole('figure', { name: 'Ordered funnel conversion chart' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Equivalent funnel data table' })).toBeVisible();
+    expect(
+      screen.getByText('84 of 336 participants completed every selected step in order.'),
+    ).toBeVisible();
+    await userEvent.setup().click(screen.getAllByRole('button', { name: 'Dropped actors' })[2]);
+    expect(screen.getByRole('dialog', { name: 'Exact members' })).toBeVisible();
+  });
 });

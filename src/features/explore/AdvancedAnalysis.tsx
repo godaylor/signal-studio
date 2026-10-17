@@ -465,13 +465,15 @@ export function AdvancedResults({
     );
     return (
       <>
-        <FunnelTrace
-          key={serializeAnalysisQuery(query)}
-          steps={steps}
-          onInspect={row =>
-            setSelection({ kind: 'funnel-step', step: row.step, outcome: 'dropped' })
-          }
-        />
+        {query.visualization !== 'table' ? (
+          <FunnelTrace
+            key={serializeAnalysisQuery(query)}
+            steps={steps}
+            onInspect={row =>
+              setSelection({ kind: 'funnel-step', step: row.step, outcome: 'dropped' })
+            }
+          />
+        ) : null}
         <FunnelNarrative steps={steps} />
         <div className={styles.tableWrap}>
           <table>
