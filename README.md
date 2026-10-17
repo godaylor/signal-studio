@@ -12,8 +12,7 @@ This is a working full-stack application with PostgreSQL persistence, authentica
 APIs and background jobs. Production runs on **Vercel Hobby + Neon Free ($0 within
 quotas)**, with encrypted PostgreSQL exports, request-triggered jobs and scheduled recovery.
 
-**[Open the hosted app](https://signal-studio-smoky.vercel.app/demo)** ·
-[Sign in to a real workspace](https://signal-studio-smoky.vercel.app/login)
+**[Open the hosted app](https://signal-studio-smoky.vercel.app/login)**
 
 Choose **Try without signing up** to open a private guest workspace with 1,281
 clearly labeled synthetic events. Calculations use the real PostgreSQL analytics
@@ -21,24 +20,26 @@ services. Edit a question, save an Insight, assemble a Dashboard and export CSV 
 JSON; server-saved work survives reloads for the 24-hour guest session. Each guest
 has a separate user, workspace and source, with bounded resource use. No shared
 administrator credentials are provided. The older guided example remains at `/demo/tour`.
-The current M20 source candidate adds the Optical Trace identity, coordinated
+The published M20 release adds the Optical Trace identity, coordinated
 light/dark screens, responsive motion and explicit guest/account selection in each
 tab. It preserves the signed-in account when trying the guest workspace. Local
-production checks passed; exact-revision CI and public verification are tracked in the
+production checks, all six CI jobs and public verification passed on application
+revision `7026491702e182b4454dc7e6f12b21b821dd12e6`. Results are recorded in the
 [M20 acceptance report](docs/M20_FINAL_REPORT.md); the earlier published guest
 acceptance remains in the [historical M19 report](docs/M19_GUEST_WORKSPACE_REPORT.md).
 See [free deployment](docs/FREE_DEPLOYMENT.md).
 
-![Яснослед — actual Home in the local production app](docs/design/m20-yasnosled/actual-home-light-desktop.png)
+![Яснослед — actual Home in the public app](docs/design/m20-yasnosled/hosted-home-light-desktop.png)
 
 [Design alternatives, selected mockups and real screens](docs/design/m20-yasnosled/REVIEW.html)
 · [Before/after comparison](docs/design/m20-yasnosled/compare.html)
 · [Design contract](docs/design/m20-yasnosled/DESIGN.md)
 
-The image above shows the working local production app. The review gallery
+The image above shows the working public app. The review gallery
 separately labels generated design concepts and actual application screens.
-All displayed application calculations use explicitly synthetic events; artwork
-never substitutes for an analytical result.
+The pictured guest workspace calculates results from explicitly synthetic events;
+normal workspaces analyze their connected sources. Artwork never substitutes for
+an analytical result.
 
 ## What works
 

@@ -2,6 +2,11 @@
 
 ## M20 — Яснослед: cohesive identity, expressive motion and reliable browser entry
 
+Status: **Complete**. Application revision
+`7026491702e182b4454dc7e6f12b21b821dd12e6` passed all six CI jobs and public
+Chrome guest, persistence, calculation, export and responsive acceptance.
+See `docs/M20_FINAL_REPORT.md` for evidence, measurements and remaining limits.
+
 Current explicit user scope (2026-10-17): M19's visual treatment is rejected as
 too fragmented and static. Preserve the product and its data/services, while
 reworking composition, Russian naming/identity, imagery and motion across the

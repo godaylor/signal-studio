@@ -51,9 +51,9 @@ Motion is implemented in code; no generated video was created. The available `us
 | Drawer/editor transition | Preserve spatial context on mobile | Reachable controls, focus trap/restore, bounded 220–320ms |
 | Hover/focus | Indicate action without a button wall | 120–180ms, subtle fill/translation; no motion required for understanding |
 
-Avoid perpetual movement in dense tables. Pause nonessential loops when the tab is hidden, the scene is off-screen or the user/OS requests less motion. Screen readers receive final accurate values with restrained announcements. Data freshness must never be simulated by decorative motion.
+Avoid perpetual movement in dense tables. Nonessential loops pause when the tab is hidden or the user/OS requests less motion. Screen readers receive final accurate values with restrained announcements. Data freshness must never be simulated by decorative motion.
 
-Only decorative optical paths may fade. Text-containing routes, widgets and stages keep full opacity at all times: a translucent ancestor can temporarily lower text contrast even when the final colors pass. Use an explicit tween for bounded entry transitions rather than inheriting a spring unintentionally.
+Workspace routes, widgets, stages and dialogs keep full text opacity: a translucent ancestor can temporarily lower contrast even when the final colors pass. Decorative optical paths may fade; the public entry hero and its three explanatory steps use finite introductions, disabled with reduced motion. Use an explicit tween for bounded workspace transitions rather than inheriting a spring unintentionally.
 
 ## Actual data authority
 
@@ -66,4 +66,3 @@ In the dark responsive board, the flowing stage illustration is a visual composi
 Use `/brand/yasnosled/optical-flow.png` (or its root-managed WebP derivative) as the transparent illustrative layer and `/brand/yasnosled/yasnosled-mark.png` (or derivative) as the mark. They were generated from original prompts, inspected in light/dark, and their genuine alpha was verified. ASSETS.md records exact files, dimensions, source IDs and dependency ownership; PROMPTS.md records every exact prompt.
 
 Do not place a generated UI/graph image in the runtime in place of working analytics. No new dependency, external stock art or public guest was created by the asset task. Preserve root LICENSE and explicit Umami provenance.
-

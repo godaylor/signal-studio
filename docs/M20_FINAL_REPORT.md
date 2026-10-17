@@ -1,7 +1,8 @@
 # M20 — Яснослед: целостный интерфейс и надёжный гостевой вход
 
-Дата: 2026-10-17. **Статус: локальные проверки production-кандидата пройдены;
-exact-revision CI и публичная HTTPS-приёмка ожидаются.**
+Дата: 2026-10-17. **Статус: M20 принята и опубликована. Исправленная ревизия
+702649… прошла все шесть exact-revision CI jobs и публичные сквозную/мобильную
+проверки. Измеренные ограничения производительности и квот приведены ниже.**
 Этот документ описывает M20. [Приёмка M19](M19_GUEST_WORKSPACE_REPORT.md) остаётся
 историческим свидетельством опубликованной версии и не подтверждает новую сборку.
 Визуальное направление M19 заменено по явному запросу пользователя; существующие
@@ -181,7 +182,9 @@ task-owned PostgreSQL на `127.0.0.1:32241`, приложение на своб
 | Финальная принятая production-сборка | PASS; `build-accepted.log`, standalone и юридический реестр |
 | Финальный guest/auth/visual набор | 7/8 в общем запуске + оставшийся mobile 1/1 отдельно, 6,3 с; все 8 сценариев подтверждены суммарно |
 | Production visual-аудит | 24 page/theme/device состояния, 0 serious/critical axe нарушений; desktop с движением и mobile с reduced motion |
-| Финальные основные снимки и видео | 16 кадров входа/Главной/Анализа/Дашбордов, light/dark и desktop/mobile; нет overflow/JS ошибок; реальное видео 1 434 989 байт |
+| Финальные основные снимки и видео | 16 кадров входа/Главной/Анализа/Дашбордов, light/dark и desktop/mobile; нет overflow/JS ошибок; итоговое реальное видео 1 417 952 байта |
+| Коррекция responsive/dialog состояний после первого CI | Production build PASS; visual mobile 1/1 за 9,3 с, 12 page/theme состояний при 390 px и новая геометрия 320 px; export-dialog EN/RU 2/2 за 7 с, axe 0 |
+| Дополнительная узкая геометрия и фокус | 320/768 px × четыре маршрута: 8/8; навигация/фокус: 6/6; повторно использован действующий гость |
 
 Ранний smoke выявил контраст отдельных статусов/loading и мобильное переполнение;
 эти ошибки исправлены и проверены финальной production-сборкой. В финальном общем
@@ -190,7 +193,8 @@ task-owned PostgreSQL на `127.0.0.1:32241`, приложение на своб
 получил реальный 429 глобальной квоты. После учёта Retry-After и ожидания фактического
 цвета таблицы перед axe он прошёл отдельно. Производственный код при этом не менялся.
 **Это суммарное подтверждение 8/8 случаев, а не один чистый запуск восьми тестов.**
-Единый запуск остаётся задачей exact-revision CI.
+Позднее единый чистый запуск подтверждён exact-revision CI 702649…: все 38 случаев,
+включая эти восемь, прошли без retries/flaky; подробности ниже.
 
 Функциональные browser-прогоны относятся к production-кандидату
 `ee6aec3565ab53d5c4244a36fa36187fdf05c983f762b3cd9db5a91b27776b92`.
@@ -200,7 +204,8 @@ task-owned PostgreSQL на `127.0.0.1:32241`, приложение на своб
 собрана с source fingerprint
 `350daa566a4438d2ea205b3f50a7a26288cb29c377a38ae97df4bfefdad61237`.
 Снимки этой сборки обновляются из существующего гостевого пространства.
-Единый функциональный запуск конкретной опубликованной revision подтверждается CI.
+Единый функциональный запуск конкретной опубликованной revision подтверждён CI
+для 702649…, а локальные измерения выше сохраняют собственный source fingerprint.
 
 Тестовый лимит не сбрасывался ради зелёного результата. Предыдущая release-база
 израсходовала 7/10 созданий за час; для полного нового набора подготовлена
@@ -213,19 +218,164 @@ task-owned PostgreSQL на `127.0.0.1:32241`, приложение на своб
 | Gate | Статус |
 | --- | --- |
 | Финальный полный lint/typecheck/unit/Studio | PASS; точные результаты выше |
-| Принятый production build, legal inventory, локальный source fingerprint | PASS; `350daa…61237`, 1 029 компонентов / 478 текстов лицензий |
-| Новый production guest/auth/visual набор | Все 8 сценариев прошли суммарно; единый чистый прогон ожидает CI |
+| Финальный native delivery build и legal inventory | PASS; `build-delivery.log`, source fingerprint `925d970ebc8ec774af1b2e830996bf74d8da0773499399a1af70aa598dc275e0`, 1 029 компонентов / 478 текстов лицензий / 0 missing notices; повторный `verify-release-inventory.js` PASS |
+| Новый production guest/auth/visual набор | Локально все 8 сценариев прошли суммарно; в exact-revision CI 702649… все восемь вошли в единый чистый набор 38/38 без retry |
 | Обычная account-регрессия | PASS, 11/11 на production-кандидате; заключительный визуальный polish и его повторная сборка описаны выше |
 | Скриншоты, сравнение с макетами и frame review | PASS; [REVIEW.html](design/m20-yasnosled/REVIEW.html), [compare.html](design/m20-yasnosled/compare.html), [motion-demo.webm](design/m20-yasnosled/motion-demo.webm) |
 | Font payload без Inter preload | PASS, 338 124 transfer bytes; улучшение LCP не заявлено |
 | Пять холодных idle-запусков | LCP median 1 064 мс, p95 nearest-rank 1 548 мс, n=5; локальная публичная страница входа без throttling |
-| PostgreSQL integration и единый release browser набор | ОЖИДАЕТСЯ: exact-revision CI |
-| Exact-revision remote CI | ОЖИДАЕТСЯ: revision, run URL, все обязательные jobs |
-| Публичная HTTPS-версия M20 | ОЖИДАЕТСЯ: deployment URL/revision и браузерная проверка той же сборки |
+| PostgreSQL integration и единый release browser набор | PASS на 702649…: 64/64 PG-теста в 13 файлах и 38/38 browser cases без retry/flaky |
+| Первый exact-revision remote CI | [Run 39059705184](https://github.com/godaylor/signal-studio/actions/runs/39059705184), SHA `649674db65c5e6af30f6b7e3ed1b89eeea7a4337`: serverless PASS, 12/12 browser cases (39,1 с); verify FAILED на E2E, image skipped. Исправленные verify/serverless прошли отдельным запуском ниже |
+| Исправленная source revision | [`7026491702e182b4454dc7e6f12b21b821dd12e6`](https://github.com/godaylor/signal-studio/commit/7026491702e182b4454dc7e6f12b21b821dd12e6); [CI 39060823070](https://github.com/godaylor/signal-studio/actions/runs/39060823070) **SUCCESS, 6/6 jobs**: verify, serverless, четыре image targets; 38/38 и 13/13 browser cases; Vercel Deployment has completed |
+| Публичная baseline-версия M20 | Exact-revision Chrome smoke PASS; guest 3/3 и visual 2/2 подтверждены отдельными публичными прогонами; последующая исправленная revision проверена отдельным сквозным сценарием ниже |
+| Публичная исправленная revision 702649… | Сквозной Chrome 155 PASS: stale-account guest entry/reload, изменение запроса, сохранённый Insight, Dashboard/reload, точный JSON экспорт, foreign-project 403, 320 px layout; публичный mobile visual PASS 21,1 с; без JS ошибок и overflow |
+
+## Публичная проверка той же ревизии
+
+Публичное приложение: [signal-studio-smoky.vercel.app](https://signal-studio-smoky.vercel.app/login).
+Vercel подтвердил завершение deployment для исходного коммита
+[`649674db65c5e6af30f6b7e3ed1b89eeea7a4337`](https://github.com/godaylor/signal-studio/commit/649674db65c5e6af30f6b7e3ed1b89eeea7a4337).
+Публичные build metadata подтверждают эту же revision, профиль `vercel-serverless`
+и source fingerprint
+`f474e9c9e86875a2d7271c4b3d5c59e4a379905b0b4be660297d866202d176d0`.
+
+Проверка в установленном Chrome 155 подтвердила гостевой вход со старым токеном
+аккаунта, reload, сохранение исходных учётных данных аккаунта и cookie
+Secure / HttpOnly / SameSite=Lax. На проверенном mobile-экране нет document
+overflow; JavaScript page errors отсутствуют. `/api/ready` ответил 200:
+`{ok:true,dependencies:{database:'ready'}}`, то есть проверена доступность БД,
+а не только shallow heartbeat. Машинное свидетельство — `hosted-chrome-result.json`.
+
+- [Публичная Главная, light desktop](design/m20-yasnosled/hosted-home-light-desktop.png)
+- [Публичный Анализ, dark mobile](design/m20-yasnosled/hosted-explore-dark-mobile.png)
+- [Публичный вход, 320 px](design/m20-yasnosled/hosted-login-light-320.png)
+- [Публичная Главная, 320 px](design/m20-yasnosled/hosted-home-light-320.png)
+
+Канонический публичный LICENSE имеет SHA256
+`d59f69c3a56253a150adfc42b41acd49e9024410ad087c58a23d506623258dfe`
+и длину 1 093 байта; он совпадает с LICENSE точного Git-коммита. Разница хеша
+локального Windows working copy относится только к CRLF/LF; `git diff LICENSE`
+пуст, полный MIT и Copyright (c) 2022 Umami Software, Inc. сохранены.
+Linux serverless inventory содержит 1 038 компонентов и 478 текстов лицензий,
+missing notices = 0; отличия от Windows 1 029 относятся к платформенному
+installed build/runtime superset. На исправленной ревизии все обязательные
+container image jobs завершились успешно, как указано ниже.
+
+На этой baseline-ревизии публичные guest desktop/mobile/forged-cookie сценарии
+прошли за 18,8 / 8,8 / 0,54 с. Два публичных visual-сценария прошли за 29,3 и
+35,9 с после увеличения тестового ожидания загрузки Главной с 5 до 30 с.
+Это подтверждение функциональных случаев отдельными прогонами, а не утверждение
+о быстром ответе Главной или единый чистый прогон всего release-набора.
+
+Из двух собственных ZIP trace прочитаны только HAR-статусы и тайминги в памяти,
+без извлечения cookies, заголовков или тел. Четыре GET Home API вернули 200:
+327,257 / 8 409,043 / 8 817,443 / 9 029,153 мс. Медиана — 8 613,243 мс,
+p95 nearest-rank — 9 029,153 мс, n=4. Первые запросы desktop/mobile trace:
+8 409,043 и 8 817,443 мс (n=2; median 8 613,243, p95 nearest-rank 8 817,443).
+Первый запрос внутри trace не доказывает холодный старт Vercel или Neon;
+HAR отражает полный браузерный request/response, преимущественно TTFB, а не
+отдельное время SQL. **Публичная Главная в этой малой выборке ждала 8–9 секунд.**
+Измерена baseline source revision `649674db65c5e6af30f6b7e3ed1b89eeea7a4337`,
+Vercel/Neon Frankfurt, синтетические 1 281 событие / 336 пользователей за 42 дня.
+Это остаётся ограничением free serverless-профиля; данные не подтверждают
+ускорение аналитики, p95 на реальной нагрузке или performance-budget acceptance.
+Безопасная сводка — `hosted-home-trace-latency.json` в игнорируемом каталоге.
+
+Read-only проверка orchestration Главной обнаружила последовательные независимые
+метрики, но каждая уже выполняет текущий и сравнительный периоды параллельно,
+а serverless PostgreSQL pool ограничен двумя соединениями. Выигрыш дополнительной
+параллельности не измерен; M20 не меняет SQL, определения или fan-out запросов.
+Ускорение Home остаётся отдельным измеряемым follow-up. Гостевой вход открывает
+Анализ с первым фактическим результатом, а не ожидает агрегаты Главной.
+
+Первый CI на baseline прошёл 1 064 unit/component, 28 Studio и 64 PostgreSQL
+integration теста. На release E2E прошли 34 случая, один оказался flaky и три
+упали: EN/RU export-dialog axe во время opacity-анимации, и visual mobile 429.
+Desktop visual прошёл retry после гонки перехода темы. Причина часового 429
+воспроизведена: два PG-fixture гостя и browser-кейсы использовали одну
+direct-client корзину, а дополнительный retry исчерпал 10 созданий за час.
+
+Коррекция PG-фикстуры задаёт уникальный documentation IPv6 и trusted-header
+только в изолированном test-worker, восстанавливая env в finally. Сервер и его
+лимиты не меняются. Проверка 6/6 прошла даже при уже исчерпанной старой
+direct-client корзине: её 10/10 и время сброса остались неизменными, собственная
+корзина интеграционного набора получила 2/10; глобальные 2/5 также начислены.
+Лог — `guest-integration-isolation.log`. Исправления анимационных состояний,
+экспорта и 320 px геометрии вошли в `7026491702e182b4454dc7e6f12b21b821dd12e6`
+и проходят отдельный повторный CI. Серверные квоты, сессии и прежние корзины
+не сбрасывались; уникальный fixture-client применяется только внутри PG-тестов.
+
+### Исправленная публичная ревизия 702649…
+
+Отдельный финальный сквозной запуск установленного Chrome 155 подтвердил именно
+`7026491702e182b4454dc7e6f12b21b821dd12e6`, профиль `vercel-serverless`,
+source fingerprint
+`2bf3500d8628a5763d988b0b0b0a0b706e7db7ea90bafceb9cc4a389ffeb2afe`.
+Свидетельство — `hosted-final-result.json` в игнорируемом каталоге. Четыре
+публичных снимка, связанные выше, обновлены на эту ревизию.
+
+Проверен вход гостя с оставшимся аккаунтным токеном, reload, сохранность токена
+аккаунта и Secure/HttpOnly/SameSite=Lax cookie. При 320 px кнопка входа заканчивается
+на x=302,34375 px, rate/action расположены отдельно; document overflow отсутствует.
+Реальный запрос с последним событием `subscription_started` посчитан как
+336 → 252 → 84. Сохранённый Insight содержит этот запрос; Dashboard хранит ссылку
+виджета на Insight и восстанавливает его после reload. JSON-экспорт содержит
+точный изменённый запрос в metadata и тот же результат 84. Случайный чужой проект
+вернул 403. JavaScript page errors отсутствуют.
+
+Один переход на Главную в этом запуске занял 1 001 мс; это одиночное наблюдение
+при тёплом cache на новой ревизии, а не сопоставимый benchmark с четырьмя HAR
+пробами baseline выше. Оно не отменяет performance follow-up Главной. Проверка
+использовала одно собственное пространство; после 10/10 созданий за час новые
+гости не создавались, квоты не сбрасывались. Этот сквозной запуск обозначен
+отдельно от пяти baseline browser-случаев и от полного CI.
+
+Временная оговорка после QA: десять собственных публичных пространств исчерпали
+часовой лимит именно клиента проверки. Последний свежий Chrome probe получил
+ожидаемый `429 guest-entry-limited`, `Retry-After: 2489`; сброс этой корзины —
+2026-10-17 19:51:34 UTC / 22:51:34 МСК. Рабочий cookie существующего гостя
+возобновляет его пространство до проверки лимита новых созданий. Создание
+финального гостя на revision 702649… прошло с первой попытки до исчерпания квоты.
+Счётчики не сбрасывались и не обходились; это временное следствие собственного
+приёмочного QA, а не отказ сценария в пределах лимита. Новые создания остановлены.
+
+После сквозного запуска публичный mobile visual на этой же 702649… прошёл
+за 21,1 с: все шесть разделов × две темы при 390 px, геометрия входа/Главной
+при 320 px, статичная reduced-motion трасса, фокус редактора и Escape.
+Лог — `hosted-final-visual.log`. Он повторно использовал тот же собственный
+гостевой cookie: entry возобновил пространство и не создал новое. В завершение
+DELETE отозвал последнего собственного публичного тестового гостя; активных
+публичных QA-гостей не осталось. Счётчики сохранились без изменений.
+
+### Исправленный exact-revision CI
+
+[Run 39060823070](https://github.com/godaylor/signal-studio/actions/runs/39060823070)
+проверяет только commit `7026491702e182b4454dc7e6f12b21b821dd12e6`.
+Run завершён с conclusion **success**; все шесть jobs успешны:
+
+| Уровень | Результат remote CI |
+| --- | --- |
+| Release/supervisor Node contract | 4/4 |
+| Полный unit/component | 1 064/1 064 в 168 файлах, 129,30 с |
+| Studio | 28/28 в 9 файлах, 19,73 с |
+| PostgreSQL integration | 64/64 в 13 файлах, 24,80 с |
+| Critical browser workflows | **38/38, 3,1 мин, без retry/flaky** |
+| Serverless browser workflows | **13/13, 31,7 с**; очередь, source ingestion, login/logout, lifecycle/legal, экспорт |
+| TypeScript, E2E TypeScript, lint, build, legal inventory, отсутствие packaged secrets | PASS |
+| Linux legal inventory | 1 038 компонентов, 478 текстов, missing notices = 0 |
+| Контейнеры runner / worker / migration / hosted | **PASS, 4/4 image jobs**; runtime/legal inventory, non-root user, отсутствие .env; offline Prisma для migration/worker/hosted |
+
+Чистый основной browser-прогон включает три смешанных auth-контекста, полный
+гостевой desktop с сохранением/дашбордом/экспортом, mobile/error recovery,
+поддельный cookie, EN/RU export-dialog axe и обе visual-темы/устройства.
+Гостевой mobile занял 49,9 с с ожиданием реального Retry-After; лимит сервера
+сохранён. Visual desktop/mobile прошли за 17,7/13,4 с. Первые неуспешные baseline
+результаты выше не заменяют и не скрывают этот отдельный чистый запуск.
 
 ## Ограничения и сохранность
 
-- Кандидат не объявлен завершённым до закрытия финальных gates M20.
+- Все финальные gates M20 закрыты для source revision 702649…; это не отменяет
+  явно описанные ограничения и deferred требования.
 - Guest cookie относится к профилю браузера: гостевые вкладки этого профиля
   используют одно пространство, а не отдельного гостя на каждую вкладку аккаунта.
   Выбор контекста авторизации относится к вкладке.
@@ -247,7 +397,14 @@ task-owned PostgreSQL на `127.0.0.1:32241`, приложение на своб
 - Исходное дерево M20 было чистым. Изменения других участников сохранены; чужие
   процессы, контейнеры, БД и тома не останавливались и не удалялись. Остановлен
   только проверенный собственный dev-процесс и его потомки для production-сборки.
-- Финальные git status, owned commit/push и deployment: **ожидается фиксация**.
+- Исходный runtime-коммит `649674db65c5e6af30f6b7e3ed1b89eeea7a4337` и исправленный
+  `7026491702e182b4454dc7e6f12b21b821dd12e6` отправлены; сведения о deployment
+  приведены выше. Заключительный документационный коммит содержит отчёт, галерею,
+  макеты и публичные QA-снимки M20; runtime source не менялся после зелёной
+  ревизии. Документационные материалы исключены из source manifest и сохраняют
+  проверенный fingerprint приложения. Локальный standalone повторно собран из
+  точной зелёной source revision и запущен на `http://127.0.0.1:32243`;
+  `/api/ready` проверяет PostgreSQL, а не только состояние HTTP-процесса.
 
 Машинные промежуточные журналы находятся в игнорируемом `.local/m20-yasnosled`;
 секреты, cookies, пароли и connection strings не включаются в публикуемый отчёт.
