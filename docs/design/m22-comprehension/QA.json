@@ -1,0 +1,634 @@
+{
+  "milestone": "M22",
+  "date": "2026-10-18",
+  "timezone": "Europe/Moscow",
+  "status": "complete",
+  "acceptedRuntime": "dff0f544d16dc724ea8d663f6d0870ed6513760c",
+  "ci": {
+    "run": 39080522711,
+    "url": "https://github.com/godaylor/signal-studio/actions/runs/39080522711",
+    "status": "success",
+    "suites": {
+      "unit": {
+        "passed": 1085,
+        "files": 173
+      },
+      "studio": {
+        "passed": 47,
+        "files": 9
+      },
+      "postgres": {
+        "passed": 64,
+        "files": 13
+      },
+      "criticalBrowser": {
+        "passed": 41,
+        "durationMinutes": 3.3,
+        "failed": 0,
+        "flaky": 0
+      },
+      "serverlessBrowser": {
+        "passed": 13,
+        "durationSeconds": 36.2
+      },
+      "releaseContracts": {
+        "passed": 4
+      }
+    },
+    "jobs": [
+      {
+        "name": "verify",
+        "conclusion": "success"
+      },
+      {
+        "name": "serverless",
+        "conclusion": "success"
+      },
+      {
+        "name": "image (runner)",
+        "conclusion": "success"
+      },
+      {
+        "name": "image (worker)",
+        "conclusion": "success"
+      },
+      {
+        "name": "image (migration)",
+        "conclusion": "success"
+      },
+      {
+        "name": "image (hosted)",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "environment": {
+    "node": "22.22.2",
+    "pnpm": "10.15.1",
+    "chrome": "155.0.8059.80",
+    "playwright": "1.62.0",
+    "database": "PostgreSQL",
+    "publicProviders": [
+      "existing Vercel Hobby",
+      "existing Neon Free Frankfurt"
+    ]
+  },
+  "dataset": {
+    "kind": "clearly labeled synthetic Orbit events",
+    "events": 1281,
+    "users": 336,
+    "accounts": 84,
+    "sessions": 441,
+    "utcDays": 42
+  },
+  "responsive": {
+    "units": "CSS px, DPR1 unless stated",
+    "viewports": [
+      [
+        200,
+        800
+      ],
+      [
+        240,
+        800
+      ],
+      [
+        280,
+        800
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        360,
+        800
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        430,
+        932
+      ],
+      [
+        768,
+        1024
+      ],
+      [
+        1024,
+        768
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ],
+      [
+        3840,
+        2160
+      ],
+      [
+        7680,
+        4320
+      ],
+      [
+        568,
+        320
+      ],
+      [
+        844,
+        390
+      ]
+    ],
+    "baseline": {
+      "cases": 154,
+      "overflow": 8,
+      "clipped": 10
+    },
+    "intermediatePostfix": {
+      "cases": 154,
+      "overflow": 2,
+      "clipped": 2
+    },
+    "finalNarrowExplore": [
+      {
+        "width": 200,
+        "height": 800,
+        "docWidth": 200,
+        "overflow": false,
+        "clipped": []
+      },
+      {
+        "width": 240,
+        "height": 800,
+        "docWidth": 240,
+        "overflow": false,
+        "clipped": []
+      },
+      {
+        "width": 280,
+        "height": 800,
+        "docWidth": 280,
+        "overflow": false,
+        "clipped": []
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "docWidth": 320,
+        "overflow": false,
+        "clipped": []
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "docWidth": 390,
+        "overflow": false,
+        "clipped": []
+      },
+      {
+        "width": 568,
+        "height": 320,
+        "docWidth": 568,
+        "overflow": false,
+        "clipped": []
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "docWidth": 844,
+        "overflow": false,
+        "clipped": []
+      }
+    ],
+    "finalDashboardEnglish200": {
+      "docWidth": 200,
+      "elements": []
+    },
+    "note": "Intermediate findings retained; targeted rechecks and final production acceptance are separate, overlapping runs, not additive unique devices."
+  },
+  "productionScreens": {
+    "revision": "e0c3f4c9d4518bcadc18df41798c51b5930b1131",
+    "runtimeNote": "The later table-only guard does not change these default bar-view captures. Final revision has separate table/reload/drilldown and usability acceptance.",
+    "cases": [
+      {
+        "route": "login",
+        "theme": "light",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "home",
+        "theme": "light",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "explore",
+        "theme": "light",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "dashboards",
+        "theme": "light",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "audiences",
+        "theme": "light",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "experience",
+        "theme": "light",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "live",
+        "theme": "light",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "login",
+        "theme": "dark",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "home",
+        "theme": "dark",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "explore",
+        "theme": "dark",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "dashboards",
+        "theme": "dark",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "audiences",
+        "theme": "dark",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "experience",
+        "theme": "dark",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "live",
+        "theme": "dark",
+        "viewport": "1440x1000",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "login",
+        "theme": "light",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "home",
+        "theme": "light",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "explore",
+        "theme": "light",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "dashboards",
+        "theme": "light",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "audiences",
+        "theme": "light",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "experience",
+        "theme": "light",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "live",
+        "theme": "light",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "login",
+        "theme": "dark",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "home",
+        "theme": "dark",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "explore",
+        "theme": "dark",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "dashboards",
+        "theme": "dark",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "audiences",
+        "theme": "dark",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "experience",
+        "theme": "dark",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      },
+      {
+        "route": "live",
+        "theme": "dark",
+        "viewport": "390x844",
+        "overflow": false,
+        "seriousCriticalAxe": 0
+      }
+    ],
+    "pageErrors": []
+  },
+  "webkit": {
+    "version": "26.5",
+    "fullRoutes": 7,
+    "fullRunRevision": "cf9aa31308f825f4996a8cdaa2aa2cee7f58fd4e",
+    "viewport": "390x844",
+    "dpr": 3,
+    "touch": true,
+    "focusRecheckRevision": "8e5e60a6036f947629a3373ed5a5d4dc2672838a",
+    "focusCases": [
+      {
+        "width": 390,
+        "height": 844,
+        "dialogBounds": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 843.984375
+        },
+        "titleReceivesPointer": true,
+        "pointerEscapeRestore": true,
+        "pointerCloseRestore": true,
+        "keyboardEscapeRestore": true,
+        "touchCloseRestore": true
+      },
+      {
+        "width": 568,
+        "height": 320,
+        "dialogBounds": {
+          "x": 0,
+          "y": 0,
+          "width": 568,
+          "height": 320
+        },
+        "titleReceivesPointer": true,
+        "pointerEscapeRestore": true,
+        "pointerCloseRestore": true,
+        "keyboardEscapeRestore": true,
+        "touchCloseRestore": true
+      }
+    ],
+    "focusErrors": [],
+    "focusHttpErrors": []
+  },
+  "firefox": {
+    "version": "153.0",
+    "uiCases": 0,
+    "status": "unverified",
+    "reason": "Playwright adapter failed in newPage before any site URL: Cannot read properties of undefined (reading '_page')"
+  },
+  "hosted": {
+    "url": "https://signal-studio-smoky.vercel.app",
+    "revision": "dff0f544d16dc724ea8d663f6d0870ed6513760c",
+    "sourceSha256": "a2c37f311fad4e02b0f2e2a7ff9c64254e7ff860b2771bde87f8e4daaec3d9f8",
+    "profile": "vercel-serverless",
+    "ready": {
+      "ok": true,
+      "dependencies": {
+        "database": "ready"
+      }
+    },
+    "chrome": "155.0.8059.80",
+    "staleAccountGuestEntry": true,
+    "accountCredentialPreserved": true,
+    "reload": true,
+    "narrow320": {
+      "signInRight": 306,
+      "answerDoesNotOverlap": true
+    },
+    "homeNavigationToMatureCohortMs": 1133,
+    "funnel": [
+      336,
+      252,
+      84
+    ],
+    "insightPersisted": true,
+    "dashboardPersisted": true,
+    "jsonExport": true,
+    "crossProjectDenied": true,
+    "cookie": {
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    "pageErrors": []
+  },
+  "tableOnly": {
+    "native": {
+      "revision": "dff0f544d16dc724ea8d663f6d0870ed6513760c",
+      "sourceSha256": "b11669c9f734b4b301cfa41aecf5b86891578bd1fb457f0a241562412f68f62b",
+      "buildProfile": "native",
+      "ready": true,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "tableOnly": true,
+      "reload": true,
+      "memberDrilldown": true,
+      "errors": []
+    },
+    "hosted": {
+      "revision": "dff0f544d16dc724ea8d663f6d0870ed6513760c",
+      "sourceSha256": "a2c37f311fad4e02b0f2e2a7ff9c64254e7ff860b2771bde87f8e4daaec3d9f8",
+      "buildProfile": "vercel-serverless",
+      "ready": true,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "tableOnly": true,
+      "reload": true,
+      "memberDrilldown": true,
+      "errors": []
+    }
+  },
+  "usability": {
+    "native": {
+      "passed": 3,
+      "durationSeconds": 5.8
+    },
+    "hosted": {
+      "passed": 3,
+      "durationSeconds": 7.5
+    },
+    "note": "Critical rapid-mode changes, real device rates/refetch, mobile dialog/date/clipboard failures; existing owned sessions, no guest quota reset."
+  },
+  "gallery": {
+    "reviewChecks": 56,
+    "compareChecks": 4,
+    "widths": [
+      390,
+      1600
+    ],
+    "overflow": false,
+    "seriousCriticalAxe": 0,
+    "errors": [],
+    "assetErrors": [],
+    "video": {
+      "duration": 10.64,
+      "readyState": 4,
+      "error": null,
+      "controls": true,
+      "autoplay": false,
+      "playsInline": true,
+      "preload": "metadata",
+      "muted": true,
+      "videoWidth": 1440,
+      "videoHeight": 1000
+    },
+    "board": {
+      "width": 1960,
+      "height": 3426,
+      "source": "actual unmodified application screenshots, composed in HTML"
+    }
+  },
+  "performance": {
+    "environment": "Windows, Playwright APIRequestContext, public Vercel Hobby + Neon Free Frankfurt, no network/CPU throttling, one owned guest, sequential requests",
+    "revision": "cf9aa31308f825f4996a8cdaa2aa2cee7f58fd4e",
+    "dataset": "1281 synthetic events / 336 users / 84 accounts / 441 sessions / 42 UTC days",
+    "firstRequest": {
+      "ms": 419,
+      "bytes": 16513
+    },
+    "followingRequests": [
+      {
+        "ms": 121,
+        "bytes": 16506
+      },
+      {
+        "ms": 171,
+        "bytes": 16506
+      },
+      {
+        "ms": 121,
+        "bytes": 16506
+      },
+      {
+        "ms": 125,
+        "bytes": 16506
+      },
+      {
+        "ms": 123,
+        "bytes": 16506
+      }
+    ],
+    "p50": 123,
+    "p95NearestRank": 171,
+    "n": 5,
+    "scope": "HTTP snapshot endpoint including full response body; not UI rendering, server SQL timing, a field benchmark or a causal improvement claim"
+  },
+  "cleanup": {
+    "onlyOwnedGuest": true,
+    "status": 200,
+    "revoked": true,
+    "note": "Guest expiry/revocation requested through its normal API. Shared cleanup performs bounded physical data removal; no other session or database was deleted."
+  },
+  "limits": [
+    "Representative simulated viewports, not every physical device or aspect ratio; 200px diagnostic stress, 8K CSS viewport DPR1, no 200-megapixel framebuffer.",
+    "Firefox UI not verified; no physical Safari/iOS/Android or screen-reader certification.",
+    "Cold Home navigation 11863ms remains; later warm navigations are not proof of improvement.",
+    "Retention raw exports retain partial periods; segmented funnel members combine all groups, both explicitly labeled.",
+    "No new 1M-event benchmark or ClickHouse parity."
+  ],
+  "preservation": {
+    "sqlChanged": false,
+    "schemaChanged": false,
+    "migrations": 0,
+    "newDependencies": 0,
+    "authAndPermissions": "preserved",
+    "license": "Full MIT and Umami notice unchanged",
+    "otherProjects": "No other project processes, containers, databases or volumes stopped/deleted"
+  }
+}

@@ -2,7 +2,13 @@
 
 ## M22 — Understandable product and responsive hardening
 
-Status: In progress. Explicit user request (2026-10-18): audit complete product
+Status: **Complete**. Runtime `dff0f544d16dc724ea8d663f6d0870ed6513760c`
+passed all six CI jobs in run `39080522711`, native and public guest acceptance,
+responsive/keyboard checks and actual-screen review. Evidence and explicit
+browser/device/performance limits: `docs/M22_FINAL_REPORT.md` and
+`docs/design/m22-comprehension/REVIEW.html`.
+
+Explicit user request (2026-10-18): audit complete product
 journeys and popular viewport/aspect-ratio classes, fix discovered defects,
 make results understandable to a first-time non-analyst, strengthen useful
 visuals and reconcile concept promises with actual working screens.

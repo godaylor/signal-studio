@@ -20,28 +20,27 @@ services. Edit a question, save an Insight, assemble a Dashboard and export CSV 
 JSON; server-saved work survives reloads for the 24-hour guest session. Each guest
 has a separate user, workspace and source, with bounded resource use. No shared
 administrator credentials are provided. The older guided example remains at `/demo/tour`.
-The M21 release introduces a panoramic data workspace: real result-driven flows,
-coordinated light/dark screens, responsive motion and a new original identity.
-The entry scene is an explicitly fixed synthetic example; private workspaces
-calculate from their own events. Guest/account selection remains explicit per tab
-and preserves the signed-in account.
-[M21 acceptance report](docs/M21_FINAL_REPORT.md) records exact revisions, CI,
-public checks and limitations. Earlier releases remain documented in the
-[historical M20 report](docs/M20_FINAL_REPORT.md) and
-[M19 guest report](docs/M19_GUEST_WORKSPACE_REPORT.md).
+M22 makes the first question and the answer easier to follow: ready-to-run sample
+questions, plain-language interpretation, readable event labels, responsive
+editing and explicit partial-retention states. Try **Phone or computer?** in the
+synthetic workspace: normal SQL calculates desktop126/168=75% and
+mobile42/168=25%. This shows an observed difference, not its cause.
+
+[M22 acceptance report](docs/M22_FINAL_REPORT.md) records scenarios, fixes,
+measurements, exact revisions and limitations. Historical
+[M21](docs/M21_FINAL_REPORT.md), [M20](docs/M20_FINAL_REPORT.md) and
+[M19](docs/M19_GUEST_WORKSPACE_REPORT.md) records remain available.
 See [free deployment](docs/FREE_DEPLOYMENT.md).
 
-![Кинорит — actual entry in the public app](docs/design/m21-kinorit/hosted-entry-desktop.png)
+![Kinorit — actual desktop and mobile analysis](docs/design/m22-comprehension/device-comparison.png)
 
-[Design alternatives, selected mockups and real screens](docs/design/m21-kinorit/REVIEW.html)
-· [Before/after comparison](docs/design/m21-kinorit/compare.html)
-· [Design contract](docs/design/m21-kinorit/DESIGN.md)
+[Working screens and visual review](docs/design/m22-comprehension/REVIEW.html)
+· [Actual before/after comparison](docs/design/m22-comprehension/compare.html)
+· [Design contract](docs/design/m22-comprehension/DESIGN.md)
 
-The image above shows the working public app. The review gallery
-separately labels generated design concepts and actual application screens.
-The pictured guest workspace calculates results from explicitly synthetic events;
-normal workspaces analyze their connected sources. Artwork never substitutes for
-an analytical result.
+The images show working screens. Historical imagegen concepts are labeled as
+inspiration, not screenshots of implemented features. The guest data is synthetic;
+normal workspaces analyze their own sources.
 
 ## What works
 
@@ -156,8 +155,8 @@ artifacts live in PostgreSQL. Migrations remain an explicit operator step. The D
 `hosted`, `runner`, `worker` and `migration` targets remain available for self-hosting.
 
 [Free hosting configuration, quotas and first-administrator setup](docs/FREE_DEPLOYMENT.md).
-The published M19 acceptance and the current M20 candidate acceptance are recorded
-separately; a successful local build alone does not verify a public release.
+M22 records the current usability and public-release acceptance. Historical
+M19–M21 records remain available; a local build alone does not verify a public release.
 
 ## Verification
 

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Кинорит — один вопрос на двух экранах</title>
+  <style>
+    :root{font-family:"Segoe UI",system-ui,sans-serif;color:#112e3e;background:#f2f2eb;line-height:1.45;color-scheme:light}*{box-sizing:border-box}body{margin:0}main{width:min(1960px,100%);margin:auto;padding:48px}a{color:#075e75;text-underline-offset:5px}a:focus-visible{outline:3px solid #1462ce;outline-offset:5px}header{display:flex;justify-content:space-between;align-items:center;gap:24px;padding-bottom:26px;border-bottom:1px solid #c3d1d1}.brand{font-size:28px;font-weight:750;letter-spacing:-.05em}.edition{font-size:14px;letter-spacing:.06em;color:#526c78}.intro{padding-block:38px 28px}h1{font-size:clamp(38px,4vw,72px);line-height:1.05;letter-spacing:-.055em;font-weight:650;margin:0 0 18px;max-width:1400px}.intro p{font-size:22px;color:#4b6571;margin:0;max-width:1350px}.numbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding-block:22px 26px;margin-bottom:30px;border-block:1px solid #c3d1d1;gap:32px}.numbers div{min-width:0}.numbers p{font-size:18px;margin:0;color:#526c78}.numbers strong{display:block;font-size:55px;letter-spacing:-.05em;line-height:1.15;color:#076e79;margin:4px 0}.numbers div:nth-child(2) strong{color:#a04c28}.numbers small{font-size:16px}.screens{display:grid;grid-template-columns:minmax(0,1fr) 390px;align-items:start;gap:36px}figure{margin:0;min-width:0}figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #087e87;font-size:20px;font-weight:650}figcaption small{color:#526c78;font-size:14px;font-weight:500;white-space:nowrap}img{display:block;width:100%;height:auto;border:1px solid #c6d4d9;background:#eef6f9}.note{font-size:17px;color:#4b6571;margin:18px 0 0}.footer{margin-top:32px;padding-top:22px;border-top:1px solid #c3d1d1;display:flex;justify-content:space-between;gap:28px;align-items:baseline;font-size:15px;color:#526c78}.footer p{margin:0;max-width:1300px}@media(max-width:1000px){main{padding:24px}.screens{grid-template-columns:minmax(0,1fr)}figure:last-child{width:min(100%,390px);margin-inline:auto}.intro p{font-size:18px}.numbers{gap:16px}.numbers p{font-size:14px}.numbers strong{font-size:38px}.numbers small{font-size:13px}.footer{flex-direction:column;gap:12px}}@media(max-width:450px){main{padding:16px}header{align-items:flex-start;gap:12px;flex-direction:column}.edition{font-size:11px}.intro{padding-block:28px 24px}.numbers{grid-template-columns:minmax(0,1fr);gap:18px}.numbers strong{display:inline-block;margin:0 12px 0 0}.numbers p{font-size:16px}.numbers small{font-size:14px}figcaption{font-size:17px;flex-wrap:wrap}.note{font-size:14px}}@media print{body{background:#fff}.footer a{display:none}}
+  </style>
+</head>
+<body>
+  <main id="board">
+    <header><span class="brand">Кинорит</span><span class="edition">РЕАЛЬНЫЙ ИНТЕРФЕЙС · СИНТЕТИЧЕСКИЕ СОБЫТИЯ ORBIT</span></header>
+    <section class="intro" aria-labelledby="question"><h1 id="question">Телефон или компьютер?</h1><p>Сравните, сколько людей проходит путь от регистрации до ключевой функции. Один рабочий вопрос — в двух форматах интерфейса.</p></section>
+    <section class="numbers" aria-label="Результат расчёта по синтетическим событиям">
+      <div><p>С компьютера</p><strong>75%</strong><small>126 из 168 участников дошли до результата</small></div>
+      <div><p>С телефона</p><strong>25%</strong><small>42 из 168 участников дошли до результата</small></div>
+      <div><p>Следующий шаг</p><strong>Где уходят?</strong><small>Сравнить переходы и открыть участников</small></div>
+    </section>
+    <section class="screens" aria-label="Полные снимки одного анализа на компьютере и телефоне">
+      <figure><figcaption><span>Компьютер</span><small>1440 CSS px</small></figcaption><a href="question-devices-desktop.png"><img src="question-devices-desktop.png" alt="Реальный полный экран анализа Кинорита на компьютере: воронки по типу устройства, результаты 75% и 25% и эквивалентная таблица"></a></figure>
+      <figure><figcaption><span>Телефон</span><small>390 CSS px</small></figcaption><a href="question-devices-mobile.png"><img src="question-devices-mobile.png" alt="Тот же рабочий анализ в мобильной компоновке: группы компьютера и телефона, результаты и таблица"></a><p class="note">Параметры, участники и результаты доступны в обеих компоновках. Широкие таблицы прокручиваются внутри своей области.</p></figure>
+    </section>
+    <div class="footer"><p>Полные снимки приложения, без подмены элементов интерфейса. Значения рассчитаны по явно обозначенным синтетическим событиям. Рабочая сборка e0c3f4c · На основе Umami · MIT.</p><a href="REVIEW.html">Все рабочие экраны →</a></div>
+  </main>
+</body>
+</html>
