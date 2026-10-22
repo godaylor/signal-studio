@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { getClientAuthMode, getClientAuthToken, setClientAuthToken } from '@/lib/client';
 import { GuestStartButton } from './GuestStartButton';
@@ -14,6 +15,13 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('Guest entry failure and resource states', () => {
+  test('keeps server markup disabled until the real click handler is hydrated', () => {
+    const markup = renderToString(<GuestStartButton />);
+    expect(markup).toContain('disabled=""');
+    expect(markup).toContain('aria-busy="true"');
+    render(<GuestStartButton />);
+    expect(screen.getByRole('button', { name: /Try without/ })).toBeEnabled();
+  });
   test('keeps a retry available when the server cannot allocate another workspace', async () => {
     const fetch = vi.fn().mockResolvedValue({
       ok: false,

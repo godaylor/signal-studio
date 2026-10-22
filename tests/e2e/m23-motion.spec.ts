@@ -1,5 +1,34 @@
 import { expect, type Locator, test } from '@playwright/test';
 
+test('guest entry becomes available only after its real scripts load', async ({ page }) => {
+  let release = () => {};
+  const scriptsReady = new Promise<void>(resolve => {
+    release = resolve;
+  });
+  let delayed = 0;
+  await page.route('**/_next/static/chunks/**', async route => {
+    if (route.request().resourceType() === 'script') {
+      delayed++;
+      await scriptsReady;
+    }
+    await route.continue();
+  });
+  try {
+    await page.goto('/login?locale=ru-RU', { waitUntil: 'commit' });
+    const entry = page.getByRole('button', { name: 'Попробовать без регистрации', exact: true });
+    await expect(entry).toBeVisible();
+    await expect.poll(() => delayed).toBeGreaterThan(0);
+    await expect(entry).toBeDisabled();
+    await expect(entry).toHaveAttribute('aria-busy', 'true');
+    release();
+    await expect(entry).toBeEnabled({ timeout: 30_000 });
+    await expect(entry).not.toHaveAttribute('aria-busy', 'true');
+  } finally {
+    release();
+    await page.unrouteAll({ behavior: 'wait' });
+  }
+});
+
 async function offset(pulse: Locator) {
   return pulse.evaluate(element => getComputedStyle(element).strokeDashoffset);
 }

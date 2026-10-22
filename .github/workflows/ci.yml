@@ -71,10 +71,10 @@ jobs:
           curl --fail --silent http://127.0.0.1:32140/api/ready
       - name: Critical browser workflows, access restrictions, RU/EN and axe
         run: node scripts/run-release-e2e.js tests/e2e/public-demo.spec.ts tests/e2e/guest-workspace.spec.ts tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-home.spec.ts tests/e2e/explore-workspace.spec.ts tests/e2e/insight-library.spec.ts tests/e2e/dashboard-workspace.spec.ts tests/e2e/audiences-experience.spec.ts tests/e2e/live-workspace.spec.ts tests/e2e/m15-export.spec.ts tests/e2e/m14-viewer-access.spec.ts tests/e2e/m14-public-share.spec.ts tests/e2e/m14-localization.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts tests/e2e/guest-auth-context.spec.ts tests/e2e/visual-experience.spec.ts tests/e2e/m22-usability.spec.ts tests/e2e/m23-motion.spec.ts
-      - if: failure()
+      - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-failure-context
+          name: browser-test-context
           path: test-results
           retention-days: 7
   serverless:
@@ -125,10 +125,10 @@ jobs:
           curl --fail --silent http://127.0.0.1:32140/api/ready
       - name: Browser queue, source, auth and lifecycle against PostgreSQL artifacts
         run: node scripts/run-release-e2e.js tests/e2e/public-demo.spec.ts tests/e2e/m15-export.spec.ts tests/e2e/source-onboarding.spec.ts tests/e2e/login.spec.ts tests/e2e/m16-lifecycle-legal.spec.ts
-      - if: failure()
+      - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: serverless-failure-context
+          name: serverless-test-context
           path: |
             test-results
             .local/serverless-app.log

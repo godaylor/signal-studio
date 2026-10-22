@@ -97,8 +97,14 @@ async function enterGuest(page: Page, context: BrowserContext, token: string, ki
       response.url().endsWith(`/api/projects/${guest.projectId}/analytics/query`) &&
       response.request().method() === 'POST',
   );
+  const entered = page.waitForResponse(
+    response => response.url().endsWith('/api/guest') && response.request().method() === 'POST',
+  );
   await page.getByRole('button', { name: /Try without|Попробовать без регистрации/ }).click();
-  await expect(page).toHaveURL(new RegExp(`/studio/${guest.projectId}/explore\\?`));
+  expect((await entered).status()).toBe(200);
+  await expect(page).toHaveURL(new RegExp(`/studio/${guest.projectId}/explore\\?`), {
+    timeout: 30_000,
+  });
   const response = await verified;
   expect(response.status()).toBe(200);
   expect(await response.json()).toMatchObject({ isGuest: true });

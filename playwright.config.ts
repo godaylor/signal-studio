@@ -15,6 +15,7 @@ export default defineConfig({
     baseURL,
     testIdAttribute: 'data-test',
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
   webServer: process.env.PLAYWRIGHT_SKIP_WEB_SERVER
     ? undefined

@@ -15,7 +15,8 @@ No schema, SQL, provider, account or data migration; preserve other projects.
 Definition of done: visible purposeful entrance/data/navigation animation;
 reactive reduced-motion and saved pause, bounded offscreen/hidden work;
 working guest query/save/dashboard/export/reload; fixes for bounded Insight
-picker, query draft reset and failed rename; light/dark desktop/mobile keyboard
+picker, query draft reset and failed rename; hydration-safe guest CTA with a
+delayed-script regression; light/dark desktop/mobile keyboard
 and error-state verification, appropriate unit/component/browser/build/CI and
 exact public source acceptance. Report measured limits without universal claims.
 

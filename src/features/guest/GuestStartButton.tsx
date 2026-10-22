@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowUpRight, LoaderCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { getApiUrl } from '@/lib/api-url';
 import { activateClientGuestSession } from '@/lib/client';
@@ -9,10 +9,13 @@ import styles from './GuestWorkspace.module.css';
 
 export function GuestStartButton({ className }: { className?: string }) {
   const { t } = useStudioLocale();
+  const [ready, setReady] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  // The server-rendered CTA must not accept a click before its handler is ready.
+  useEffect(() => setReady(true), []);
   const start = async () => {
-    if (pending) return;
+    if (!ready || pending) return;
     setPending(true);
     setError('');
     try {
@@ -59,7 +62,8 @@ export function GuestStartButton({ className }: { className?: string }) {
       <button
         type="button"
         className={className ?? styles.startButton}
-        disabled={pending}
+        disabled={!ready || pending}
+        aria-busy={!ready || pending || undefined}
         onClick={start}
       >
         {pending ? <LoaderCircle size={18} aria-hidden="true" /> : null}
