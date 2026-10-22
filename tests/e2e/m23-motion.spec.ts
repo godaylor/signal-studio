@@ -6,7 +6,7 @@ test('guest entry becomes available only after its real scripts load', async ({ 
     release = resolve;
   });
   let delayed = 0;
-  await page.route('**/_next/static/chunks/**', async route => {
+  await page.route(/\/_next\/static\/(?:immutable\/)?chunks\//, async route => {
     if (route.request().resourceType() === 'script') {
       delayed++;
       await scriptsReady;
@@ -14,12 +14,29 @@ test('guest entry becomes available only after its real scripts load', async ({ 
     await route.continue();
   });
   try {
-    await page.goto('/login?locale=ru-RU', { waitUntil: 'commit' });
+    const response = await page.goto('/login?locale=ru-RU', { waitUntil: 'commit' });
+    if (!response) throw new Error('The server document was not received.');
     const entry = page.getByRole('button', { name: 'Попробовать без регистрации', exact: true });
-    await expect(entry).toBeVisible();
     await expect.poll(() => delayed).toBeGreaterThan(0);
-    await expect(entry).toBeDisabled();
-    await expect(entry).toHaveAttribute('aria-busy', 'true');
+    // WebKit may keep streamed HTML hidden until scripts load. Inspect the
+    // actual server document in every engine, and any already-visible CTA.
+    const serverEntry = await page.evaluate(
+      html => {
+        const document = new DOMParser().parseFromString(html, 'text/html');
+        const button = Array.from(document.querySelectorAll('button')).find(element =>
+          element.textContent?.includes('Попробовать без регистрации'),
+        );
+        return button
+          ? { disabled: button.disabled, busy: button.getAttribute('aria-busy') }
+          : null;
+      },
+      await response.text(),
+    );
+    expect(serverEntry).toEqual({ disabled: true, busy: 'true' });
+    if (await entry.isVisible()) {
+      await expect(entry).toBeDisabled();
+      await expect(entry).toHaveAttribute('aria-busy', 'true');
+    }
     release();
     await expect(entry).toBeEnabled({ timeout: 30_000 });
     await expect(entry).not.toHaveAttribute('aria-busy', 'true');
