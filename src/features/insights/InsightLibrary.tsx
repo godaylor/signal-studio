@@ -119,6 +119,15 @@ export function InsightLibrary({
   const duplicate = useDuplicateInsight(projectId);
   const insights = useMemo(() => list.data?.pages.flatMap(page => page.data) ?? [], [list.data]);
   const mutationError = update.error ?? duplicate.error;
+  const saveTitle = async (id: string) => {
+    if (update.isPending || !editTitle.trim()) return;
+    try {
+      await update.mutateAsync({ id, patch: { title: editTitle.trim() } });
+      setEditingId(current => (current === id ? undefined : current));
+    } catch {
+      // Keep the editor and title draft available for a retry after rollback.
+    }
+  };
 
   return (
     <AccessibleDialog
@@ -188,6 +197,7 @@ export function InsightLibrary({
                         value={editTitle}
                         onChange={event => setEditTitle(event.target.value)}
                         maxLength={200}
+                        disabled={update.isPending}
                       />
                     </label>
                   ) : (
@@ -238,12 +248,12 @@ export function InsightLibrary({
                   <>
                     <button
                       type="button"
-                      onClick={() => {
-                        update.mutate({ id: insight.id, patch: { title: editTitle } });
-                        setEditingId(undefined);
-                      }}
+                      disabled={update.isPending || !editTitle.trim()}
+                      onClick={() => void saveTitle(insight.id)}
                     >
-                      {t('Save title', 'Сохранить название')}
+                      {update.isPending
+                        ? t('Saving title…', 'Сохраняем название…')
+                        : t('Save title', 'Сохранить название')}
                     </button>
                     <button type="button" onClick={() => setEditingId(undefined)}>
                       {t('Cancel', 'Отмена')}
@@ -252,7 +262,9 @@ export function InsightLibrary({
                 ) : (
                   <button
                     type="button"
+                    disabled={update.isPending}
                     onClick={() => {
+                      update.reset();
                       setEditingId(insight.id);
                       setEditTitle(insight.title);
                     }}

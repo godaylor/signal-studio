@@ -651,6 +651,10 @@
 :global([data-theme="dark"]) .mobileEditorBody {
   --studio-ink-muted: #c0b7ce;
 }
+.plotWindow {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
 .answer {
   display: flex;
   flex-wrap: wrap;
@@ -668,7 +672,7 @@
 .answer > div:last-child {
   border: 0;
 }
-.answer span,
+.answer > div > span,
 .answer small {
   color: var(--studio-ink-muted);
   font-size: 12px;
@@ -1066,7 +1070,7 @@
   font-weight: 550;
   letter-spacing: -0.055em;
 }
-.answer span,
+.answer > div > span,
 .answer small {
   font-size: 11px;
 }
@@ -1311,7 +1315,7 @@
   .answer strong {
     font-size: 34px;
   }
-  .answer span,
+  .answer > div > span,
   .answer small {
     font-size: 9px;
     line-height: 1.5;

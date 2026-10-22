@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { useProjectAccess } from '@/features/access/useProjectAccess';
 import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
@@ -221,6 +221,229 @@ test('clearing a shared date retains the valid period without sending an invalid
   fireEvent.change(start, { target: { value: '2026-03-02' } });
   expect(start).toHaveValue('2026-03-02');
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
+
+test('saving a widget keeps unsaved shared dates and segment conditions for the same dashboard', async () => {
+  const dashboard = {
+    id: '20000000-0000-4000-8000-000000000001',
+    title: 'Product pulse',
+    updatedAt: '2026-03-10T00:00:00Z',
+    owner: { username: 'owner' },
+    widgets: [],
+    globalContext: { range: query.range },
+    canEdit: true,
+  };
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (init?.method === 'POST')
+      return Response.json({
+        ...dashboard,
+        updatedAt: '2026-03-11T00:00:00Z',
+        widgets: [
+          {
+            ...widget('note-1'),
+            kind: 'note',
+            insightId: null,
+            insight: null,
+            title: 'Saved note',
+            body: 'Evidence',
+          },
+        ],
+      });
+    return Response.json(
+      String(url).includes('/insights') ? { data: [], nextCursor: null } : { data: [dashboard] },
+    );
+  });
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+  fireEvent.click(screen.getByText('Shared context', { exact: true }));
+  fireEvent.change(screen.getByLabelText('Start date'), { target: { value: '2026-03-02' } });
+  fireEvent.change(screen.getByLabelText('Segment field'), { target: { value: 'device' } });
+  fireEvent.change(screen.getByLabelText('Segment value'), { target: { value: 'mobile' } });
+  fireEvent.change(screen.getByLabelText('Note title'), { target: { value: 'Saved note' } });
+  fireEvent.change(screen.getByLabelText('Note body'), { target: { value: 'Evidence' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add note' }));
+  expect(await screen.findByRole('heading', { name: 'Saved note' })).toBeVisible();
+  expect(screen.getByLabelText('Start date')).toHaveValue('2026-03-02');
+  expect(screen.getByLabelText('Segment field')).toHaveValue('device');
+  expect(screen.getByLabelText('Segment value')).toHaveValue('mobile');
+});
+
+test('a shared context save does not overwrite a newer edit made while its response is in flight', async () => {
+  const dashboard = {
+    id: '20000000-0000-4000-8000-000000000001',
+    title: 'Product pulse',
+    updatedAt: '2026-03-10T00:00:00Z',
+    owner: { username: 'owner' },
+    widgets: [],
+    globalContext: { range: query.range },
+    canEdit: true,
+  };
+  let finish: ((response: Response) => void) | undefined;
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (init?.method === 'PATCH')
+      return new Promise<Response>(resolve => {
+        finish = resolve;
+      });
+    return Response.json(
+      String(url).includes('/insights') ? { data: [], nextCursor: null } : { data: [dashboard] },
+    );
+  });
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+  fireEvent.click(screen.getByText('Shared context', { exact: true }));
+  fireEvent.change(screen.getByLabelText('Start date'), { target: { value: '2026-03-02' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Apply shared context' }));
+  await waitFor(() => expect(finish).toBeDefined());
+  expect(screen.getByRole('button', { name: 'Apply shared context' })).toBeDisabled();
+  // Returning to the old applied value is still a newer intentional edit.
+  fireEvent.change(screen.getByLabelText('Start date'), { target: { value: '2026-03-01' } });
+  await act(async () =>
+    finish?.(
+      Response.json({
+        ...dashboard,
+        globalContext: { range: { ...query.range, startAt: '2026-03-02T00:00:00.000Z' } },
+      }),
+    ),
+  );
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Apply shared context' })).toBeEnabled(),
+  );
+  expect(screen.getByLabelText('Start date')).toHaveValue('2026-03-01');
+});
+
+test('switching dashboard initializes its applied context and external changes update only a pristine editor', async () => {
+  const first = {
+    id: '20000000-0000-4000-8000-000000000001',
+    title: 'First dashboard',
+    updatedAt: '2026-03-10T00:00:00Z',
+    owner: { username: 'owner' },
+    widgets: [],
+    globalContext: { range: query.range },
+    canEdit: true,
+  };
+  const second = {
+    ...first,
+    id: '20000000-0000-4000-8000-000000000002',
+    title: 'Second dashboard',
+    globalContext: {
+      range: {
+        ...query.range,
+        startAt: '2026-04-01T00:00:00.000Z',
+        endAt: '2026-04-10T00:00:00.000Z',
+      },
+    },
+  };
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async url =>
+    Response.json(
+      String(url).includes('/insights')
+        ? { data: [], nextCursor: null }
+        : { data: [first, second] },
+    ),
+  );
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(
+    <QueryClientProvider client={client}>
+      <DashboardWorkspace projectId={projectId} projectName="Demo" />
+    </QueryClientProvider>,
+  );
+  fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+  fireEvent.click(screen.getByText('Shared context', { exact: true }));
+  fireEvent.change(screen.getByLabelText('Start date'), { target: { value: '2026-03-05' } });
+  fireEvent.click(screen.getByRole('button', { name: /Second dashboard/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+  fireEvent.click(screen.getByText('Shared context', { exact: true }));
+  expect(screen.getByLabelText('Start date')).toHaveValue('2026-04-01');
+  await act(async () =>
+    client.setQueryData(['studio-dashboards', projectId], {
+      data: [
+        first,
+        {
+          ...second,
+          globalContext: {
+            range: { ...second.globalContext.range, startAt: '2026-04-02T00:00:00.000Z' },
+          },
+        },
+      ],
+    }),
+  );
+  await waitFor(() => expect(screen.getByLabelText('Start date')).toHaveValue('2026-04-02'));
+  fireEvent.change(screen.getByLabelText('Start date'), { target: { value: '2026-04-03' } });
+  await act(async () =>
+    client.setQueryData(['studio-dashboards', projectId], {
+      data: [
+        first,
+        {
+          ...second,
+          title: 'Externally updated dashboard',
+          globalContext: {
+            range: { ...second.globalContext.range, startAt: '2026-04-04T00:00:00.000Z' },
+          },
+        },
+      ],
+    }),
+  );
+  await screen.findByRole('heading', { name: 'Externally updated dashboard' });
+  expect(screen.getByLabelText('Start date')).toHaveValue('2026-04-03');
+});
+
+test('the saved analysis picker loads a bounded next page, recovers from failure and adds an older analysis', async () => {
+  const dashboard = {
+    id: '20000000-0000-4000-8000-000000000001',
+    title: 'Product pulse',
+    updatedAt: '2026-03-10T00:00:00Z',
+    owner: { username: 'owner' },
+    widgets: [],
+    globalContext: {},
+    canEdit: true,
+  };
+  const recent = Array.from({ length: 20 }, (_, index) => ({
+    ...widget(`recent-${index + 1}`).insight,
+    id: `recent-${index + 1}`,
+    title: `Recent analysis ${index + 1}`,
+  }));
+  const older = {
+    ...widget('older-analysis').insight,
+    id: 'older-analysis',
+    title: 'Older analysis',
+  };
+  let nextRequests = 0;
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (init?.method === 'POST') return Response.json(dashboard);
+    if (String(url).includes('/insights')) {
+      const params = new URL(String(url), 'http://localhost').searchParams;
+      expect(params.get('limit')).toBe('20');
+      if (params.get('cursor') === 'older-cursor') {
+        nextRequests += 1;
+        return nextRequests === 1
+          ? Response.json({ error: { message: 'Temporary page failure' } }, { status: 503 })
+          : Response.json({ data: [older], nextCursor: null });
+      }
+      return Response.json({ data: recent, nextCursor: 'older-cursor' });
+    }
+    return Response.json({ data: [dashboard] });
+  });
+  wrapper(<DashboardWorkspace projectId={projectId} projectName="Demo" />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+  const picker = screen.getByLabelText('Insight to add');
+  expect(within(picker).getAllByRole('option')).toHaveLength(21);
+  expect(screen.queryByRole('option', { name: 'Older analysis' })).not.toBeInTheDocument();
+  expect(nextRequests).toBe(0);
+  fireEvent.click(screen.getByRole('button', { name: 'Load more saved analyses' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('loaded choices remain available');
+  expect(within(picker).getByRole('option', { name: 'Recent analysis 1' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Retry loading more analyses' }));
+  expect(await screen.findByRole('option', { name: 'Older analysis' })).toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: 'Load more saved analyses' }),
+  ).not.toBeInTheDocument();
+  fireEvent.change(picker, { target: { value: older.id } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add Insight' }));
+  await waitFor(() => {
+    const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(post).toBeDefined();
+    expect(JSON.parse(String(post?.[1]?.body))).toEqual({ kind: 'insight', insightId: older.id });
+  });
+  expect(nextRequests).toBe(2);
 });
 
 test('identical dashboard widget queries share one TanStack request', async () => {

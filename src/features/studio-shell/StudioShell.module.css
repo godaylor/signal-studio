@@ -377,7 +377,7 @@
 .studioFrame[data-sidebar-collapsed]
   :is(
     .brandText,
-    .navLink span,
+    .navLink > span:not([aria-hidden="true"]),
     .utilityLink span,
     .utilityLink kbd,
     .userSummary > span:last-child
@@ -1314,39 +1314,26 @@
   position: relative;
   isolation: isolate;
 }
-.routeFrame::before {
-  content: "";
+.navigationProgress {
   position: absolute;
+  inset: auto 12px 0;
+  height: 3px;
   pointer-events: none;
-  z-index: 5;
-  inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 30%,
-    #35e0cf09 48%,
-    #35e0cf20 50%,
-    transparent 55%
-  );
-  animation: sceneSweep 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-@keyframes sceneSweep {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  45% {
-    clip-path: inset(0 0 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 100%);
-  }
+.mobileBottomNav a {
+  position: relative;
 }
-:global([data-visual-motion="off"]) .routeFrame::before {
-  animation: none;
-  display: none;
+:global([data-visual-motion="off"]) .studioFrame *,
+:global([data-visual-motion="off"]) .studioFrame *::before,
+:global([data-visual-motion="off"]) .studioFrame *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .routeFrame::before {
-    animation: none;
-    display: none;
+  .studioFrame *,
+  .studioFrame *::before,
+  .studioFrame *::after {
+    animation: none !important;
+    transition-duration: 0s !important;
   }
 }

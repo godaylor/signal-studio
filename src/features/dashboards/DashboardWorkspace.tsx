@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProjectAccess } from '@/features/access/useProjectAccess';
 import { dateInputToUtc } from '@/features/explore/model';
 import { useAnalysisResult } from '@/features/explore/useAnalysisQuery';
@@ -43,6 +43,29 @@ import {
 
 function utcDate(value?: string) {
   return value ? new Date(value).toISOString().slice(0, 10) : '';
+}
+
+function contextIdentity(context: DashboardGlobalContext) {
+  return JSON.stringify({
+    ...(context.range
+      ? {
+          range: {
+            startAt: context.range.startAt,
+            endAt: context.range.endAt,
+            ...(context.range.timezone ? { timezone: context.range.timezone } : {}),
+          },
+        }
+      : {}),
+    ...(context.segment
+      ? {
+          segment: {
+            field: context.segment.field,
+            operator: context.segment.operator,
+            value: context.segment.value,
+          },
+        }
+      : {}),
+  });
 }
 
 export function DashboardWorkspace({
@@ -76,18 +99,57 @@ export function DashboardWorkspace({
   const [noteBody, setNoteBody] = useState('');
   const [contextDraft, setContextDraft] = useState<DashboardGlobalContext>({});
   const [contextDateError, setContextDateError] = useState(false);
+  const contextDashboardId = useRef<string | undefined>(undefined);
+  const contextEditRevision = useRef(0);
+  const contextSavedRevision = useRef(0);
   const list = dashboards.data?.data ?? [];
   const selected = list.find(item => item.id === selectedId) ?? list[0];
+  const selectedDashboardId = selected?.id;
+  const appliedContextIdentity = contextIdentity(selected?.globalContext ?? {});
 
   useEffect(() => {
     if (!selectedId && list[0]) setSelectedId(list[0].id);
   }, [list, selectedId]);
   useEffect(() => {
-    if (selected) {
-      setContextDraft(selected.globalContext ?? {});
+    if (!selectedDashboardId) return;
+    const switched = contextDashboardId.current !== selectedDashboardId;
+    if (switched) {
+      contextDashboardId.current = selectedDashboardId;
+      contextEditRevision.current += 1;
+      contextSavedRevision.current = contextEditRevision.current;
       setContextDateError(false);
     }
-  }, [selected]);
+    setContextDraft(current =>
+      switched || contextEditRevision.current === contextSavedRevision.current
+        ? (JSON.parse(appliedContextIdentity) as DashboardGlobalContext)
+        : current,
+    );
+  }, [selectedDashboardId, appliedContextIdentity]);
+
+  const editContext = (change: (current: DashboardGlobalContext) => DashboardGlobalContext) => {
+    contextEditRevision.current += 1;
+    setContextDraft(change);
+  };
+
+  const applyContext = (context: DashboardGlobalContext) => {
+    if (!selected?.canEdit || update.isPending) return;
+    const dashboardId = selected.id;
+    const submittedRevision = contextEditRevision.current;
+    update.mutate(
+      { id: dashboardId, patch: { globalContext: context } },
+      {
+        onSuccess: dashboard => {
+          if (
+            contextDashboardId.current === dashboardId &&
+            contextEditRevision.current === submittedRevision
+          ) {
+            contextSavedRevision.current = submittedRevision;
+            setContextDraft(dashboard.globalContext ?? {});
+          }
+        },
+      },
+    );
+  };
 
   const updateContextDate = (field: 'startAt' | 'endAt', value: string) => {
     if (!value) {
@@ -96,7 +158,7 @@ export function DashboardWorkspace({
     }
     const date = dateInputToUtc(value);
     setContextDateError(false);
-    setContextDraft(current => ({
+    editContext(current => ({
       ...current,
       range: {
         startAt: current.range?.startAt ?? date,
@@ -290,7 +352,7 @@ export function DashboardWorkspace({
                       <select
                         value={contextDraft.segment?.field ?? ''}
                         onChange={event =>
-                          setContextDraft(current =>
+                          editContext(current =>
                             event.target.value
                               ? {
                                   ...current,
@@ -317,7 +379,7 @@ export function DashboardWorkspace({
                         value={contextDraft.segment?.value ?? ''}
                         disabled={!contextDraft.segment}
                         onChange={event =>
-                          setContextDraft(current =>
+                          editContext(current =>
                             current.segment
                               ? {
                                   ...current,
@@ -339,18 +401,18 @@ export function DashboardWorkspace({
                       ) : null}
                       <button
                         type="button"
-                        onClick={() =>
-                          update.mutate({ id: selected.id, patch: { globalContext: contextDraft } })
-                        }
+                        disabled={update.isPending}
+                        onClick={() => applyContext(contextDraft)}
                       >
                         {t('Apply shared context', 'Применить общий контекст')}
                       </button>
                       <button
                         type="button"
+                        disabled={update.isPending}
                         onClick={() => {
-                          setContextDraft({});
+                          editContext(() => ({}));
                           setContextDateError(false);
-                          update.mutate({ id: selected.id, patch: { globalContext: {} } });
+                          applyContext({});
                         }}
                       >
                         {t('Clear', 'Очистить')}
@@ -376,6 +438,7 @@ export function DashboardWorkspace({
                         aria-label={t('Insight to add', 'Инсайт для добавления')}
                         value={selectedInsightId}
                         onChange={event => setSelectedInsightId(event.target.value)}
+                        disabled={insightsQuery.isPending || !insights.length}
                         required
                       >
                         <option value="">{t('Choose Insight', 'Выберите анализ')}</option>
@@ -389,6 +452,51 @@ export function DashboardWorkspace({
                     <button type="submit" disabled={!selectedInsightId || addWidget.isPending}>
                       <Plus aria-hidden="true" /> {t('Add Insight', 'Добавить инсайт')}
                     </button>
+                    <div className={styles.contextActions} style={{ gridColumn: '1 / -1' }}>
+                      {insightsQuery.isPending ? (
+                        <p role="status">
+                          {t('Loading saved analyses…', 'Загружаем сохранённые анализы…')}
+                        </p>
+                      ) : insightsQuery.error ? (
+                        <p role="alert">
+                          {t(
+                            insights.length
+                              ? 'More analyses could not be loaded. The loaded choices remain available.'
+                              : 'Saved analyses could not be loaded.',
+                            insights.length
+                              ? 'Не удалось загрузить остальные анализы. Уже загруженные доступны для выбора.'
+                              : 'Не удалось загрузить сохранённые анализы.',
+                          )}
+                        </p>
+                      ) : !insights.length ? (
+                        <p>
+                          {t('No saved analyses yet. ', 'Сохранённых анализов пока нет. ')}
+                          <Link href={`/studio/${projectId}/explore`}>
+                            {t(
+                              'Save an analysis in Explore',
+                              'Сохраните результат в разделе «Анализ»',
+                            )}
+                          </Link>
+                        </p>
+                      ) : null}
+                      {insightsQuery.hasNextPage ? (
+                        <button
+                          type="button"
+                          disabled={insightsQuery.isFetchingNextPage}
+                          onClick={() => void insightsQuery.fetchNextPage()}
+                        >
+                          {insightsQuery.isFetchingNextPage
+                            ? t('Loading more analyses…', 'Загружаем ещё анализы…')
+                            : insightsQuery.isFetchNextPageError
+                              ? t('Retry loading more analyses', 'Повторить загрузку анализов')
+                              : t('Load more saved analyses', 'Загрузить ещё анализы')}
+                        </button>
+                      ) : insightsQuery.error ? (
+                        <button type="button" onClick={() => void insightsQuery.refetch()}>
+                          {t('Retry saved analyses', 'Повторить загрузку анализов')}
+                        </button>
+                      ) : null}
+                    </div>
                   </form>
                   <form
                     onSubmit={event => {

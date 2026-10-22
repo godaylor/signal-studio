@@ -5,6 +5,8 @@ import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { getStudioPath } from '@/features/studio-shell/navigation';
 import { StudioState } from '@/features/studio-shell/StudioState';
+import { DataValue } from '@/features/visual/DataValue';
+import { useSceneEntrance } from '@/features/visual/useSceneEntrance';
 import type { AnalysisBreakdownRow } from '@/server/analytics/contracts';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import type { HomeMetric, HomeSnapshot } from '@/server/home/contracts';
@@ -24,6 +26,9 @@ export function HomeWorkspace({
   projectName: string;
 }) {
   const { t, locale } = useStudioLocale();
+  const headingEntrance = useSceneEntrance<HTMLElement>();
+  const lifecycleEntrance = useSceneEntrance<HTMLElement>(100);
+  const metricsEntrance = useSceneEntrance<HTMLElement>();
   const guest = useGuestWorkspace();
   const home = useHome(projectId);
   const data = home.data;
@@ -43,7 +48,7 @@ export function HomeWorkspace({
   const activationTotal = activation?.result?.data.total;
   return (
     <section className={styles.page}>
-      <header className={styles.heading}>
+      <header className={styles.heading} ref={headingEntrance}>
         <div>
           <p className={styles.eyebrow}>
             {projectName} / {t('First value', 'Первая ценность')}
@@ -63,12 +68,16 @@ export function HomeWorkspace({
           <div className={styles.heroDecision}>
             <div className={styles.heroValue}>
               <strong>
-                {activationTotal?.rate == null
-                  ? '—'
-                  : activationTotal.rate.toLocaleString(locale, {
-                      style: 'percent',
-                      maximumFractionDigits: 1,
-                    })}
+                <DataValue
+                  value={
+                    activationTotal?.rate == null
+                      ? '—'
+                      : activationTotal.rate.toLocaleString(locale, {
+                          style: 'percent',
+                          maximumFractionDigits: 1,
+                        })
+                  }
+                />
               </strong>
               <span>{t('Activation', 'Активация')}</span>
             </div>
@@ -107,7 +116,11 @@ export function HomeWorkspace({
         />
       ) : (
         <>
-          <section aria-labelledby="home-lifecycle" className={styles.lifecycle}>
+          <section
+            aria-labelledby="home-lifecycle"
+            className={styles.lifecycle}
+            ref={lifecycleEntrance}
+          >
             <header className={styles.sectionHeading}>
               <div>
                 <h2 id="home-lifecycle">
@@ -133,7 +146,7 @@ export function HomeWorkspace({
             refreshing={home.isFetching}
             onRefresh={() => home.refetch()}
           />
-          <section aria-labelledby="home-week" className={styles.section}>
+          <section aria-labelledby="home-week" className={styles.section} ref={metricsEntrance}>
             <header className={styles.sectionHeading}>
               <h2 id="home-week">{t('Last completed week', 'Последняя полная неделя')}</h2>
               <span>{range(data.activeRange)}</span>

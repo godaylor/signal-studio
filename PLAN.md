@@ -1,5 +1,24 @@
 # Signal Studio transformation plan
 
+## M23 — Motion that explains the workspace
+
+Status: In progress. Explicit continuation (2026-10-22/23, Europe/Moscow):
+finish the website, make motion more expressive, verify working scenarios and
+fix concrete defects. Initial tree clean at `2c0a954ea`.
+
+Subsystems: entry choreography, shared data/reveal motion and motion policy,
+Studio navigation/state feedback, existing product surface interactions,
+focused regression tests and actual desktop/mobile motion evidence. Reuse the
+current Kinorit identity, dependencies, auth and bounded analytics services.
+No schema, SQL, provider, account or data migration; preserve other projects.
+
+Definition of done: visible purposeful entrance/data/navigation animation;
+reactive reduced-motion and saved pause, bounded offscreen/hidden work;
+working guest query/save/dashboard/export/reload; fixes for bounded Insight
+picker, query draft reset and failed rename; light/dark desktop/mobile keyboard
+and error-state verification, appropriate unit/component/browser/build/CI and
+exact public source acceptance. Report measured limits without universal claims.
+
 ## M22 — Understandable product and responsive hardening
 
 Status: **Complete**. Runtime `dff0f544d16dc724ea8d663f6d0870ed6513760c`

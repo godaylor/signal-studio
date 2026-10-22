@@ -247,6 +247,34 @@ describe('ExploreWorkspace', () => {
     );
   });
 
+  test('resetting draft filters preserves event and date edits until the question is run', async () => {
+    const user = userEvent.setup();
+    render(<ExploreWorkspace projectId={projectId} projectName="Demo project" />);
+    await user.click(screen.getByRole('button', { name: 'Edit query' }));
+    const editor = within(screen.getByRole('dialog', { name: 'Edit query' }));
+    fireEvent.change(editor.getByLabelText('Event or metric'), { target: { value: 'purchase' } });
+    await user.click(editor.getByRole('button', { name: /Context/ }));
+    fireEvent.change(editor.getByLabelText('Start date'), { target: { value: '2026-03-02' } });
+    fireEvent.change(editor.getByLabelText('End date'), { target: { value: '2026-03-07' } });
+    await user.click(editor.getByRole('button', { name: /Filters/ }));
+    await user.click(editor.getByRole('button', { name: 'Add filter' }));
+    expect(editor.getByLabelText('Filter 1 · value')).toHaveValue('/app');
+    await user.click(editor.getByRole('button', { name: 'Reset filters only' }));
+    expect(editor.queryByLabelText('Filter 1 · value')).not.toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+    await user.click(editor.getByRole('button', { name: /Signal/ }));
+    expect(editor.getByLabelText('Event or metric')).toHaveValue('purchase');
+    await user.click(editor.getByRole('button', { name: /Context/ }));
+    expect(editor.getByLabelText('Start date')).toHaveValue('2026-03-02');
+    expect(editor.getByLabelText('End date')).toHaveValue('2026-03-07');
+    await user.click(editor.getByRole('button', { name: 'Run analysis' }));
+    const applied = new URL(push.mock.calls[0][0], 'http://localhost').searchParams;
+    expect(applied.get('event')).toBe('purchase');
+    expect(applied.get('start')).toBe('2026-03-02T00:00:00.000Z');
+    expect(applied.get('end')).toBe('2026-03-07T00:00:00.000Z');
+    expect(applied.getAll('f')).toEqual([]);
+  });
+
   test('renders permission denial without hiding the Query Spine', () => {
     vi.mocked(useAnalysisResult).mockReturnValue({
       data: undefined,

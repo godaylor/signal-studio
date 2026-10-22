@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
+import { DataValue } from '@/features/visual/DataValue';
 import { useVisualMotion } from '@/features/visual/MotionPreferences';
 import { FlowField } from '@/features/visual/FlowField';
 import { serializeAnalysisQuery } from '@/server/analytics/url-codec';
@@ -80,7 +81,9 @@ export function ProductFlow({ metrics }: { metrics: HomeMetric[] }) {
                   <span>
                     {labels[id]} <ArrowUpRight size={13} aria-hidden="true" />
                   </span>
-                  <strong>{total?.value.toLocaleString(locale) ?? '—'}</strong>
+                  <strong>
+                    <DataValue value={total?.value.toLocaleString(locale) ?? '—'} />
+                  </strong>
                   {metric.error ? (
                     <small>{t('Unavailable', 'Недоступно')}</small>
                   ) : difference != null ? (

@@ -1,13 +1,15 @@
 'use client';
 import { useTheme } from '@umami/react-zen';
 import { ArrowDown, ArrowRight, ArrowUpRight, Moon, Pause, Play, Sun } from 'lucide-react';
-import { motion } from 'motion/react';
 import { type PropsWithChildren, useEffect, useState } from 'react';
 import { GuestStartButton } from '@/features/guest/GuestStartButton';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { BrandMark } from '@/features/visual/BrandMark';
+import { DataValue } from '@/features/visual/DataValue';
 import { FlowField } from '@/features/visual/FlowField';
 import { useVisualMotion } from '@/features/visual/MotionPreferences';
+import { SceneEntrance } from '@/features/visual/SceneEntrance';
+import { useSceneEntrance } from '@/features/visual/useSceneEntrance';
 import { LoginForm } from './LoginForm';
 import styles from './LoginPage.module.css';
 
@@ -29,7 +31,9 @@ export function LoginPage({
 }) {
   const { t, locale } = useStudioLocale();
   const { theme, setTheme } = useTheme();
-  const { animate, enabled, toggle } = useVisualMotion();
+  const { enabled, toggle } = useVisualMotion();
+  const journeyEntrance = useSceneEntrance<HTMLElement>();
+  const accountEntrance = useSceneEntrance<HTMLElement>();
   const [expired, setExpired] = useState(false);
   const [subscription, setSubscription] = useState(false);
   const [active, setActive] = useState<number>();
@@ -49,7 +53,8 @@ export function LoginPage({
       ? t('Subscribed', 'Оформили подписку')
       : t('Used a feature', 'Использовали функцию'),
   ];
-  const rate = values[0] ? values[2] / values[0] : 0;
+  const inspectedStep = active ?? 2;
+  const rate = values[0] ? values[inspectedStep] / values[0] : 0;
   return (
     <LoginPageWrapper>
       <div className={styles.observatory}>
@@ -87,12 +92,7 @@ export function LoginPage({
           </nav>
         </header>
         <section className={styles.hero}>
-          <motion.div
-            className={styles.intro}
-            initial={animate ? { y: 28 } : false}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
+          <SceneEntrance className={styles.intro}>
             <p className={styles.eyebrow}>
               <span />
               {t('Product intelligence, made visible', 'Продуктовая аналитика, которую видно')}
@@ -129,8 +129,8 @@ export function LoginPage({
                 'Попробуйте на Orbit — вымышленном онлайн-сервисе. Подключать свои данные не нужно.',
               )}
             </p>
-          </motion.div>
-          <div className={styles.dataScene}>
+          </SceneEntrance>
+          <SceneEntrance className={styles.dataScene} delay={140}>
             <div className={styles.sampleTop}>
               <span>
                 {t('Synthetic example · 42 days · UTC', 'Синтетический пример · 42 дня · UTC')}
@@ -166,27 +166,39 @@ export function LoginPage({
                   onFocus={() => setActive(index)}
                   onBlur={() => setActive(undefined)}
                   onClick={() => setActive(index)}
+                  data-highlight={active === index || undefined}
                   aria-label={`${labels[index]}: ${value.toLocaleString(locale)}`}
                 >
-                  <strong>{value.toLocaleString(locale)}</strong>
+                  <strong>
+                    <DataValue value={value.toLocaleString(locale)} />
+                  </strong>
                   <span>{labels[index]}</span>
                 </button>
               ))}
             </div>
             <FlowField values={values} active={active} className={styles.heroFlow} panoramic />
             <div className={styles.sceneAnswer}>
-              <span>{t('From signup to the outcome', 'От регистрации до результата')}</span>
+              <span>
+                {active == null
+                  ? t('From signup to the outcome', 'От регистрации до результата')
+                  : `${labels[active]} · ${t('of signups', 'от регистраций')}`}
+              </span>
               <strong>
-                {rate.toLocaleString(locale, { style: 'percent', maximumFractionDigits: 0 })}
+                <DataValue
+                  value={rate.toLocaleString(locale, {
+                    style: 'percent',
+                    maximumFractionDigits: 0,
+                  })}
+                />
               </strong>
               <span className={styles.answerNote}>
                 {t(
-                  `${values[2]} of ${values[0]} reached the final step.`,
-                  `${values[2]} из ${values[0]} дошли до последнего шага.`,
+                  `${values[inspectedStep]} of ${values[0]} reached ${active == null ? 'the final' : 'this'} step.`,
+                  `${values[inspectedStep]} из ${values[0]} дошли до ${active == null ? 'последнего' : 'этого'} шага.`,
                 )}
               </span>
             </div>
-          </div>
+          </SceneEntrance>
           <a href="#how" className={styles.scrollLink}>
             <ArrowDown size={16} />
             {t('Look inside', 'Что внутри')}
@@ -222,7 +234,7 @@ export function LoginPage({
           </span>
         </div>
       </div>
-      <section id="how" className={styles.journey}>
+      <section id="how" className={styles.journey} ref={journeyEntrance}>
         <p className={styles.sectionLabel}>
           {t('One continuous workspace', 'Одно пространство исследования')}
         </p>
@@ -257,17 +269,11 @@ export function LoginPage({
               t('Insights, dashboards, CSV / JSON', 'Инсайты, дашборды, CSV / JSON'),
             ],
           ].map(([n, title, copy], i) => (
-            <motion.div
-              key={title}
-              initial={animate ? { y: 22 } : false}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ delay: i * 0.1, duration: 0.6 }}
-            >
+            <SceneEntrance key={title} delay={i * 90}>
               <span>{n}</span>
               <h3>{title}</h3>
               <p>{copy}</p>
-            </motion.div>
+            </SceneEntrance>
           ))}
         </div>
         <p className={styles.sampleDefinition}>
@@ -277,7 +283,7 @@ export function LoginPage({
           )}
         </p>
       </section>
-      <section id="account" className={styles.account}>
+      <section id="account" className={styles.account} ref={accountEntrance}>
         <div>
           <p className={styles.sectionLabel}>{t('Your workspace', 'Ваше рабочее пространство')}</p>
           <h2>{t('Continue your research.', 'Продолжить исследование.')}</h2>

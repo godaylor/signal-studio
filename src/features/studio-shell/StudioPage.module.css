@@ -516,3 +516,6 @@
     animation: none;
   }
 }
+.stateProgress {
+  margin-top: 16px;
+}

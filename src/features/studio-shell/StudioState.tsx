@@ -3,6 +3,8 @@
 import { AlertTriangle, Inbox, LoaderCircle, LockKeyhole } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
+import { QueryProgress } from '@/features/visual/QueryProgress';
+import { useSceneEntrance } from '@/features/visual/useSceneEntrance';
 import styles from './StudioPage.module.css';
 
 type StudioStateVariant = 'loading' | 'empty' | 'error' | 'permission';
@@ -27,15 +29,23 @@ export function StudioState({
 }) {
   const Icon = stateIcons[variant];
   const role = variant === 'error' ? 'alert' : 'status';
+  const ref = useSceneEntrance<HTMLElement>();
 
   return (
-    <section className={styles.statePanel} data-variant={variant} role={role} aria-live="polite">
+    <section
+      ref={ref}
+      className={styles.statePanel}
+      data-variant={variant}
+      role={role}
+      aria-live="polite"
+    >
       <span className={styles.stateIcon}>
         <Icon aria-hidden="true" size={20} />
       </span>
       <div>
         <h2>{title}</h2>
         <p>{message}</p>
+        {variant === 'loading' ? <QueryProgress className={styles.stateProgress} /> : null}
         {action ? <div className={styles.stateAction}>{action}</div> : null}
       </div>
     </section>

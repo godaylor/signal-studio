@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import type { AnalysisFunnelStepRow } from '@/server/analytics/contracts';
 import { eventLabel } from './eventLabel';
+import { DataValue } from './DataValue';
 import { FlowField } from './FlowField';
 import styles from './FunnelTrace.module.css';
 
@@ -56,9 +57,13 @@ export function FunnelTrace({
                       aria-label={`${t('Explore drop-off', 'Исследовать отток')}: ${eventLabel(row.label, locale)}`}
                       data-highlight={active === i || undefined}
                     >
-                      <span className={styles.label}>{eventLabel(row.label, locale)}</span>
+                      <span className={styles.label}>
+                        {row.label === 'signup'
+                          ? t('Signup', 'Регистрация')
+                          : eventLabel(row.label, locale)}
+                      </span>
                       <strong>
-                        {row.converted.toLocaleString(locale)}
+                        <DataValue value={row.converted.toLocaleString(locale)} />
                         <small>
                           {row.overallConversionRate.toLocaleString(locale, {
                             style: 'percent',

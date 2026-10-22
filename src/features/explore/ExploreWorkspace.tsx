@@ -14,13 +14,16 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { ExportControls } from '@/features/exports/ExportControls';
 import { useGuestWorkspace } from '@/features/guest/GuestWorkspaceContext';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { InsightLibrary, SaveInsightDialog } from '@/features/insights/InsightLibrary';
 import { AccessibleDialog } from '@/features/studio-shell/AccessibleDialog';
 import { StudioState } from '@/features/studio-shell/StudioState';
+import { DataValue } from '@/features/visual/DataValue';
+import { QueryProgress } from '@/features/visual/QueryProgress';
+import { usePlotEntrance, useSceneEntrance } from '@/features/visual/useSceneEntrance';
 import { eventLabel } from '@/features/visual/eventLabel';
 import type {
   AnalysisFilter,
@@ -29,11 +32,7 @@ import type {
   AnalysisResult,
 } from '@/server/analytics/contracts';
 import { AnalysisValidationError } from '@/server/analytics/errors';
-import {
-  parseAnalysisQueryUrl,
-  resetAnalysisFilters,
-  serializeAnalysisQuery,
-} from '@/server/analytics/url-codec';
+import { parseAnalysisQueryUrl, serializeAnalysisQuery } from '@/server/analytics/url-codec';
 import { AdvancedMeasureEditor, AdvancedResults, AdvancedSignalEditor } from './AdvancedAnalysis';
 import { createChartScale } from './chartScale';
 import styles from './ExploreWorkspace.module.css';
@@ -172,11 +171,6 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
     }
   };
 
-  const resetFilters = () => {
-    const nextParams = resetAnalysisFilters(searchParams);
-    router.push(`${pathname}?${nextParams}`, { scroll: false });
-  };
-
   const copyUrl = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -240,10 +234,7 @@ export function ExploreWorkspace({ projectId }: { projectId: string; projectName
           <button
             type="button"
             className={styles.textButton}
-            onClick={() => {
-              setDraft({ ...draft, filters: [], match: 'all' });
-              resetFilters();
-            }}
+            onClick={() => setDraft(current => ({ ...current, filters: [], match: 'all' }))}
           >
             {t('Reset filters only', 'Сбросить только фильтры')}
           </button>
@@ -1096,6 +1087,7 @@ function ResultCanvas({
   onSelectRow: (row: DisplayRow) => void;
 }) {
   const { locale, t } = useStudioLocale();
+  const resultEntrance = useSceneEntrance<HTMLDivElement>();
   if (result.isPending || result.isPlaceholderData) {
     return (
       <div className={styles.resultState} role="status" aria-live="polite">
@@ -1107,6 +1099,7 @@ function ResultCanvas({
             'Считаем события, соответствующие вашему вопросу.',
           )}
         </p>
+        <QueryProgress />
       </div>
     );
   }
@@ -1193,7 +1186,7 @@ function ResultCanvas({
         : undefined);
 
   return (
-    <div className={styles.result} data-mode={query.mode}>
+    <div className={styles.result} data-mode={query.mode} ref={resultEntrance}>
       <header className={styles.resultHeader}>
         <div>
           <p className={styles.eyebrow}>{t('Your answer', 'Результат')}</p>
@@ -1236,7 +1229,9 @@ function ResultCanvas({
                 ? t('Completed every step', 'Прошли все шаги')
                 : t('Exact range total', 'Точный итог диапазона')}
             </span>
-            <strong>{answer.value.toLocaleString(locale)}</strong>
+            <strong>
+              <DataValue value={answer.value.toLocaleString(locale)} />
+            </strong>
             {query.measure.source === 'revenue' ? ` ${query.measure.property}` : ''}
             {answer.denominator !== undefined ? (
               <small>
@@ -1255,10 +1250,12 @@ function ResultCanvas({
             <div>
               <span>{t('Conversion', 'Конверсия')}</span>
               <strong>
-                {new Intl.NumberFormat(locale, {
-                  style: 'percent',
-                  maximumFractionDigits: 1,
-                }).format(answer.rate)}
+                <DataValue
+                  value={new Intl.NumberFormat(locale, {
+                    style: 'percent',
+                    maximumFractionDigits: 1,
+                  }).format(answer.rate)}
+                />
               </strong>
               <small>{t('with the current definition', 'по текущему определению')}</small>
             </div>
@@ -1307,7 +1304,9 @@ function ResultCanvas({
         <AdvancedResults query={query} result={data} />
       ) : (
         <>
-          {query.visualization !== 'table' ? <ResultChart query={query} rows={rows} /> : null}
+          {query.visualization !== 'table' ? (
+            <ResultChart key={serializeAnalysisQuery(query)} query={query} rows={rows} />
+          ) : null}
           <ResultTable query={query} rows={rows} onSelectRow={onSelectRow} />
         </>
       )}
@@ -1332,12 +1331,14 @@ function ResultCanvas({
 
 function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow[] }) {
   const { locale, t } = useStudioLocale();
+  const plotEntrance = usePlotEntrance<HTMLElement>();
+  const plotId = useId().replaceAll(':', '');
   const scale = createChartScale(rows.flatMap(row => [row.value, row.comparison ?? 0]));
   const label = analysisSummary(query, rows);
 
   if (query.visualization === 'bar' || query.mode === 'breakdown') {
     return (
-      <figure className={styles.chart} role="img" aria-label={label}>
+      <figure className={styles.chart} role="img" aria-label={label} ref={plotEntrance}>
         <figcaption>{label}</figcaption>
         <div className={styles.bars} aria-hidden="true">
           {rows.map(row => (
@@ -1347,9 +1348,11 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
                 <span className={styles.signedTrack}>
                   <span className={styles.zeroLine} style={{ left: `${scale.zero}%` }} />
                   <i
+                    data-plot-arrival
                     style={{
                       left: `${scale.bar(row.value).left}%`,
                       width: `${scale.bar(row.value).width}%`,
+                      transformOrigin: row.value < 0 ? 'right center' : 'left center',
                     }}
                   />
                 </span>
@@ -1357,10 +1360,12 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
                   <span className={styles.signedTrack}>
                     <span className={styles.zeroLine} style={{ left: `${scale.zero}%` }} />
                     <i
+                      data-plot-arrival
                       className={styles.comparisonBar}
                       style={{
                         left: `${scale.bar(row.comparison).left}%`,
                         width: `${scale.bar(row.comparison).width}%`,
+                        transformOrigin: row.comparison < 0 ? 'right center' : 'left center',
                       }}
                     />
                   </span>
@@ -1395,7 +1400,7 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
     : undefined;
 
   return (
-    <figure className={styles.chart} role="img" aria-label={label}>
+    <figure className={styles.chart} role="img" aria-label={label} ref={plotEntrance}>
       <figcaption>{label}</figcaption>
       <div className={styles.linePlot}>
         <div
@@ -1418,6 +1423,18 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
           ))}
         </div>
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <clipPath id={`${plotId}-reveal`}>
+              <rect
+                data-plot-arrival
+                className={styles.plotWindow}
+                x="-1"
+                y="-1"
+                width="102"
+                height="102"
+              />
+            </clipPath>
+          </defs>
           <g className={styles.gridLines}>
             <line x1="0" y1="25" x2="100" y2="25" />
             <line x1="0" y1="50" x2="100" y2="50" />
@@ -1430,10 +1447,12 @@ function ResultChart({ query, rows }: { query: AnalysisQueryV1; rows: DisplayRow
             x2="100"
             y2={scale.lineY(0)}
           />
-          <polyline points={points} />
-          {comparisonPoints ? (
-            <polyline className={styles.comparisonLine} points={comparisonPoints} />
-          ) : null}
+          <g clipPath={`url(#${plotId}-reveal)`}>
+            <polyline points={points} />
+            {comparisonPoints ? (
+              <polyline className={styles.comparisonLine} points={comparisonPoints} />
+            ) : null}
+          </g>
         </svg>
       </div>
       <div className={styles.xAxis} aria-hidden="true">

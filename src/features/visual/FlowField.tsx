@@ -1,9 +1,18 @@
 'use client';
 
-import { motion, useMotionValue, useSpring } from 'motion/react';
-import { type PointerEvent, useEffect, useId, useRef, useState } from 'react';
-import { useVisualMotion } from './MotionPreferences';
+import { animate as animateValue, motion, useMotionValue, useSpring } from 'motion/react';
+import {
+  type CSSProperties,
+  type PointerEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 import styles from './FlowField.module.css';
+import { useVisualMotion } from './MotionPreferences';
+import { useSceneEntrance } from './useSceneEntrance';
 
 /** Aggregate geometry only. Moving traces encode direction, never individual people or new events. */
 export function flowGeometry(values: readonly number[]) {
@@ -13,6 +22,40 @@ export function flowGeometry(values: readonly number[]) {
     height: base > 0 && Number.isFinite(value) ? Math.max(0, Math.min(1, value / base)) * 168 : 0,
     lost: index > 0 ? Math.max(0, bounded[index - 1] - value) : 0,
   }));
+}
+
+/** Motion interpolates the SVG attribute in JavaScript, including in WebKit. */
+function FlowPath({
+  d,
+  moving,
+  ...props
+}: {
+  d: string;
+  moving: boolean;
+  className?: string;
+  fill?: string;
+  stroke?: string;
+  pathLength?: string;
+  style?: CSSProperties;
+  'data-flow-body'?: boolean;
+  'data-flow-pulse'?: boolean;
+  'data-flow-filament'?: boolean;
+}) {
+  const path = useMotionValue(d);
+  useEffect(() => {
+    if (!moving) {
+      path.jump(d);
+      return;
+    }
+    const animation = animateValue(path, d, {
+      duration: 0.62,
+      ease: [0.22, 1, 0.36, 1],
+      // Keep the terminal geometry exact rather than a rounded interpolated string.
+      onComplete: () => path.jump(d),
+    });
+    return () => animation.stop();
+  }, [d, moving, path]);
+  return <motion.path {...props} d={path} />;
 }
 
 export function FlowField({
@@ -26,31 +69,49 @@ export function FlowField({
   className?: string;
   panoramic?: boolean;
 }) {
-  const { animate, ambient } = useVisualMotion();
+  const { ready, animate, ambient } = useVisualMotion();
   const id = useId().replaceAll(':', '');
   const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(true);
+  const entrance = useSceneEntrance<HTMLDivElement>();
+  const attach = useCallback(
+    (node: HTMLDivElement | null) => {
+      ref.current = node;
+      entrance(node);
+    },
+    [entrance],
+  );
+  const [inView, setInView] = useState(false);
+  const moving = ready && animate && ambient && inView;
   const pointer = useMotionValue(0);
   const shift = useSpring(pointer, { stiffness: 70, damping: 24 });
   useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setInView(true);
+      return;
+    }
     const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
-      rootMargin: '100px',
+      threshold: 0.01,
     });
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
+  useEffect(() => {
+    if (!moving) {
+      pointer.jump(0);
+      shift.jump(0);
+    }
+  }, [moving, pointer, shift]);
   const geometry = values[0] > 0 ? flowGeometry(values) : [];
   // Keep a complete eight-step query within the same filament budget as a short funnel.
   const lineCount = Math.min(32, Math.max(8, Math.floor(96 / Math.max(1, geometry.length))));
   const move = (event: PointerEvent<HTMLDivElement>) => {
-    if (!animate || event.pointerType !== 'mouse') return;
+    if (!moving || event.pointerType !== 'mouse') return;
     const box = event.currentTarget.getBoundingClientRect();
     pointer.set(((event.clientY - box.top) / box.height - 0.5) * 12);
   };
   return (
     <div
-      ref={ref}
+      ref={attach}
       className={`${styles.field} ${className}`}
       data-ambient
       data-active={ambient && inView}
@@ -66,7 +127,7 @@ export function FlowField({
         viewBox="0 0 1000 360"
         preserveAspectRatio="none"
         className={styles.svg}
-        style={{ y: animate ? shift : 0 }}
+        style={{ y: moving ? shift : 0 }}
       >
         <defs>
           <linearGradient id={`${id}-water`} x1="0" x2="1" y1="0" y2="0">
@@ -106,7 +167,8 @@ export function FlowField({
             const selected = active == null || active === index;
             return (
               <g key={index} opacity={selected ? 1 : 0.42} className={styles.segment}>
-                <path
+                <FlowPath
+                  moving={moving}
                   data-flow-body
                   className={styles.body}
                   d={`M${left} ${top} C${middle} ${top} ${middle} ${nextTop} ${right} ${nextTop} L${right} ${nextCenter + nextHeight / 2} C${middle} ${nextCenter + nextHeight / 2} ${middle} ${center + point.height / 2} ${left} ${center + point.height / 2} Z`}
@@ -119,9 +181,16 @@ export function FlowField({
                   const d = `M${left} ${y} C${middle} ${y} ${middle} ${endY} ${right} ${endY}`;
                   return (
                     <g key={line}>
-                      <path d={d} stroke={`url(#${id}-water)`} className={styles.filament} />
+                      <FlowPath
+                        moving={moving}
+                        data-flow-filament
+                        d={d}
+                        stroke={`url(#${id}-water)`}
+                        className={styles.filament}
+                      />
                       {line % 4 === 0 ? (
-                        <path
+                        <FlowPath
+                          moving={moving}
                           data-flow-pulse
                           d={d}
                           pathLength="100"
@@ -137,12 +206,14 @@ export function FlowField({
                 })}
                 {next && next.lost > 0 && point.height > next.height ? (
                   <g>
-                    <path
+                    <FlowPath
+                      moving={moving}
                       d={`M${left + 8} ${center + next.height / 2} C${middle} ${center + next.height / 2} ${right - 70} 235 ${right - 38} 306 L${right - 25} 306 C${right - 34} 220 ${middle} ${center + point.height / 2} ${left + 8} ${center + point.height / 2} Z`}
                       fill={`url(#${id}-loss)`}
                     />
                     {Array.from({ length: 12 }, (_, line) => (
-                      <path
+                      <FlowPath
+                        moving={moving}
                         key={line}
                         className={styles.lossLine}
                         d={`M${left + 8} ${center + next.height / 2 + ((point.height - next.height) / 2) * (line / 12)} C${middle} ${180 + line * 2} ${right - 70 + line} 245 ${right - 38 + line} 306`}

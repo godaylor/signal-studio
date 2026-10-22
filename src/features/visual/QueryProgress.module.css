@@ -1,0 +1,43 @@
+.track {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 360px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--studio-grid, #ccdde7);
+}
+.pulse {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, var(--studio-cobalt, #147a9c), #35e0cf);
+  animation: query-flow 1.45s ease-in-out infinite;
+}
+@keyframes query-flow {
+  from {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+  25%,
+  70% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(360%);
+    opacity: 0;
+  }
+}
+.track[data-active="false"] .pulse {
+  animation: none;
+  transform: translateX(80%);
+  opacity: 0.65;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+    transform: translateX(80%);
+    opacity: 0.65;
+  }
+}

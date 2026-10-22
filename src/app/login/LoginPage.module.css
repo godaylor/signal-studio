@@ -258,6 +258,17 @@
   padding: 4px 10px;
   min-height: 80px;
   cursor: pointer;
+  transition:
+    color 180ms,
+    transform 240ms;
+}
+.sceneLabels button[data-highlight] {
+  color: #a4fff0;
+  transform: translateY(-4px);
+}
+.sceneLabels button:focus-visible {
+  outline: 2px solid #35e0cf;
+  outline-offset: 3px;
 }
 .sceneLabels strong {
   font-size: clamp(28px, 3vw, 48px);
@@ -265,7 +276,7 @@
   letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
 }
-.sceneLabels span {
+.sceneLabels button > span {
   color: #b3d2e2;
   font-size: 12px;
 }
@@ -356,7 +367,7 @@
   .sceneLabels strong {
     font-size: 23px;
   }
-  .sceneLabels span {
+  .sceneLabels button > span {
     font-size: 9px;
     overflow-wrap: anywhere;
   }
@@ -673,7 +684,7 @@
   .sceneLabels strong {
     font-size: 30px;
   }
-  .sceneLabels span {
+  .sceneLabels button > span {
     font-size: 10px;
   }
   .dataScene .heroFlow {
@@ -848,4 +859,18 @@
 }
 :global([data-visual-motion="off"]) .guestAction {
   transition: none;
+}
+:global([data-visual-motion="off"]) .screen *,
+:global([data-visual-motion="off"]) .screen *::before,
+:global([data-visual-motion="off"]) .screen *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen *,
+  .screen *::before,
+  .screen *::after {
+    animation: none !important;
+    transition-duration: 0s !important;
+  }
 }

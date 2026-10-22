@@ -36,9 +36,11 @@ import { WorkspaceHelp } from '@/features/guest/WorkspaceHelp';
 import { useStudioLocale } from '@/features/i18n/useStudioLocale';
 import { BrandMark } from '@/features/visual/BrandMark';
 import { useVisualMotion } from '@/features/visual/MotionPreferences';
+import { SceneEntrance } from '@/features/visual/SceneEntrance';
 import type { StudioCapabilities, StudioRole } from '@/server/permissions/capabilities';
 import { AccessibleDialog } from './AccessibleDialog';
 import { CommandPalette } from './CommandPalette';
+import { NavigationFeedback } from './NavigationFeedback';
 import {
   getLocalizedStudioNavigation,
   getStudioPath,
@@ -54,7 +56,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
   const pathname = usePathname();
   const config = useConfig();
   const { theme, setTheme } = useTheme();
-  const { animate, enabled: motionEnabled, toggle: toggleMotion } = useVisualMotion();
+  const { enabled: motionEnabled, toggle: toggleMotion } = useVisualMotion();
   const { locale, t } = useStudioLocale();
   const localizedNavigation = useMemo(() => getLocalizedStudioNavigation(locale), [locale]);
   const { user, isLoading: isLoginLoading, error: loginError } = useLoginQuery();
@@ -398,15 +400,9 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
         </header>
         <GuestWorkspaceContext.Provider value={user.isGuest ? (guest.data ?? null) : null}>
           <main id="studio-main" className={styles.mainContent} tabIndex={-1}>
-            <motion.div
-              className={styles.routeFrame}
-              key={pathSection}
-              initial={animate ? { y: 18 } : false}
-              animate={{ y: 0 }}
-              transition={{ type: 'tween', duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-            >
+            <SceneEntrance className={styles.routeFrame} key={pathSection}>
               {children}
-            </motion.div>
+            </SceneEntrance>
           </main>
         </GuestWorkspaceContext.Provider>
         <footer className={styles.footer}>
@@ -429,6 +425,7 @@ export function StudioShell({ projectId, children }: { projectId: string; childr
           >
             <item.icon size={20} aria-hidden="true" />
             {item.label}
+            <NavigationFeedback />
           </Link>
         ))}
         <button
@@ -521,6 +518,7 @@ function PrimaryNavigation({
   navigation: StudioNavItem[];
 }) {
   const groupId = useId();
+  const { animate } = useVisualMotion();
   return (
     <LayoutGroup id={groupId}>
       <nav
@@ -545,12 +543,14 @@ function PrimaryNavigation({
                 {selected ? (
                   <motion.span
                     className={styles.navMarker}
-                    layoutId="selected-navigation"
+                    layoutId={animate ? 'selected-navigation' : undefined}
+                    transition={{ duration: animate ? 0.32 : 0 }}
                     aria-hidden="true"
                   />
                 ) : null}
                 <Icon aria-hidden="true" size={19} />
                 <span>{item.label}</span>
+                <NavigationFeedback />
               </Link>
             );
           })}

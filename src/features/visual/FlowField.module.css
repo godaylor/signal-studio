@@ -28,13 +28,11 @@
 }
 .body {
   opacity: 0.38;
-  transition: d 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .filament {
   fill: none;
   stroke-width: 0.9;
   opacity: 0.85;
-  transition: d 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .pulse {
   fill: none;
@@ -50,7 +48,6 @@
   stroke: #ffb381;
   stroke-width: 0.7;
   opacity: 0.4;
-  transition: d 0.8s;
 }
 .gateLine {
   stroke: #b5ffff;
@@ -73,16 +70,8 @@
 .field[data-active="false"] .pulse {
   animation-play-state: paused;
 }
-.field[data-animate="true"] .svg {
-  animation: fieldReveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-@keyframes fieldReveal {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
+.field[data-animate="false"] .pulse {
+  animation: none;
 }
 @keyframes stream {
   to {

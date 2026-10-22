@@ -118,7 +118,7 @@
   letter-spacing: -0.07em;
   font-variant-numeric: tabular-nums;
 }
-.heroValue span {
+.heroValue > span {
   color: #b3d0de;
   font-size: 13px;
 }
@@ -627,7 +627,7 @@
   .heroValue strong {
     font-size: 48px;
   }
-  .heroValue span {
+  .heroValue > span {
     font-size: 12px;
   }
   .page .primaryAction {
