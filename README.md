@@ -26,17 +26,22 @@ editing and explicit partial-retention states. Try **Phone or computer?** in the
 synthetic workspace: normal SQL calculates desktop126/168=75% and
 mobile42/168=25%. This shows an observed difference, not its cause.
 
-[M22 acceptance report](docs/M22_FINAL_REPORT.md) records scenarios, fixes,
-measurements, exact revisions and limitations. Historical
+M23 adds real flow-geometry transitions, plot arrivals and navigation feedback,
+with saved pause and live reduced-motion preferences. Figures stay exact during
+every frame. Failed renames and unrelated saves preserve drafts; dashboards can
+load later pages of saved analyses.
+
+[M23 acceptance report](docs/M23_FINAL_REPORT.md) records scenarios, fixes,
+measurements, exact revisions and limitations. Historical [M22](docs/M22_FINAL_REPORT.md),
 [M21](docs/M21_FINAL_REPORT.md), [M20](docs/M20_FINAL_REPORT.md) and
 [M19](docs/M19_GUEST_WORKSPACE_REPORT.md) records remain available.
 See [free deployment](docs/FREE_DEPLOYMENT.md).
 
-![Kinorit — actual desktop and mobile analysis](docs/design/m22-comprehension/device-comparison.png)
+![Kinorit — actual desktop and mobile analysis](docs/design/m23-motion/device-comparison.png)
 
-[Working screens and visual review](docs/design/m22-comprehension/REVIEW.html)
-· [Actual before/after comparison](docs/design/m22-comprehension/compare.html)
-· [Design contract](docs/design/m22-comprehension/DESIGN.md)
+[Working screens and motion recordings](docs/design/m23-motion/REVIEW.html)
+· [Actual before/after comparison](docs/design/m23-motion/compare.html)
+· [Design contract](docs/design/m23-motion/DESIGN.md)
 
 The images show working screens. Historical imagegen concepts are labeled as
 inspiration, not screenshots of implemented features. The guest data is synthetic;

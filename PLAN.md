@@ -2,7 +2,13 @@
 
 ## M23 — Motion that explains the workspace
 
-Status: In progress. Explicit continuation (2026-10-22/23, Europe/Moscow):
+Status: **Complete**. Final regression revision
+`e8fb05a9025a852646fc5889b5a3436ec786f503` passed all six jobs in
+CI `39860650064`, with 44/44 critical and 13/13 serverless browser scenarios
+on the first attempt. Native/public acceptance, 42 viewport cases and actual
+production recordings passed. Evidence: `docs/M23_FINAL_REPORT.md`.
+
+Explicit continuation (2026-10-22/23, Europe/Moscow):
 finish the website, make motion more expressive, verify working scenarios and
 fix concrete defects. Initial tree clean at `2c0a954ea`.
 

@@ -1,0 +1,1319 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Europe/Moscow",
+  "source": "e8fb05a9025a852646fc5889b5a3436ec786f503",
+  "app": "bc1147851b6a254edf45071e2e8e0d78f57b2f8a",
+  "appSourcesIdentical": true,
+  "ci": {
+    "run": 39860650064,
+    "url": "https://github.com/godaylor/signal-studio/actions/runs/39860650064",
+    "revision": "e8fb05a9025a852646fc5889b5a3436ec786f503",
+    "runAttempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "allSixJobsSucceeded": true,
+    "counts": {
+      "releaseContracts": {
+        "passed": 4,
+        "failed": 0,
+        "durationMs": 158.789115
+      },
+      "unit": {
+        "passed": 1099,
+        "files": 175,
+        "durationSeconds": 112.52
+      },
+      "studio": {
+        "passed": 53,
+        "files": 10,
+        "durationSeconds": 19.16
+      },
+      "postgresql": {
+        "passed": 64,
+        "files": 13,
+        "durationSeconds": 19.72
+      },
+      "criticalBrowser": {
+        "total": 44,
+        "firstPass": 44,
+        "flakyPassedOnRetry": 0,
+        "finalFailed": 0,
+        "duration": "3.4m"
+      },
+      "serverlessBrowser": {
+        "passed": 13,
+        "failed": 0,
+        "flakyPassedOnRetry": 0,
+        "durationSeconds": 32.2
+      }
+    },
+    "checks": {
+      "typecheck": "success",
+      "e2eTypecheck": "success",
+      "lint": "success",
+      "build": "success",
+      "standaloneInventory": "success",
+      "standaloneNoEnvAndRequiredLegalFiles": "success"
+    },
+    "inventory": {
+      "components": 1038,
+      "licenseTexts": 478,
+      "missingNoticeText": 0,
+      "nativeSourceSha256": "b79e721745bfc35c1a153ea39bba1f4960154d6c856cb519fbde2f136b86c5d8"
+    },
+    "browserFlakes": [],
+    "jobs": [
+      {
+        "name": "verify",
+        "id": 120110170154,
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-22T21:52:07Z",
+        "completedAt": "2026-10-22T22:09:35Z"
+      },
+      {
+        "name": "serverless",
+        "id": 120110170333,
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-22T21:52:07Z",
+        "completedAt": "2026-10-22T22:04:44Z"
+      },
+      {
+        "name": "image (migration)",
+        "id": 120117627512,
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-22T22:09:37Z",
+        "completedAt": "2026-10-22T22:12:38Z"
+      },
+      {
+        "name": "image (runner)",
+        "id": 120117627563,
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-22T22:09:37Z",
+        "completedAt": "2026-10-22T22:11:59Z"
+      },
+      {
+        "name": "image (worker)",
+        "id": 120117627630,
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-22T22:09:37Z",
+        "completedAt": "2026-10-22T22:12:33Z"
+      },
+      {
+        "name": "image (hosted)",
+        "id": 120117627660,
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-22T22:09:37Z",
+        "completedAt": "2026-10-22T22:12:45Z"
+      }
+    ],
+    "images": [
+      {
+        "target": "migration",
+        "jobId": 120117627512,
+        "build": "success",
+        "releaseRuntimeInspection": "success",
+        "requiredLegalFiles": true,
+        "noEnvFile": true,
+        "configuredUserCheck": "nextjs",
+        "packagedInventoryVerified": true,
+        "sourceSha256": "b79e721745bfc35c1a153ea39bba1f4960154d6c856cb519fbde2f136b86c5d8",
+        "buildProfile": "docker-proxy",
+        "offlineNonRootMigrationEngine": "success"
+      },
+      {
+        "target": "runner",
+        "jobId": 120117627563,
+        "build": "success",
+        "releaseRuntimeInspection": "success",
+        "requiredLegalFiles": true,
+        "noEnvFile": true,
+        "configuredUserCheck": "nextjs",
+        "packagedInventoryVerified": true,
+        "sourceSha256": "b79e721745bfc35c1a153ea39bba1f4960154d6c856cb519fbde2f136b86c5d8",
+        "buildProfile": "docker-proxy",
+        "offlineNonRootMigrationEngine": "skipped"
+      },
+      {
+        "target": "worker",
+        "jobId": 120117627630,
+        "build": "success",
+        "releaseRuntimeInspection": "success",
+        "requiredLegalFiles": true,
+        "noEnvFile": true,
+        "configuredUserCheck": "nextjs",
+        "packagedInventoryVerified": true,
+        "sourceSha256": "b79e721745bfc35c1a153ea39bba1f4960154d6c856cb519fbde2f136b86c5d8",
+        "buildProfile": "docker-proxy",
+        "offlineNonRootMigrationEngine": "success"
+      },
+      {
+        "target": "hosted",
+        "jobId": 120117627660,
+        "build": "success",
+        "releaseRuntimeInspection": "success",
+        "requiredLegalFiles": true,
+        "noEnvFile": true,
+        "configuredUserCheck": "nextjs",
+        "packagedInventoryVerified": true,
+        "sourceSha256": "b79e721745bfc35c1a153ea39bba1f4960154d6c856cb519fbde2f136b86c5d8",
+        "buildProfile": "docker-proxy",
+        "offlineNonRootMigrationEngine": "success"
+      }
+    ],
+    "acceptedExclusions": [
+      "CI intentionally skips the offline Prisma engine step for the runner image."
+    ],
+    "priorRuns": [
+      {
+        "run": 39857231905,
+        "summary": "ci-first-result.json",
+        "browserFlakes": 2
+      },
+      {
+        "run": 39859623410,
+        "summary": "ci-bc-result.json",
+        "browserFlakes": 0
+      }
+    ],
+    "note": "Final E8 revision is test-only relative to BC application source. Final CI completed on run attempt 1; all 44 critical browser and 13 serverless browser scenarios passed without test retries. Chromium dependency provisioning was slow but completed successfully. Watcher made no source changes, rerun requests, database/app requests or deployment actions."
+  },
+  "localVerification": {
+    "date": "2026-10-23",
+    "timezone": "Europe/Moscow",
+    "sourceRevision": "27fb78fb043f67623f07010fd78b26b6e77defbf",
+    "environment": {
+      "node": "22.22.2",
+      "pnpm": "10.15.1",
+      "platform": "Windows",
+      "unitStudioMaxWorkers": 2,
+      "database": "existing isolated test database from final-acceptance-runtime.env",
+      "secretsPrinted": false,
+      "newDatabase": false,
+      "migrations": false,
+      "seeding": false,
+      "build": false
+    },
+    "unit": {
+      "status": "passed",
+      "tests": 1098,
+      "files": 175,
+      "vitestDurationSeconds": 392.37,
+      "wallDurationSeconds": 394.06,
+      "log": "unit.log"
+    },
+    "studio": {
+      "status": "passed",
+      "tests": 53,
+      "files": 10,
+      "vitestDurationSeconds": 56.68,
+      "wallDurationSeconds": 58.36,
+      "log": "studio.log"
+    },
+    "postgresql": {
+      "status": "passed",
+      "tests": 64,
+      "files": 13,
+      "vitestDurationSeconds": 34.7,
+      "wallDurationSeconds": 35.47,
+      "log": "postgresql.log",
+      "initialAttempt": {
+        "status": "environment-blocked",
+        "reason": "Sandbox denied existing loopback database connection: EACCES 127.0.0.1:32241",
+        "failedFiles": 13,
+        "failedTests": 1,
+        "skippedTests": 63,
+        "wallDurationSeconds": 35.1,
+        "log": "postgresql-sandbox-blocked.log"
+      },
+      "resolution": "Rerun with approved sandbox escalation; existing database unchanged except test-owned entities"
+    },
+    "lint": {
+      "status": "passed",
+      "files": 1693,
+      "warnings": 38,
+      "infos": 72,
+      "wallDurationSeconds": 2.3,
+      "log": "lint.log"
+    },
+    "e2eTypes": {
+      "status": "passed",
+      "wallDurationSeconds": 6.2,
+      "log": "e2e-types.log"
+    },
+    "releaseContracts": {
+      "status": "passed",
+      "tests": 4,
+      "nodeDurationMilliseconds": 250.5646,
+      "wallDurationSeconds": 0.36,
+      "log": "release-contract.log"
+    }
+  },
+  "nativeBuild": {
+    "exitCode": 0,
+    "seconds": 51.2087974
+  },
+  "nativeAcceptance": {
+    "baseURL": "http://127.0.0.1:32255",
+    "revision": "bc1147851b6a254edf45071e2e8e0d78f57b2f8a",
+    "sourceSha256": "d8dc321d2f27b112f63d05cec0da84b744151bfa4b4608a115f39423dd1a29c4",
+    "ready": {
+      "ok": true,
+      "dependencies": {
+        "database": "ready"
+      }
+    },
+    "reusedExistingGuest": true,
+    "counts": [
+      336,
+      252,
+      84
+    ],
+    "insightPersisted": true,
+    "dashboardPersisted": true,
+    "jsonExport": true,
+    "crossProjectDenied": true,
+    "mobileOverflow": false,
+    "errors": []
+  },
+  "publicAppAcceptance": {
+    "url": "https://signal-studio-smoky.vercel.app",
+    "revision": "bc1147851b6a254edf45071e2e8e0d78f57b2f8a",
+    "sourceSha256": "10795d3ccf4829091ee38c675a285462d0f6ab34f1ca9b7a1a102e559e53129e",
+    "profile": "vercel-serverless",
+    "ready": {
+      "ok": true,
+      "dependencies": {
+        "database": "ready"
+      }
+    },
+    "chrome": "155.0.8059.85",
+    "staleAccountGuestEntry": true,
+    "accountCredentialPreserved": true,
+    "reload": true,
+    "narrow320": {
+      "signInRight": 306,
+      "answerDoesNotOverlap": true
+    },
+    "homeNavigationToMatureCohortMs": 9261,
+    "funnel": [
+      336,
+      252,
+      84
+    ],
+    "insightPersisted": true,
+    "dashboardPersisted": true,
+    "jsonExport": true,
+    "crossProjectDenied": true,
+    "cookie": {
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    "pageErrors": []
+  },
+  "publicSourceAcceptance": {
+    "url": "https://signal-studio-smoky.vercel.app",
+    "revision": "e8fb05a9025a852646fc5889b5a3436ec786f503",
+    "sourceSha256": "b79e721745bfc35c1a153ea39bba1f4960154d6c856cb519fbde2f136b86c5d8",
+    "profile": "vercel-serverless",
+    "ready": {
+      "ok": true,
+      "dependencies": {
+        "database": "ready"
+      }
+    }
+  },
+  "publicCsvAndHttpSample": {
+    "url": "https://signal-studio-smoky.vercel.app",
+    "revision": "bc1147851b6a254edf45071e2e8e0d78f57b2f8a",
+    "dataset": {
+      "events": 1281,
+      "users": 336,
+      "days": 42
+    },
+    "home": {
+      "counts": [
+        56,
+        28,
+        21
+      ],
+      "httpSamplesMs": [
+        350,
+        291,
+        124,
+        140,
+        134
+      ],
+      "p50": 140,
+      "p95": 350,
+      "condition": "sequential Home HTTP requests after the browser acceptance; warm/cold status not assumed; n=5, one guest, Vercel Hobby/Neon Free"
+    },
+    "csv": {
+      "status": 200,
+      "exactness": "exact",
+      "converted": [
+        336,
+        252,
+        168
+      ],
+      "bytes": 7498
+    }
+  },
+  "ownedPublicGuestCleanup": {
+    "onlyOwnedGuest": true,
+    "status": 200,
+    "revoked": true,
+    "note": "Normal API revocation; bounded shared cleanup owns physical removal. No other user, project, database or container was deleted."
+  },
+  "geometry": {
+    "source": "27fb78fb043f67623f07010fd78b26b6e77defbf",
+    "engine": "155.0.8059.85",
+    "cases": [
+      {
+        "section": "entry",
+        "width": 320,
+        "height": 568,
+        "dpr": 1,
+        "documentWidth": 320,
+        "issues": []
+      },
+      {
+        "section": "entry",
+        "width": 390,
+        "height": 844,
+        "dpr": 1,
+        "documentWidth": 390,
+        "issues": []
+      },
+      {
+        "section": "entry",
+        "width": 768,
+        "height": 1024,
+        "dpr": 1,
+        "documentWidth": 768,
+        "issues": []
+      },
+      {
+        "section": "entry",
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1,
+        "documentWidth": 1440,
+        "issues": []
+      },
+      {
+        "section": "entry",
+        "width": 2560,
+        "height": 1440,
+        "dpr": 1,
+        "documentWidth": 2560,
+        "issues": []
+      },
+      {
+        "section": "entry",
+        "width": 7680,
+        "height": 4320,
+        "dpr": 1,
+        "documentWidth": 7680,
+        "issues": []
+      },
+      {
+        "section": "home",
+        "width": 320,
+        "height": 568,
+        "dpr": 1,
+        "documentWidth": 320,
+        "issues": []
+      },
+      {
+        "section": "home",
+        "width": 390,
+        "height": 844,
+        "dpr": 1,
+        "documentWidth": 390,
+        "issues": []
+      },
+      {
+        "section": "home",
+        "width": 768,
+        "height": 1024,
+        "dpr": 1,
+        "documentWidth": 768,
+        "issues": []
+      },
+      {
+        "section": "home",
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1,
+        "documentWidth": 1440,
+        "issues": []
+      },
+      {
+        "section": "home",
+        "width": 2560,
+        "height": 1440,
+        "dpr": 1,
+        "documentWidth": 2560,
+        "issues": []
+      },
+      {
+        "section": "home",
+        "width": 7680,
+        "height": 4320,
+        "dpr": 1,
+        "documentWidth": 7680,
+        "issues": []
+      },
+      {
+        "section": "explore",
+        "width": 320,
+        "height": 568,
+        "dpr": 1,
+        "documentWidth": 320,
+        "issues": []
+      },
+      {
+        "section": "explore",
+        "width": 390,
+        "height": 844,
+        "dpr": 1,
+        "documentWidth": 390,
+        "issues": []
+      },
+      {
+        "section": "explore",
+        "width": 768,
+        "height": 1024,
+        "dpr": 1,
+        "documentWidth": 768,
+        "issues": []
+      },
+      {
+        "section": "explore",
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1,
+        "documentWidth": 1440,
+        "issues": []
+      },
+      {
+        "section": "explore",
+        "width": 2560,
+        "height": 1440,
+        "dpr": 1,
+        "documentWidth": 2560,
+        "issues": []
+      },
+      {
+        "section": "explore",
+        "width": 7680,
+        "height": 4320,
+        "dpr": 1,
+        "documentWidth": 7680,
+        "issues": []
+      },
+      {
+        "section": "dashboards",
+        "width": 320,
+        "height": 568,
+        "dpr": 1,
+        "documentWidth": 320,
+        "issues": []
+      },
+      {
+        "section": "dashboards",
+        "width": 390,
+        "height": 844,
+        "dpr": 1,
+        "documentWidth": 390,
+        "issues": []
+      },
+      {
+        "section": "dashboards",
+        "width": 768,
+        "height": 1024,
+        "dpr": 1,
+        "documentWidth": 768,
+        "issues": []
+      },
+      {
+        "section": "dashboards",
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1,
+        "documentWidth": 1440,
+        "issues": []
+      },
+      {
+        "section": "dashboards",
+        "width": 2560,
+        "height": 1440,
+        "dpr": 1,
+        "documentWidth": 2560,
+        "issues": []
+      },
+      {
+        "section": "dashboards",
+        "width": 7680,
+        "height": 4320,
+        "dpr": 1,
+        "documentWidth": 7680,
+        "issues": []
+      },
+      {
+        "section": "audiences",
+        "width": 320,
+        "height": 568,
+        "dpr": 1,
+        "documentWidth": 320,
+        "issues": []
+      },
+      {
+        "section": "audiences",
+        "width": 390,
+        "height": 844,
+        "dpr": 1,
+        "documentWidth": 390,
+        "issues": []
+      },
+      {
+        "section": "audiences",
+        "width": 768,
+        "height": 1024,
+        "dpr": 1,
+        "documentWidth": 768,
+        "issues": []
+      },
+      {
+        "section": "audiences",
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1,
+        "documentWidth": 1440,
+        "issues": []
+      },
+      {
+        "section": "audiences",
+        "width": 2560,
+        "height": 1440,
+        "dpr": 1,
+        "documentWidth": 2560,
+        "issues": []
+      },
+      {
+        "section": "audiences",
+        "width": 7680,
+        "height": 4320,
+        "dpr": 1,
+        "documentWidth": 7680,
+        "issues": []
+      },
+      {
+        "section": "experience",
+        "width": 320,
+        "height": 568,
+        "dpr": 1,
+        "documentWidth": 320,
+        "issues": []
+      },
+      {
+        "section": "experience",
+        "width": 390,
+        "height": 844,
+        "dpr": 1,
+        "documentWidth": 390,
+        "issues": []
+      },
+      {
+        "section": "experience",
+        "width": 768,
+        "height": 1024,
+        "dpr": 1,
+        "documentWidth": 768,
+        "issues": []
+      },
+      {
+        "section": "experience",
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1,
+        "documentWidth": 1440,
+        "issues": []
+      },
+      {
+        "section": "experience",
+        "width": 2560,
+        "height": 1440,
+        "dpr": 1,
+        "documentWidth": 2560,
+        "issues": []
+      },
+      {
+        "section": "experience",
+        "width": 7680,
+        "height": 4320,
+        "dpr": 1,
+        "documentWidth": 7680,
+        "issues": []
+      },
+      {
+        "section": "live",
+        "width": 320,
+        "height": 568,
+        "dpr": 1,
+        "documentWidth": 320,
+        "issues": []
+      },
+      {
+        "section": "live",
+        "width": 390,
+        "height": 844,
+        "dpr": 1,
+        "documentWidth": 390,
+        "issues": []
+      },
+      {
+        "section": "live",
+        "width": 768,
+        "height": 1024,
+        "dpr": 1,
+        "documentWidth": 768,
+        "issues": []
+      },
+      {
+        "section": "live",
+        "width": 1440,
+        "height": 1000,
+        "dpr": 1,
+        "documentWidth": 1440,
+        "issues": []
+      },
+      {
+        "section": "live",
+        "width": 2560,
+        "height": 1440,
+        "dpr": 1,
+        "documentWidth": 2560,
+        "issues": []
+      },
+      {
+        "section": "live",
+        "width": 7680,
+        "height": 4320,
+        "dpr": 1,
+        "documentWidth": 7680,
+        "issues": []
+      }
+    ],
+    "errors": [],
+    "failedResponses": []
+  },
+  "workspace": {
+    "cases": [
+      {
+        "name": "Home values retain actual snapshot numbers throughout real arrival animations",
+        "status": "pass"
+      },
+      {
+        "name": "Explore narrow layouts preserve the real result in both themes",
+        "status": "pass"
+      },
+      {
+        "name": "query editor covers the viewport and restores focus after motion in portrait and landscape",
+        "status": "pass"
+      },
+      {
+        "name": "narrow mode tabs remain keyboard reachable and show the corresponding real query result",
+        "status": "pass"
+      },
+      {
+        "name": "mobile menu is keyboard reachable and navigates to the actual Live snapshot",
+        "status": "pass"
+      },
+      {
+        "name": "pausing Live stops real polling and keeps the same timestamped numbers",
+        "status": "pass"
+      }
+    ],
+    "errors": [],
+    "failedResponses": []
+  },
+  "functionalErrors": {
+    "startedAt": "2026-10-22T21:58:53.237Z",
+    "baseURL": "http://127.0.0.1:32255",
+    "browser": "155.0.8059.85",
+    "cases": [
+      {
+        "name": "Insight one-shot 503 preserves rename draft; real PATCH retry saves",
+        "status": "pass",
+        "injectedFailures": 1,
+        "draftRetained": true,
+        "retryRealServer": 200,
+        "serverTitleVerified": true
+      },
+      {
+        "name": "Dashboard real note save preserves unsaved range and segment; real pending context keeps newer edits",
+        "status": "pass",
+        "realNoteStatus": 200,
+        "unsavedRangeRetained": true,
+        "unsavedSegmentRetained": true,
+        "pendingRealContextStatus": 200,
+        "newerTypedDateRetained": true
+      },
+      {
+        "name": "Explore filter reset preserves event/date drafts until Run and applies them to actual URL",
+        "status": "pass",
+        "urlUnchangedBeforeRun": true,
+        "eventDraftRetained": true,
+        "dateDraftRetained": true,
+        "filtersAfterRun": 0,
+        "actualQueryStatus": 200
+      },
+      {
+        "name": "Analytics one-shot 503 hides previous answer; Retry recovers real calculation",
+        "status": "pass",
+        "injectedFailures": 1,
+        "errorClear": true,
+        "staleTableAbsent": true,
+        "retryRealServer": 200,
+        "actualResultRows": 38,
+        "actualTotal": null
+      }
+    ],
+    "errors": [],
+    "failedResponses": [
+      {
+        "path": "/api/projects/:id/insights/:id",
+        "status": 503
+      },
+      {
+        "path": "/api/projects/:id/analytics/query",
+        "status": 503
+      }
+    ],
+    "cleanup": [
+      {
+        "operation": "Restore owned Insight original title",
+        "status": 200
+      },
+      {
+        "operation": "Restore owned dashboard original context",
+        "status": 200
+      },
+      {
+        "operation": "Remove only acceptance-created note",
+        "status": 200
+      }
+    ],
+    "apiRequests": 36,
+    "fixtures": {
+      "existingOwnedNativeInsight": true,
+      "existingOwnedNativeDashboard": true,
+      "existingWidgets": 1,
+      "newGuests": 0
+    },
+    "finishedAt": "2026-10-22T21:59:05.551Z"
+  },
+  "plotsAndNavigation": {
+    "cases": [
+      {
+        "name": "line arrival reveals the actual plot and leaves its exact geometry",
+        "status": "pass"
+      },
+      {
+        "name": "bar arrival interrupted by pause settles to exact widths",
+        "status": "pass"
+      },
+      {
+        "name": "line plot with OS reduced motion never starts a reveal animation",
+        "status": "pass"
+      },
+      {
+        "name": "wide and8K layouts remain bounded and centered with no motion overflow",
+        "status": "pass"
+      },
+      {
+        "name": "navigation pending feedback responds to a genuinely delayed Next request",
+        "status": "pass"
+      }
+    ],
+    "errors": [],
+    "failedResponses": []
+  },
+  "morphChrome": {
+    "cases": [
+      {
+        "name": "real goal change produces intermediate d values then the exact target",
+        "status": "pass"
+      },
+      {
+        "name": "manual pause interrupts the morph and leaves exact final geometry",
+        "status": "pass"
+      },
+      {
+        "name": "OS reduced motion interrupts the morph and leaves exact final geometry",
+        "status": "pass"
+      },
+      {
+        "name": "offscreen interrupts the morph and leaves exact final geometry",
+        "status": "pass"
+      }
+    ],
+    "errors": [],
+    "failedResponses": []
+  },
+  "morphWebKit": {
+    "cases": [
+      {
+        "name": "real goal change produces intermediate d values then the exact target",
+        "status": "pass"
+      },
+      {
+        "name": "manual pause interrupts the morph and leaves exact final geometry",
+        "status": "pass"
+      },
+      {
+        "name": "OS reduced motion interrupts the morph and leaves exact final geometry",
+        "status": "pass"
+      },
+      {
+        "name": "offscreen interrupts the morph and leaves exact final geometry",
+        "status": "pass"
+      }
+    ],
+    "errors": [],
+    "failedResponses": []
+  },
+  "realWebKitGuestEntry": {
+    "engine": "26.5",
+    "revision": "bc1147851b6a254edf45071e2e8e0d78f57b2f8a",
+    "reusedGuest": true,
+    "actualEntryPost": 200,
+    "funnelTable": [
+      336,
+      252,
+      168
+    ],
+    "errors": [],
+    "historicalProbeLimitation": "unsupported: WebKit did not expose visible SSR CTA with every JS chunk withheld; normal hydrated guest entry is verified separately",
+    "finalPortableMotionAndHydration": {
+      "passed": 3,
+      "failed": 0,
+      "durationSeconds": 7.7
+    }
+  },
+  "publicFinalMotionAndHydration": {
+    "revision": "e8fb05a9025a852646fc5889b5a3436ec786f503",
+    "passed": 3,
+    "failed": 0,
+    "durationSeconds": 8
+  },
+  "ambientDiagnostic": {
+    "condition": "Local Next development server; fixed synthetic336→252→168 entry sample; Chrome headless1440×1000 CSSpx/DPR1; novideo recording in this20-second sample. Diagnostic only, not an FPS, production or1M-event performance claim.",
+    "normal": {
+      "visibility": "visible",
+      "active": "true",
+      "animate": "true",
+      "filaments": 96,
+      "pulseNodes": 24,
+      "svgPaths": 155,
+      "runningInfiniteLoops": 24,
+      "pausedInfiniteLoops": 0,
+      "pulseOffset": "-24.6095px",
+      "dpr": 1
+    },
+    "rafIntervals": {
+      "durationMs": 20001.5,
+      "count": 4564,
+      "p50Ms": 4.199999999999818,
+      "p95Ms": 4.30000000000291,
+      "maxMs": 25,
+      "intervalsOver50Ms": 0
+    },
+    "offscreen": {
+      "visibility": "visible",
+      "active": "false",
+      "animate": "true",
+      "filaments": 96,
+      "pulseNodes": 24,
+      "svgPaths": 155,
+      "runningInfiniteLoops": 0,
+      "pausedInfiniteLoops": 24,
+      "pulseOffset": "-25.0095px",
+      "dpr": 1
+    },
+    "paused": {
+      "visibility": "visible",
+      "active": "false",
+      "animate": "false",
+      "filaments": 96,
+      "pulseNodes": 24,
+      "svgPaths": 155,
+      "runningInfiniteLoops": 0,
+      "pausedInfiniteLoops": 0,
+      "pulseOffset": "0px",
+      "dpr": 1
+    },
+    "reduced": {
+      "visibility": "visible",
+      "active": "false",
+      "animate": "false",
+      "filaments": 96,
+      "pulseNodes": 24,
+      "svgPaths": 155,
+      "runningInfiniteLoops": 0,
+      "pausedInfiniteLoops": 0,
+      "pulseOffset": "0px",
+      "dpr": 1
+    }
+  },
+  "gallery": {
+    "source": "bc1147851b6a254edf45071e2e8e0d78f57b2f8a",
+    "verifiedRuntimeRevision": "bc1147851b6a254edf45071e2e8e0d78f57b2f8a",
+    "publishedAppEquivalent": "Код приложения совпадает с опубликованной версией e8fb05a90; изменения после сборки относятся к тестам.",
+    "environment": "native production127.0.0.1:32255",
+    "screenshots": 13,
+    "videos": 2,
+    "comparisons": 3,
+    "createdAt": "2026-10-22T22:01:41.264Z"
+  },
+  "galleryValidation": {
+    "engine": "155.0.8059.85",
+    "rows": [
+      {
+        "name": "REVIEW.html",
+        "width": 390,
+        "images": [
+          {
+            "source": "images/entry-desktop-light.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/entry-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/entry-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/entry-mobile-dark.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/home-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/home-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/explore-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/explore-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/live-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/live-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/dashboards-1440-full.png",
+            "width": 1440,
+            "height": 1412
+          },
+          {
+            "source": "images/audiences-1440-full.png",
+            "width": 1440,
+            "height": 2967
+          },
+          {
+            "source": "images/experience-1440-full.png",
+            "width": 1440,
+            "height": 1000
+          }
+        ],
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "name": "compare.html",
+        "width": 390,
+        "images": [
+          {
+            "source": "images/entry-desktop-before.png",
+            "width": 1440,
+            "height": 1000
+          }
+        ],
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "name": "REVIEW.html",
+        "width": 1600,
+        "images": [
+          {
+            "source": "images/entry-desktop-light.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/entry-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/entry-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/entry-mobile-dark.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/home-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/home-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/explore-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/explore-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/live-desktop-dark.png",
+            "width": 1440,
+            "height": 1000
+          },
+          {
+            "source": "images/live-mobile-light.png",
+            "width": 390,
+            "height": 844
+          },
+          {
+            "source": "images/dashboards-1440-full.png",
+            "width": 1440,
+            "height": 1412
+          },
+          {
+            "source": "images/audiences-1440-full.png",
+            "width": 1440,
+            "height": 2967
+          },
+          {
+            "source": "images/experience-1440-full.png",
+            "width": 1440,
+            "height": 1000
+          }
+        ],
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "name": "compare.html",
+        "width": 1600,
+        "images": [
+          {
+            "source": "images/entry-desktop-before.png",
+            "width": 1440,
+            "height": 1000
+          }
+        ],
+        "overflow": false,
+        "violations": []
+      }
+    ],
+    "errors": [],
+    "videos": [
+      {
+        "src": "videos/workspace-desktop.webm",
+        "duration": 10.64,
+        "videoWidth": 1440,
+        "videoHeight": 1000,
+        "readyState": 4,
+        "error": null,
+        "currentTime": 0.298926,
+        "controls": true,
+        "autoplay": false
+      },
+      {
+        "src": "videos/workspace-mobile.webm",
+        "duration": 7.76,
+        "videoWidth": 390,
+        "videoHeight": 844,
+        "readyState": 4,
+        "error": null,
+        "currentTime": 0.3065,
+        "controls": true,
+        "autoplay": false
+      }
+    ],
+    "comparisons": [
+      {
+        "width": 390,
+        "scene": "entry-desktop",
+        "phase": "before",
+        "image": {
+          "source": "images/entry-desktop-before.png",
+          "width": 1440,
+          "height": 1000
+        }
+      },
+      {
+        "width": 390,
+        "scene": "entry-desktop",
+        "phase": "after",
+        "image": {
+          "source": "images/entry-desktop-after.png",
+          "width": 1440,
+          "height": 1000
+        }
+      },
+      {
+        "width": 390,
+        "scene": "explore-mobile",
+        "phase": "before",
+        "image": {
+          "source": "images/explore-mobile-before.png",
+          "width": 390,
+          "height": 844
+        }
+      },
+      {
+        "width": 390,
+        "scene": "explore-mobile",
+        "phase": "after",
+        "image": {
+          "source": "images/explore-mobile-after.png",
+          "width": 390,
+          "height": 844
+        }
+      },
+      {
+        "width": 390,
+        "scene": "home-desktop",
+        "phase": "before",
+        "image": {
+          "source": "images/home-desktop-before.png",
+          "width": 1440,
+          "height": 1000
+        }
+      },
+      {
+        "width": 390,
+        "scene": "home-desktop",
+        "phase": "after",
+        "image": {
+          "source": "images/home-desktop-after.png",
+          "width": 1440,
+          "height": 1000
+        }
+      },
+      {
+        "width": 1600,
+        "scene": "entry-desktop",
+        "phase": "before",
+        "image": {
+          "source": "images/entry-desktop-before.png",
+          "width": 1440,
+          "height": 1000
+        }
+      },
+      {
+        "width": 1600,
+        "scene": "entry-desktop",
+        "phase": "after",
+        "image": {
+          "source": "images/entry-desktop-after.png",
+          "width": 1440,
+          "height": 1000
+        }
+      },
+      {
+        "width": 1600,
+        "scene": "explore-mobile",
+        "phase": "before",
+        "image": {
+          "source": "images/explore-mobile-before.png",
+          "width": 390,
+          "height": 844
+        }
+      },
+      {
+        "width": 1600,
+        "scene": "explore-mobile",
+        "phase": "after",
+        "image": {
+          "source": "images/explore-mobile-after.png",
+          "width": 390,
+          "height": 844
+        }
+      },
+      {
+        "width": 1600,
+        "scene": "home-desktop",
+        "phase": "before",
+        "image": {
+          "source": "images/home-desktop-before.png",
+          "width": 1440,
+          "height": 1000
+        }
+      },
+      {
+        "width": 1600,
+        "scene": "home-desktop",
+        "phase": "after",
+        "image": {
+          "source": "images/home-desktop-after.png",
+          "width": 1440,
+          "height": 1000
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Real hidden-tab behavior was not produced by the headless harness; unit policy and real offscreen behavior are separately tested.",
+    "No physical-device, manual screen-reader, Firefox or Safari-product certification.",
+    "No one-million-event or physical-display FPS claim.",
+    "Cold Home navigation remains slow; small HTTP sample is diagnostic only.",
+    "Partial retention exports and all-group funnel drilldown retain existing contracts."
+  ],
+  "licenseSha256": "2a2a42dba0334d768c61edc8f5bb5d3732d94de23d99a7e539a719b1d5117ba0"
+}

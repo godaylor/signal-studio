@@ -1,0 +1,324 @@
+{
+  "engine": "155.0.8059.85",
+  "rows": [
+    {
+      "name": "REVIEW.html",
+      "width": 390,
+      "images": [
+        {
+          "source": "images/entry-desktop-light.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/entry-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/entry-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/entry-mobile-dark.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/home-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/home-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/explore-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/explore-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/live-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/live-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/dashboards-1440-full.png",
+          "width": 1440,
+          "height": 1412
+        },
+        {
+          "source": "images/audiences-1440-full.png",
+          "width": 1440,
+          "height": 2967
+        },
+        {
+          "source": "images/experience-1440-full.png",
+          "width": 1440,
+          "height": 1000
+        }
+      ],
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "compare.html",
+      "width": 390,
+      "images": [
+        {
+          "source": "images/entry-desktop-before.png",
+          "width": 1440,
+          "height": 1000
+        }
+      ],
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "REVIEW.html",
+      "width": 1600,
+      "images": [
+        {
+          "source": "images/entry-desktop-light.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/entry-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/entry-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/entry-mobile-dark.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/home-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/home-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/explore-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/explore-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/live-desktop-dark.png",
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "source": "images/live-mobile-light.png",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "source": "images/dashboards-1440-full.png",
+          "width": 1440,
+          "height": 1412
+        },
+        {
+          "source": "images/audiences-1440-full.png",
+          "width": 1440,
+          "height": 2967
+        },
+        {
+          "source": "images/experience-1440-full.png",
+          "width": 1440,
+          "height": 1000
+        }
+      ],
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "compare.html",
+      "width": 1600,
+      "images": [
+        {
+          "source": "images/entry-desktop-before.png",
+          "width": 1440,
+          "height": 1000
+        }
+      ],
+      "overflow": false,
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "videos": [
+    {
+      "src": "videos/workspace-desktop.webm",
+      "duration": 10.64,
+      "videoWidth": 1440,
+      "videoHeight": 1000,
+      "readyState": 4,
+      "error": null,
+      "currentTime": 0.298926,
+      "controls": true,
+      "autoplay": false
+    },
+    {
+      "src": "videos/workspace-mobile.webm",
+      "duration": 7.76,
+      "videoWidth": 390,
+      "videoHeight": 844,
+      "readyState": 4,
+      "error": null,
+      "currentTime": 0.3065,
+      "controls": true,
+      "autoplay": false
+    }
+  ],
+  "comparisons": [
+    {
+      "width": 390,
+      "scene": "entry-desktop",
+      "phase": "before",
+      "image": {
+        "source": "images/entry-desktop-before.png",
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "width": 390,
+      "scene": "entry-desktop",
+      "phase": "after",
+      "image": {
+        "source": "images/entry-desktop-after.png",
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "width": 390,
+      "scene": "explore-mobile",
+      "phase": "before",
+      "image": {
+        "source": "images/explore-mobile-before.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "width": 390,
+      "scene": "explore-mobile",
+      "phase": "after",
+      "image": {
+        "source": "images/explore-mobile-after.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "width": 390,
+      "scene": "home-desktop",
+      "phase": "before",
+      "image": {
+        "source": "images/home-desktop-before.png",
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "width": 390,
+      "scene": "home-desktop",
+      "phase": "after",
+      "image": {
+        "source": "images/home-desktop-after.png",
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "width": 1600,
+      "scene": "entry-desktop",
+      "phase": "before",
+      "image": {
+        "source": "images/entry-desktop-before.png",
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "width": 1600,
+      "scene": "entry-desktop",
+      "phase": "after",
+      "image": {
+        "source": "images/entry-desktop-after.png",
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "width": 1600,
+      "scene": "explore-mobile",
+      "phase": "before",
+      "image": {
+        "source": "images/explore-mobile-before.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "width": 1600,
+      "scene": "explore-mobile",
+      "phase": "after",
+      "image": {
+        "source": "images/explore-mobile-after.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "width": 1600,
+      "scene": "home-desktop",
+      "phase": "before",
+      "image": {
+        "source": "images/home-desktop-before.png",
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "width": 1600,
+      "scene": "home-desktop",
+      "phase": "after",
+      "image": {
+        "source": "images/home-desktop-after.png",
+        "width": 1440,
+        "height": 1000
+      }
+    }
+  ]
+}
